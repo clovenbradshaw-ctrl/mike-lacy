@@ -22,7 +22,6 @@ Grouped by tier, ordered by rank.
    — [`posts/163865780.housing-last-the-rodeway-to-nowhere.html`](posts/163865780.housing-last-the-rodeway-to-nowhere.html)
 7. **Breaking: The Mayor's Official Coordinating Nashville's Surveillance MOU Helped Build ICE's Data Pipeline at LexisNexis** (Jan 2026)
    — [`posts/183810155.breaking-the-mayors-official-coordinating.html`](posts/183810155.breaking-the-mayors-official-coordinating.html)
-   — see also earlier draft: [`posts/183739656.the-mayors-official-coordinating.html`](posts/183739656.the-mayors-official-coordinating.html)
 8. **I kept waiting for the city to release Metro Arts' expense report. So I did it myself.** (~May 2024)
    — [`posts/144351154.i-kept-waiting-for-the-city-to-release.html`](posts/144351154.i-kept-waiting-for-the-city-to-release.html)
 9. **Nashville's January Eviction Filings Skyrocket Despite Winter Storm & Utility Crisis** (Feb 2, 2026)
@@ -38,14 +37,12 @@ Grouped by tier, ordered by rank.
     — [`posts/192747263.nashvilles-unauthorized-secret-police.html`](posts/192747263.nashvilles-unauthorized-secret-police.html)
 13. **Who is Larry Ellison? And what does his company, Oracle, want from Nashville?** (Oct 22, 2025)
     — [`posts/175051724.who-is-larry-ellison-and-what-does.html`](posts/175051724.who-is-larry-ellison-and-what-does.html)
-      (largest/final version; earlier drafts: [`174974908`](posts/174974908.who-is-larry-ellison-and-what-does.html), [`175062068`](posts/175062068.who-is-larry-ellison-and-what-does-c6c.html))
 14. **Downtown Nashville's Self-Made Privacy Crisis** (Mar 9, 2025)
     — [`posts/158662808.downtown-nashvilles-self-made-privacy.html`](posts/158662808.downtown-nashvilles-self-made-privacy.html)
 15. **{Null_Results}: "I Cannot Compromise My Integrity": Case Manager Resigned After OHS Partnership Created Ethical Conflicts** (Nov 11, 2025)
     — [`posts/178549584.i-cannot-compromise-my-integrity.html`](posts/178549584.i-cannot-compromise-my-integrity.html)
 16. **Strings Attached: The History of the Metro Arts Commission & The Nashville Symphony** (Jun 18, 2024)
     — [`posts/144803108.strings-attached-the-history-of-the.html`](posts/144803108.strings-attached-the-history-of-the.html)
-      (full body; [`144782471`](posts/144782471.strings-attached-the-history-of-the.html) appears to be a stub/teaser)
 17. **The Mayor's Office Calls Surveillance Reporting "Misinformation." Here's What the Documents Actually Say.** (Dec 1, 2025)
     — [`posts/180083598.misinformation-or-inconvenient-truth.html`](posts/180083598.misinformation-or-inconvenient-truth.html)
 18. **Why We Have To Talk About What Nashville Ignores** (Jul 7, 2025)
@@ -55,7 +52,6 @@ Grouped by tier, ordered by rank.
 
 19. **The MLK They Want Us to Forget** (Jan 20, 2025; republished Jan 2026)
     — [`posts/155251807.the-mlk-they-want-us-to-forget.html`](posts/155251807.the-mlk-they-want-us-to-forget.html)
-      (2026 repost: [`posts/184842377.the-mlk-they-want-us-to-forget-e14.html`](posts/184842377.the-mlk-they-want-us-to-forget-e14.html))
 20. **Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick** (Sep 16, 2025)
     — [`posts/173677465.how-to-escape-tyranny-and-make-new.html`](posts/173677465.how-to-escape-tyranny-and-make-new.html)
       (Substack slug `how-to-escape-tyranny-and-make-new` predates a later title change;
@@ -64,7 +60,6 @@ Grouped by tier, ordered by rank.
     — [`posts/170694573.the-center-will-always-fold.html`](posts/170694573.the-center-will-always-fold.html)
 22. **"The Great Correction" | My Convo w/ NYC Comedian Whitley Watson** (Feb 25, 2026)
     — [`posts/189078200.the-great-correction-nyc-comedian.html`](posts/189078200.the-great-correction-nyc-comedian.html)
-      (companion: [`posts/189077456.why-great-correction.html`](posts/189077456.why-great-correction.html))
 23. **Nashville Eviction Tracker: Open Source Code** (Feb 15, 2026)
     — [`posts/188017123.nashville-eviction-tracker-open-source.html`](posts/188017123.nashville-eviction-tracker-open-source.html)
 24. **1 Minute to Demand Accountability: Email the Audit Committee Now** (Sep 22, 2025)
@@ -75,11 +70,11 @@ Grouped by tier, ordered by rank.
 
 ---
 
-## Notes on ambiguous matches
+## Notes on selection
 
-- **#7** — Two files exist with near-identical slugs. `183810155` begins with `breaking-`, matching the title on the ranking. `183739656` is ~12KB larger and may be a pre-"Breaking" draft or longer cut.
-- **#13** — Three "Larry Ellison" files at 116KB / 150KB / 124KB. Selected the largest (`175051724`) as the canonical; the others appear to be an earlier draft and a `-c6c` variant (typically a Substack edit fork).
-- **#16** — Two "Strings Attached" files. Selected `144803108` (70KB body) over `144782471` (3.7KB stub).
-- **#19** — Both the original and the 2026 repost are in the archive; original is primary.
-- **#20** — File slug `how-to-escape-tyranny-and-make-new` doesn't match the current title; Substack retained the original slug after the post was retitled to "Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick." Confirmed via the public URL.
-- **#24** — Filename slug is "one-email-today-could-change-everything"; content confirms it's the Sep 22 audit-committee CTA described in the ranking.
+- **#7** — Two files existed with near-identical slugs; kept `183810155` (prefixed `breaking-`, matches the title) and dropped the earlier draft.
+- **#13** — Three "Larry Ellison" files existed at 116KB / 150KB / 124KB; kept the largest (`175051724`) as canonical.
+- **#16** — Two "Strings Attached" files existed; kept `144803108` (70KB body) over the 3.7KB stub.
+- **#19** — Both the original and the 2026 repost were in the archive; kept the original as primary.
+- **#20** — Slug `how-to-escape-tyranny-and-make-new` doesn't match the current title; Substack retained the original slug after the post was retitled to "Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick." Confirmed via <https://readrichtext.substack.com/p/how-to-escape-tyranny-and-make-new>.
+- **#24** — Slug is "one-email-today-could-change-everything"; content confirms it's the Sep 22 audit-committee CTA.
