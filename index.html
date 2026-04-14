@@ -1,1 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Index of /</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: monospace;
+  font-size: 13.5px;
+  color: #000;
+  background: #fff;
+  padding: 20px 24px 60px;
+  max-width: 880px;
+}
+h1 { font-size: 18px; font-weight: bold; margin-bottom: 2px; }
+hr { border: none; border-top: 1px solid #999; margin: 6px 0 10px; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; padding: 3px 20px 5px 0;
+  border-bottom: 1px solid #999; font-weight: bold; white-space: nowrap;
+}
+td { padding: 4px 20px 4px 0; white-space: nowrap; vertical-align: top; }
+td.desc { white-space: normal; color: #666; max-width: 340px; }
+td.size { text-align: right; min-width: 44px; padding-right: 28px; }
+td.date { color: #666; min-width: 110px; }
+a { color: #0000ee; text-decoration: underline; cursor: pointer; }
+a:visited { color: #551a8b; }
+a:hover { color: #cc0000; }
+address {
+  font-style: normal; font-size: 11.5px; color: #888;
+  margin-top: 12px; border-top: 1px solid #ddd; padding-top: 6px;
+}
 
+.section-head td {
+  padding: 14px 0 4px;
+  font-weight: bold;
+  font-size: 12px;
+  color: #000;
+  border-bottom: 1px solid #ccc;
+  letter-spacing: 0.05em;
+}
+.tier-badge {
+  display: inline-block; font-size: 10px; color: #666;
+  border: 1px solid #bbb; padding: 0 4px; margin-right: 6px;
+  vertical-align: 1px; border-radius: 2px; background: #f4f4f4;
+}
+
+#breadcrumb {
+  font-size: 12px;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+#breadcrumb a { color: #0000ee; }
+#breadcrumb a:hover { color: #cc0000; }
+#breadcrumb .sep { color: #999; margin: 0 3px; }
+#breadcrumb .cur { color: #444; }
+
+#viewer, #textviewer, #embedviewer { display: none; }
+.v-chrome {
+  display: flex; justify-content: space-between;
+  align-items: baseline; flex-wrap: wrap;
+  gap: 8px; margin-bottom: 3px;
+}
+.v-filename { font-weight: bold; font-size: 14px; }
+.v-meta { color: #666; font-size: 12px; }
+.v-nav { display: flex; align-items: center; gap: 0; font-size: 12px; }
+.v-nav a { color: #0000ee; padding: 0 3px; }
+.v-nav a.off { color: #bbb; pointer-events: none; text-decoration: none; }
+.v-nav span { margin: 0 8px; color: #444; }
+
+#content-window, #text-window {
+  overflow-y: auto;
+  height: 560px;
+  border: 1px solid #ccc;
+  padding: 22px 26px;
+  margin-top: 8px;
+  background: #fff;
+}
+#text-window pre {
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+#text-window pre a { color: #0000ee; }
+
+#content-window p {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px; line-height: 1.78; margin-bottom: 1.1em; color: #111;
+}
+#content-window a { color: #0000ee; text-decoration: underline; }
+#content-window a:visited { color: #551a8b; }
+#content-window a:hover { color: #cc0000; }
+#content-window blockquote {
+  border-left: 3px solid #aaa; margin: 1.4em 0; padding-left: 18px;
+}
+#content-window blockquote p { font-style: italic; color: #333; }
+#content-window h1, #content-window h2, #content-window h3, #content-window h4 {
+  font-family: Georgia, serif; font-weight: bold;
+  margin: 1.4em 0 .5em; line-height: 1.3;
+}
+#content-window h1 { font-size: 22px; }
+#content-window h2 { font-size: 18px; }
+#content-window h3 { font-size: 15px; }
+#content-window figure { margin: 1.6em 0; }
+#content-window img { max-width: 100%; height: auto; display: block; }
+#content-window figcaption {
+  font-family: monospace; font-size: 11px; color: #666; margin-top: 5px;
+}
+#content-window ul, #content-window ol {
+  font-family: Georgia, serif; font-size: 15px;
+  line-height: 1.75; margin: 0 0 1em 1.5em;
+}
+#content-window pre {
+  font-family: Menlo, Consolas, monospace; font-size: 12.5px;
+  background: #f6f6f6; border: 1px solid #e0e0e0;
+  padding: 10px 12px; overflow-x: auto; margin: 1em 0;
+  white-space: pre-wrap;
+}
+#content-window code {
+  font-family: Menlo, Consolas, monospace; font-size: 12.5px;
+  background: #f2f2f2; padding: 1px 4px;
+}
+#content-window pre code { background: none; padding: 0; }
+
+.loading { color: #888; font-style: italic; padding: 20px; }
+.error { color: #a00; padding: 20px; }
+</style>
+</head>
+<body>
+
+<div id="breadcrumb"></div>
+
+<div id="listing">
+  <h1 id="dir-title">Index of /</h1>
+  <hr>
+  <table>
+    <thead><tr>
+      <th colspan="2">Name</th>
+      <th class="date">Last modified</th>
+      <th class="size">Size</th>
+      <th class="desc">Description</th>
+    </tr></thead>
+    <tbody id="dir-body"></tbody>
+  </table>
+  <hr>
+  <address>Apache/2.4.57 (Ubuntu) Server at mike-lacy.net Port 443</address>
+</div>
+
+<div id="viewer">
+  <div class="v-chrome">
+    <span class="v-filename" id="v-filename"></span>
+    <span class="v-meta" id="v-meta"></span>
+  </div>
+  <div class="v-chrome">
+    <div class="v-nav">
+      <a id="v-prev" href="#">&#8592; prev page</a>
+      <span id="v-counter">page 1 of 1</span>
+      <a id="v-next" href="#">next page &#8594;</a>
+    </div>
+  </div>
+  <hr>
+  <div id="content-window"></div>
+  <address>Apache/2.4.57 (Ubuntu) Server at mike-lacy.net Port 443</address>
+</div>
+
+<div id="textviewer">
+  <h1 id="tv-title"></h1>
+  <hr>
+  <div id="text-window"><pre id="tv-body"></pre></div>
+  <address>Apache/2.4.57 (Ubuntu) Server at mike-lacy.net Port 443</address>
+</div>
+
+<div id="embedviewer">
+  <div class="v-chrome">
+    <span class="v-filename" id="e-filename"></span>
+    <span class="v-meta" id="e-meta"></span>
+  </div>
+  <hr>
+  <iframe id="e-frame" src="about:blank"
+          style="width:100%;height:720px;border:1px solid #ccc;background:#fff;margin-top:8px"
+          referrerpolicy="no-referrer" loading="lazy"></iframe>
+  <address>Apache/2.4.57 (Ubuntu) Server at mike-lacy.net Port 443</address>
+</div>
+
+<script>
+// ── posts manifest ───────────────────────────────────────────────────────────
+// Sourced from FEATURED.md + posts/ directory.
+
+const POSTS = [
+  { f:"179891086.no-means-no-freddie-the-mayors-office.html",       t:"'No' means 'No', Freddie.",                                                      d:"2025-11-25", tier:1, desc:"Mayor's office / OHS accountability" },
+  { f:"174451008.metro-will-audit-the-office-of-homeless.html",     t:"Metro Will Audit The Office of Homeless Services",                               d:"2025-09-24", tier:1, desc:"official audit triggered" },
+  { f:"179971483.from-the-makers-of-fusus-literally.html",          t:"From the Makers of Fusus (literally): Meet \"LeoSight\"",                          d:"2025-11-26", tier:1, desc:"surveillance vendor / MOU" },
+  { f:"171344469.they-only-discovered-the-problem.html",            t:"They Only 'Discovered' the $500k Payment Issues When I Found It",                d:"2025-08-19", tier:1, desc:"NDP / BID / 21-year oversight gap" },
+  { f:"185390870.there-is-no-one-else-coming.html",                 t:"There Is No One Else Coming But Us.",                                            d:"2026-01-22", tier:1, desc:"surveillance vote · 20-15 rejection" },
+
+  { f:"163865780.housing-last-the-rodeway-to-nowhere.html",         t:"Housing Last | The Rodeway to Nowhere",                                          d:"2025-05-18", tier:2, desc:"OHS · Rodeway Inn program" },
+  { f:"183810155.breaking-the-mayors-official-coordinating.html",   t:"Breaking: Nashville's Surveillance MOU Official Helped Build ICE's LexisNexis Pipeline", d:"2026-01-15", tier:2, desc:"LexisNexis / ICE data" },
+  { f:"144351154.i-kept-waiting-for-the-city-to-release.html",      t:"I Kept Waiting For The City To Release Metro Arts' Expense Report. So I Did It Myself.", d:"2024-05-15", tier:2, desc:"Metro Arts expenses" },
+  { f:"186553419.nashvilles-january-eviction-filings.html",         t:"Nashville's January Eviction Filings Skyrocket Despite Winter Storm",            d:"2026-02-02", tier:2, desc:"56% YoY surge · 3 attorneys / 68%" },
+  { f:"193411754.we-built-the-surveillance-app-nashvilles.html",    t:"We Built the Surveillance Tool Nashville's Leaders Have Been Asking For. Except It Tracks Them.", d:"2026-04-07", tier:2, desc:"NaiBOR launch" },
+
+  { f:"178456949.null_results-text-messages-reveal.html",           t:"{Null_Results}: Text Messages Reveal OHS Director Hand-Picked Families",         d:"2025-11-10", tier:3, desc:"OHS · Title VI" },
+  { f:"192747263.nashvilles-unauthorized-secret-police.html",       t:"Nashville's Unauthorized Secret Police Force",                                   d:"2026-04-02", tier:3, desc:"NDP / THP / NDMC PSO LLC" },
+  { f:"175051724.who-is-larry-ellison-and-what-does.html",          t:"Who Is Larry Ellison? And What Does Oracle Want From Nashville?",                d:"2025-10-22", tier:3, desc:"Oracle / municipal data" },
+  { f:"158662808.downtown-nashvilles-self-made-privacy.html",       t:"Downtown Nashville's Self-Made Privacy Crisis",                                  d:"2025-03-09", tier:3, desc:"LPRs / private surveillance" },
+  { f:"178549584.i-cannot-compromise-my-integrity.html",            t:"'I Cannot Compromise My Integrity': Case Manager Resigned After OHS Conflicts",  d:"2025-11-11", tier:3, desc:"OHS / whistleblower" },
+  { f:"144803108.strings-attached-the-history-of-the.html",         t:"Strings Attached: The History of the Metro Arts Commission & The Nashville Symphony", d:"2024-06-18", tier:3, desc:"arts funding / Bredesen / 1988–" },
+  { f:"180083598.misinformation-or-inconvenient-truth.html",        t:"Misinformation or Inconvenient Truth? What the Documents Actually Say",          d:"2025-12-01", tier:3, desc:"mayor's office rebuttal" },
+  { f:"167746148.why-we-have-to-talk-about-what-nashville.html",    t:"Why We Have To Talk About What Nashville Ignores",                               d:"2025-07-07", tier:3, desc:"essay / framing" },
+
+  { f:"155251807.the-mlk-they-want-us-to-forget.html",              t:"The MLK They Want Us To Forget",                                                 d:"2025-01-20", tier:4, desc:"essay · republished Jan 2026" },
+  { f:"173677465.how-to-escape-tyranny-and-make-new.html",          t:"Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick",   d:"2025-09-16", tier:4, desc:"essay / voice piece" },
+  { f:"170694573.the-center-will-always-fold.html",                 t:"The Center Will Always Fold",                                                    d:"2025-08-12", tier:4, desc:"essay / political theory" },
+  { f:"189078200.the-great-correction-nyc-comedian.html",           t:"'The Great Correction' | My Convo w/ NYC Comedian Whitley Watson",               d:"2026-02-25", tier:4, desc:"audio post / conversation" },
+  { f:"188017123.nashville-eviction-tracker-open-source.html",      t:"Nashville Eviction Tracker: Open Source Code",                                   d:"2026-02-15", tier:4, desc:"2,243 lines of Python published" },
+  { f:"174259144.one-email-today-could-change-everything.html",     t:"1 Minute to Demand Accountability: Email the Audit Committee",                   d:"2025-09-22", tier:4, desc:"CTA / organizing" },
+  { f:"181860842.the-peoples-house-how-nashville-metro.html",       t:"The People's House: How Nashville Metro Council Is Reclaiming Oversight",        d:"2025-12-17", tier:4, desc:"Metro Council governance" },
+];
+
+const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
+
+// ── virtual filesystem ───────────────────────────────────────────────────────
+
+const dirs = {
+  "/": [
+    { type:"dir",  name:"writing",   date:"2026-04-14", desc:"{Rich Text} · 25 featured posts from posts/" },
+    { type:"dir",  name:"projects",  date:"2026-04-07", desc:"civic tech" },
+    { type:"file", name:"README",    date:"2026-04-14", desc:"start here" },
+    { type:"file", name:"contact.txt", date:"2026-04-14", desc:"" },
+    { type:"file", name:"robots.txt", date:"2026-01-20", desc:"" },
+  ],
+  "/projects/": [
+    { type:"post", name:"eviction-tracker",       file:"188017123.nashville-eviction-tracker-open-source.html", date:"2026-02-15", desc:"groundtruthnashville.org/evictions — open-source post" },
+    { type:"post", name:"naibor",                 file:"193411754.we-built-the-surveillance-app-nashvilles.html", date:"2026-04-07", desc:"clovenbradshaw-ctrl.github.io/naibor" },
+    { type:"embed", name:"metro-invoice-viewer",  src:"https://clovenbradshaw-ctrl.github.io/53902028/",         date:"2025-10-27", desc:"OHS ARPA spending · BU 53902028 · 207 invoices · $3.06M · Aug'24–Oct'25" },
+  ],
+};
+
+// ── text file contents ───────────────────────────────────────────────────────
+
+const files = {
+
+"README": `Mike Lacy
+Nashville, TN
+──────────────────────────────────────────────────────────────
+
+Independent investigative journalist.
+Publisher of {Rich Text}. Civic technologist. Former city hall.
+
+{Rich Text} is Nashville's independent accountability newsletter
+— 4,000+ subscribers. Founder of Ground Truth Nashville.
+Nashville Scene "Best Metro Watchdog" 2025.
+
+I cover surveillance, housing, and power in Nashville municipal
+government. Who gets watched, who gets evicted, who gets
+contracts, and who decides. NDP. OHS. Downtown Partnership.
+The gap between what the city says and what it does.
+
+This site serves the 25 most consequential posts directly.
+No tracking, no cookies, no Substack chrome.
+Click a filename in /writing/ to read.
+
+──────────────────────────────────────────────────────────────
+substack:   <a href="https://readrichtext.substack.com" target="_blank">readrichtext.substack.com</a>
+evictions:  <a href="https://groundtruthnashville.org/evictions" target="_blank">groundtruthnashville.org/evictions</a>
+naibor:     <a href="https://clovenbradshaw-ctrl.github.io/naibor/" target="_blank">clovenbradshaw-ctrl.github.io/naibor</a>
+linkedin:   <a href="https://linkedin.com/in/miketlacy" target="_blank">linkedin.com/in/miketlacy</a>
+signal:     available on request
+──────────────────────────────────────────────────────────────`,
+
+"contact.txt": `contact
+──────────────────────────────────────────────────────────────
+
+substack:  <a href="https://readrichtext.substack.com" target="_blank">readrichtext.substack.com</a>
+email:     michaeltlacy@gmail.com
+signal:    available — reach out via substack first
+linkedin:  <a href="https://linkedin.com/in/miketlacy" target="_blank">linkedin.com/in/miketlacy</a>
+
+If you have a tip, a records request to share, or information
+about Nashville city government that isn't getting covered:
+reach out.
+
+If it's sensitive, use Signal. I protect sources.`,
+
+"robots.txt": `User-agent: *
+Disallow: /private/
+Disallow: /drafts/
+
+# Nashville city officials: hello.
+# You have 7 business days to respond to a public
+# records request. The statute is clear. I have a calendar.
+
+# Surveillance vendors: you are not welcome here.
+
+# If you are a Metro staffer reading this on a work
+# device and something is wrong: michaeltlacy@gmail.com
+# Signal available on request.
+
+Sitemap: https://mike-lacy.net/sitemap.xml`,
+
+};
+
+// ── state ────────────────────────────────────────────────────────────────────
+
+let htmlPages = [];
+let htmlPage = 0;
+
+function parentOf(path) {
+  if (path === "/") return null;
+  const parts = path.replace(/\/$/, "").split("/");
+  parts.pop();
+  return parts.length <= 1 ? "/" : parts.join("/") + "/";
+}
+
+function show(id) {
+  ["listing","viewer","textviewer","embedviewer"].forEach(x => {
+    document.getElementById(x).style.display = x === id ? "" : "none";
+  });
+}
+
+function renderBreadcrumb(path, filename) {
+  const bc = document.getElementById("breadcrumb");
+  const parts = path === "/" ? [] : path.replace(/^\//, "").replace(/\/$/, "").split("/");
+  let html = '<a href="#" data-path="/">mike-lacy.net</a>';
+  let built = "/";
+  parts.forEach(part => {
+    built = built === "/" ? "/" + part + "/" : built + part + "/";
+    html += '<span class="sep">/</span><a href="#" data-path="' + built + '">' + part + '</a>';
+  });
+  if (filename) html += '<span class="sep">/</span><span class="cur">' + filename + '</span>';
+  bc.innerHTML = html;
+  bc.querySelectorAll('a[data-path]').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); render(a.dataset.path); });
+  });
+}
+
+function mkrow(icon, name, date, size, desc) {
+  const tr = document.createElement("tr");
+  tr.innerHTML =
+    `<td style="width:22px">${icon}</td>` +
+    `<td><a href="#">${name}</a></td>` +
+    `<td class="date">${date}</td>` +
+    `<td class="size">${size || "—"}</td>` +
+    `<td class="desc">${desc || ""}</td>`;
+  return tr;
+}
+
+function sectionRow(label) {
+  const tr = document.createElement("tr");
+  tr.className = "section-head";
+  tr.innerHTML = `<td colspan="5">${label}</td>`;
+  return tr;
+}
+
+// ── /writing/ custom view ────────────────────────────────────────────────────
+
+function renderWriting() {
+  show("listing");
+  document.title = "Index of /writing/";
+  document.getElementById("dir-title").textContent = "Index of /writing/";
+  const tbody = document.getElementById("dir-body");
+  tbody.innerHTML = "";
+
+  const up = mkrow("📂", "Parent Directory", "", "—", "");
+  up.querySelector("a").addEventListener("click", e => { e.preventDefault(); render("/"); });
+  tbody.appendChild(up);
+
+  const tierNames = {
+    1: "TIER 1 — POSTS THAT CHANGED NASHVILLE POLICY",
+    2: "TIER 2 — MAJOR INVESTIGATIONS & EXTERNAL PUBLICATION",
+    3: "TIER 3 — DEEP INVESTIGATIONS & SERIES ANCHORS",
+    4: "TIER 4 — PHILOSOPHY, VOICE, IDENTITY",
+  };
+
+  [1,2,3,4].forEach(tier => {
+    tbody.appendChild(sectionRow(tierNames[tier]));
+    POSTS.filter(p => p.tier === tier)
+      .sort((a,b) => b.d.localeCompare(a.d))
+      .forEach(p => {
+        const tr = mkrow("📄", p.t, p.d, "—", p.desc);
+        tr.querySelector("a").addEventListener("click", e => {
+          e.preventDefault();
+          openPost(p, "/writing/");
+        });
+        tbody.appendChild(tr);
+      });
+  });
+}
+
+// ── generic directory render ─────────────────────────────────────────────────
+
+function render(path) {
+  if (path === "/writing/") { renderWriting(); renderBreadcrumb(path, null); return; }
+
+  const entries = dirs[path];
+  if (!entries) { render("/"); return; }
+
+  renderBreadcrumb(path, null);
+  show("listing");
+  document.title = "Index of " + path;
+  document.getElementById("dir-title").textContent = "Index of " + path;
+
+  const tbody = document.getElementById("dir-body");
+  tbody.innerHTML = "";
+
+  const parent = parentOf(path);
+  if (parent !== null) {
+    const tr = mkrow("📂", "Parent Directory", "", "—", "");
+    tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); render(parent); });
+    tbody.appendChild(tr);
+  }
+
+  entries.forEach(item => {
+    const icon = item.type === "dir" ? "📁" : item.type === "embed" ? "🧰" : "📄";
+    const displayName = item.type === "dir" ? item.name + "/" : item.name;
+    const tr = mkrow(icon, displayName, item.date, item.size, item.desc);
+    tr.querySelector("a").addEventListener("click", e => {
+      e.preventDefault();
+      if (item.type === "dir") {
+        const child = path === "/" ? "/" + item.name + "/" : path + item.name + "/";
+        render(child);
+      } else if (item.type === "post") {
+        const meta = POST_BY_FILE[item.file] || { f: item.file, t: item.name, d: item.date, desc: item.desc };
+        openPost(meta, path);
+      } else if (item.type === "embed") {
+        openEmbed(item, path);
+      } else {
+        openText(item.name, path);
+      }
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// ── text viewer ──────────────────────────────────────────────────────────────
+
+function openEmbed(item, fromP) {
+  show("embedviewer");
+  renderBreadcrumb(fromP, item.name);
+  document.getElementById("e-filename").textContent = item.name;
+  document.getElementById("e-meta").textContent = item.date + ' · ' + (item.desc || '');
+  const frame = document.getElementById("e-frame");
+  if (frame.src !== item.src) frame.src = item.src;
+  document.title = item.name;
+}
+
+function openText(name, fromP) {
+  const content = files[name] || "[no content]";
+  show("textviewer");
+  renderBreadcrumb(fromP, name);
+  document.getElementById("tv-title").textContent = name;
+  document.getElementById("tv-body").innerHTML = content;
+  document.getElementById("text-window").scrollTop = 0;
+  document.title = name;
+}
+
+// ── html post sanitize + paginate ────────────────────────────────────────────
+
+function sanitize(html) {
+  const doc = new DOMParser().parseFromString('<div id="r">' + html + '</div>', 'text/html');
+  const root = doc.getElementById('r');
+  root.querySelectorAll('button,.image-link-expand,.pencraft,script,style').forEach(el => el.remove());
+  root.querySelectorAll('.image2-inset').forEach(el => el.replaceWith(...el.childNodes));
+  root.querySelectorAll('figure a.image-link').forEach(a => a.replaceWith(...a.childNodes));
+  root.querySelectorAll('source').forEach(s => s.remove());
+  root.querySelectorAll('img').forEach(img => {
+    ['srcset','data-attrs','fetchpriority','width','height','sizes'].forEach(a => img.removeAttribute(a));
+    img.loading = 'lazy';
+  });
+  root.querySelectorAll('a').forEach(a => {
+    if (a.href && !a.href.startsWith('#')) { a.target = '_blank'; a.rel = 'noopener'; }
+  });
+  return root.innerHTML;
+}
+
+function paginate(html, chunkSize) {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = html;
+  const kids = Array.from(wrap.children);
+  if (!kids.length) return [html];
+  const pages = [];
+  for (let i = 0; i < kids.length; i += chunkSize) {
+    const d = document.createElement('div');
+    kids.slice(i, i + chunkSize).forEach(el => d.appendChild(el.cloneNode(true)));
+    pages.push(d.innerHTML);
+  }
+  return pages;
+}
+
+function wordCount(html) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return (d.textContent || '').split(/\s+/).filter(Boolean).length;
+}
+
+function renderHtmlPage(n) {
+  htmlPage = Math.max(0, Math.min(n, htmlPages.length - 1));
+  const w = document.getElementById('content-window');
+  w.innerHTML = htmlPages[htmlPage];
+  w.scrollTop = 0;
+  document.getElementById('v-counter').textContent =
+    'page ' + (htmlPage + 1) + ' of ' + htmlPages.length;
+  document.getElementById('v-prev').className = htmlPage === 0 ? 'off' : '';
+  document.getElementById('v-next').className = htmlPage === htmlPages.length - 1 ? 'off' : '';
+}
+
+async function openPost(meta, fromP) {
+  show("viewer");
+  renderBreadcrumb(fromP, meta.f);
+  document.getElementById('v-filename').textContent = meta.t;
+  document.getElementById('v-meta').textContent = meta.d + ' · loading…';
+  document.getElementById('content-window').innerHTML = '<div class="loading">fetching posts/' + meta.f + ' …</div>';
+  document.title = meta.t;
+
+  try {
+    const res = await fetch('posts/' + meta.f);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const raw = await res.text();
+    const clean = sanitize(raw);
+    htmlPages = paginate(clean, 10);
+    const wc = wordCount(raw);
+    const mins = Math.max(1, Math.ceil(wc / 220));
+    document.getElementById('v-meta').textContent =
+      meta.d + ' · ' + wc.toLocaleString() + ' words · ~' + mins + ' min read';
+    renderHtmlPage(0);
+  } catch (err) {
+    document.getElementById('content-window').innerHTML =
+      '<div class="error">Could not load post.<br>' +
+      'If you opened this file directly (file://), your browser may block fetch. ' +
+      'Serve with <code>python3 -m http.server</code> and visit http://localhost:8000.<br><br>' +
+      '<small>' + err.message + '</small></div>';
+    document.getElementById('v-meta').textContent = meta.d + ' · error';
+    document.getElementById('v-counter').textContent = '';
+    document.getElementById('v-prev').className = 'off';
+    document.getElementById('v-next').className = 'off';
+  }
+}
+
+document.getElementById('v-prev').addEventListener('click', e => {
+  e.preventDefault(); if (htmlPages.length) renderHtmlPage(htmlPage - 1);
+});
+document.getElementById('v-next').addEventListener('click', e => {
+  e.preventDefault(); if (htmlPages.length) renderHtmlPage(htmlPage + 1);
+});
+
+render("/");
+</script>
+</body>
+</html>
