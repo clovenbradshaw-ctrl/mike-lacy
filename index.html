@@ -30,7 +30,19 @@ body {
 }
 h1 { font-size: 16px; font-weight: 600; margin-bottom: 2px; letter-spacing: -0.01em; }
 hr { border: none; border-top: 1px solid #bbb; margin: 6px 0 10px; }
-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+/* Fixed columns so long titles can't collapse the Description column into a
+   slender ribbon. File-explorer style: Name takes the lion's share, Created
+   is a tight tabular column, Description gets room to breathe. */
+col.c-icon { width: 28px; }
+col.c-name { width: auto; }
+col.c-date { width: 112px; }
+col.c-desc { width: 42%; }
+@media (max-width: 767px) {
+  col.c-icon { width: 22px; }
+  col.c-date { width: 92px; }
+  col.c-desc { width: 46%; }
+}
 th {
   text-align: left; padding: 2px 10px 3px 0;
   font-weight: 600; white-space: nowrap;
@@ -41,9 +53,6 @@ td a { word-break: break-word; overflow-wrap: anywhere; }
 /* Size column is a vestige of the original Apache-style header; hide it
    everywhere it appears. */
 th.size, td.size { display: none; }
-/* The Description column no longer exists as its own <td> — descriptions now
-   ride on a second row beneath each title — so hide the column header too. */
-th.desc { display: none; }
 a { cursor: pointer; }
 address {
   font-style: italic; font-size: 12px; color: #555;
@@ -87,16 +96,13 @@ td.w-desc {
   color: #555;
   font-size: 12px;
   line-height: 1.5;
-  padding: 2px 0 12px 0;
-  border-top: none;
+  padding: 10px 0 2px 14px;
+  border-top: 1px dotted #ccc;
   vertical-align: top;
-  max-width: 80ch;
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
-/* Description rides beneath its title row — pull it up tight against the
-   title and let it use the full table width so long blurbs can breathe
-   instead of wrapping six lines deep into a cramped fourth column. */
-tr.w-desc-row td.w-desc { padding-left: 0; }
-tr.w-desc-row:hover td { background: #f4f2ec; }
+tr.w-row.first-in-section td.w-desc { border-top: none; }
 /* Faint row-hover background: grayscale, matches page bg family — no accent,
    no link color shift. Purely tactile cue that rows are clickable targets. */
 tr.w-row:hover td { background: #f4f2ec; }
@@ -111,10 +117,6 @@ tr.w-count td {
   td.w-main a { font-size: 15px; }
   td.w-desc { font-size: 13px; }
 }
-/* Scannability: tighten spacing between title row and its description row,
-   then add a little extra air before the next title. */
-tr.w-row td { padding-bottom: 0; }
-tr.w-desc-row + tr.w-row td { padding-top: 14px; }
 
 #breadcrumb {
   font-size: 12px;
@@ -483,10 +485,15 @@ tr.w-desc-row + tr.w-row td { padding-top: 14px; }
   <h1 id="dir-title">Index of /</h1>
   <hr>
   <table>
+    <colgroup>
+      <col class="c-icon">
+      <col class="c-name">
+      <col class="c-date">
+      <col class="c-desc">
+    </colgroup>
     <thead><tr>
       <th colspan="2">Name</th>
       <th class="date">Created</th>
-      <th class="size">Size</th>
       <th class="desc">Description</th>
     </tr></thead>
     <tbody id="dir-body"></tbody>
@@ -565,7 +572,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-14b";
+const BUILD_TAG = "2026-04-14c";
 const SERVER_SIG = "Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443 · build " + BUILD_TAG;
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("address.server-sig").forEach(el => {
@@ -772,8 +779,10 @@ function parentDirRow(onClick) {
   const tr = document.createElement("tr");
   tr.className = "w-row w-parent first-in-section";
   tr.innerHTML =
-    `<td class="w-main" colspan="3"><a href="#">Parent Directory</a></td>` +
-    `<td class="w-date">—</td>`;
+    `<td></td>` +
+    `<td class="w-main"><a href="#">Parent Directory</a></td>` +
+    `<td class="w-date">—</td>` +
+    `<td class="w-desc">—</td>`;
   tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); onClick(); });
   return tr;
 }
@@ -821,23 +830,16 @@ function renderWriting() {
       tr.className = "w-row" + (i === 0 ? " first-in-section" : "");
       tr.id = "p-" + slug;
       tr.innerHTML =
-        `<td class="w-main" colspan="3"><a href="#">${escape(p.t)}</a></td>` +
-        `<td class="w-date">${p.d}</td>`;
-      tr.querySelector("a").addEventListener("click", e => {
-        e.preventDefault();
-        goPost(p, "/writing/");
-      });
+        `<td></td>` +
+        `<td class="w-main"><a href="#">${escape(p.t)}</a></td>` +
+        `<td class="w-date">${p.d}</td>` +
+        `<td class="w-desc">${p.desc ? escape(p.desc) : ''}</td>`;
+      // Whole row is a tap target; the <a> still gets the focus ring for kbd.
+      const open = () => goPost(p, "/writing/");
+      tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); open(); });
+      tr.querySelector("td.w-desc").style.cursor = "pointer";
+      tr.querySelector("td.w-desc").addEventListener("click", open);
       tbody.appendChild(tr);
-      if (p.desc) {
-        const dtr = document.createElement("tr");
-        dtr.className = "w-desc-row";
-        dtr.innerHTML = `<td class="w-desc" colspan="4">${escape(p.desc)}</td>`;
-        // Clicking the description opens the post too — larger, more forgiving
-        // tap target, and no visual change to the type itself.
-        dtr.style.cursor = "pointer";
-        dtr.addEventListener("click", () => goPost(p, "/writing/"));
-        tbody.appendChild(dtr);
-      }
     });
   });
 
@@ -889,7 +891,8 @@ function render(path) {
     tr.innerHTML =
       `<td class="w-icon"><span class="w-thumb-fallback">${iconChar}</span></td>` +
       `<td class="w-main"><a href="#">${escape(displayName)}</a></td>` +
-      `<td class="w-date" colspan="2">${escape(item.date || "")}</td>`;
+      `<td class="w-date">${escape(item.date || "")}</td>` +
+      `<td class="w-desc">${item.desc ? escape(item.desc) : ''}</td>`;
 
     const a = tr.querySelector("a");
     const activate = () => {
@@ -912,26 +915,10 @@ function render(path) {
       // No preventDefault — let the browser open the external link in a new tab.
     } else {
       a.addEventListener("click", e => { e.preventDefault(); activate(); });
+      tr.querySelector("td.w-desc").style.cursor = "pointer";
+      tr.querySelector("td.w-desc").addEventListener("click", activate);
     }
     tbody.appendChild(tr);
-
-    if (item.desc) {
-      const dtr = document.createElement("tr");
-      dtr.className = "w-desc-row";
-      dtr.innerHTML = `<td></td><td class="w-desc" colspan="3">${escape(item.desc)}</td>`;
-      if (external) {
-        // Make the description a link too, for parity with internal entries.
-        const descTd = dtr.querySelector("td.w-desc");
-        descTd.innerHTML =
-          `<a href="${item.href}" target="_blank" rel="noopener noreferrer">${escape(item.desc)}</a>`;
-        descTd.querySelector("a").style.color = "inherit";
-        descTd.querySelector("a").style.textDecoration = "none";
-      } else {
-        dtr.style.cursor = "pointer";
-        dtr.addEventListener("click", activate);
-      }
-      tbody.appendChild(dtr);
-    }
   });
 }
 
