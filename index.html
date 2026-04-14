@@ -30,7 +30,40 @@ body {
 }
 h1 { font-size: 16px; font-weight: 600; margin-bottom: 2px; letter-spacing: -0.01em; }
 hr { border: none; border-top: 1px solid #bbb; margin: 6px 0 10px; }
-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+/* Fixed columns so long titles can't collapse the Description column into a
+   slender ribbon. File-explorer style: Name takes the lion's share, Created
+   is a tight tabular column, Description gets room to breathe. */
+col.c-icon { width: 28px; }
+col.c-name { width: 30%; }
+col.c-date { width: 108px; }
+col.c-desc { width: auto; }
+/* Tablet: pull the name column in a touch so Description stays the widest. */
+@media (max-width: 1023px) {
+  col.c-name { width: 34%; }
+  col.c-date { width: 96px; }
+}
+/* Mobile: a fixed-column Apache index in 390px starves both Name and
+   Description. Drop the Description column; the JS moves it to a second
+   row underneath so blurbs stay full-width and legible. */
+@media (max-width: 639px) {
+  col.c-icon { width: 22px; }
+  col.c-name { width: auto; }
+  col.c-date { width: 88px; }
+  td.w-desc, th.desc { display: none; }
+  tr.w-desc-row td {
+    display: block;
+    padding: 2px 0 10px 0;
+    color: #555;
+    font-size: 13px;
+    line-height: 1.5;
+    border-top: none;
+  }
+}
+/* Outside mobile, the fallback desc-row is hidden (we use the column). */
+@media (min-width: 640px) {
+  tr.w-desc-row { display: none; }
+}
 th {
   text-align: left; padding: 2px 10px 3px 0;
   font-weight: 600; white-space: nowrap;
@@ -83,10 +116,12 @@ td.w-date {
 td.w-desc {
   color: #555;
   font-size: 12px;
-  line-height: 1.45;
-  padding: 10px 0 2px 8px;
+  line-height: 1.5;
+  padding: 10px 0 2px 14px;
   border-top: 1px dotted #ccc;
   vertical-align: top;
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
 tr.w-row.first-in-section td.w-desc { border-top: none; }
 /* Faint row-hover background: grayscale, matches page bg family — no accent,
@@ -471,10 +506,15 @@ tr.w-count td {
   <h1 id="dir-title">Index of /</h1>
   <hr>
   <table>
+    <colgroup>
+      <col class="c-icon">
+      <col class="c-name">
+      <col class="c-date">
+      <col class="c-desc">
+    </colgroup>
     <thead><tr>
       <th colspan="2">Name</th>
       <th class="date">Created</th>
-      <th class="size">Size</th>
       <th class="desc">Description</th>
     </tr></thead>
     <tbody id="dir-body"></tbody>
@@ -553,7 +593,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-14";
+const BUILD_TAG = "2026-04-14d";
 const SERVER_SIG = "Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443 · build " + BUILD_TAG;
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("address.server-sig").forEach(el => {
@@ -760,7 +800,8 @@ function parentDirRow(onClick) {
   const tr = document.createElement("tr");
   tr.className = "w-row w-parent first-in-section";
   tr.innerHTML =
-    `<td class="w-main" colspan="2"><a href="#">Parent Directory</a></td>` +
+    `<td></td>` +
+    `<td class="w-main"><a href="#">Parent Directory</a></td>` +
     `<td class="w-date">—</td>` +
     `<td class="w-desc">—</td>`;
   tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); onClick(); });
@@ -805,19 +846,31 @@ function renderWriting() {
       // Row anchor id derived from post filename's slug portion. Invisible
       // unless someone deep-links with "#p-<slug>"; no router impact because
       // the hash router only matches "/writing/<file>" shapes.
-      const slug = p.f.replace(/^\d+\./, "").replace(/\.html$/, "");
+      const slug = p.f.replace(/^\d+\./, "").replace(/\.html$/, "").replace(/\.md$/, "");
       const tr = document.createElement("tr");
       tr.className = "w-row" + (i === 0 ? " first-in-section" : "");
       tr.id = "p-" + slug;
       tr.innerHTML =
-        `<td class="w-main" colspan="2"><a href="#">${escape(p.t)}</a></td>` +
+        `<td></td>` +
+        `<td class="w-main"><a href="#">${escape(p.t)}</a></td>` +
         `<td class="w-date">${p.d}</td>` +
         `<td class="w-desc">${p.desc ? escape(p.desc) : ''}</td>`;
-      tr.querySelector("a").addEventListener("click", e => {
-        e.preventDefault();
-        goPost(p, "/writing/");
-      });
+      const open = () => goPost(p, "/writing/");
+      tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); open(); });
+      tr.querySelector("td.w-desc").style.cursor = "pointer";
+      tr.querySelector("td.w-desc").addEventListener("click", open);
       tbody.appendChild(tr);
+      // Mobile fallback: when the Description column is hidden via media query,
+      // this second row drops the blurb full-width beneath the title so it
+      // stays legible on narrow viewports. Hidden on desktop by CSS.
+      if (p.desc) {
+        const dtr = document.createElement("tr");
+        dtr.className = "w-desc-row";
+        dtr.innerHTML = `<td colspan="4">${escape(p.desc)}</td>`;
+        dtr.style.cursor = "pointer";
+        dtr.addEventListener("click", open);
+        tbody.appendChild(dtr);
+      }
     });
   });
 
@@ -873,28 +926,44 @@ function render(path) {
       `<td class="w-desc">${item.desc ? escape(item.desc) : ''}</td>`;
 
     const a = tr.querySelector("a");
+    const activate = () => {
+      if (item.type === "dir") {
+        const child = path === "/" ? "/" + item.name + "/" : path + item.name + "/";
+        goDir(child);
+      } else if (item.type === "post") {
+        const meta = POST_BY_FILE[item.file] || { f: item.file, t: item.name, d: item.date, desc: item.desc };
+        goPost(meta, path);
+      } else if (item.type === "embed") {
+        goEmbed(item, path);
+      } else {
+        goText(item.name, path);
+      }
+    };
     if (external) {
       a.href = item.href;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
       // No preventDefault — let the browser open the external link in a new tab.
     } else {
-      a.addEventListener("click", e => {
-        e.preventDefault();
-        if (item.type === "dir") {
-          const child = path === "/" ? "/" + item.name + "/" : path + item.name + "/";
-          goDir(child);
-        } else if (item.type === "post") {
-          const meta = POST_BY_FILE[item.file] || { f: item.file, t: item.name, d: item.date, desc: item.desc };
-          goPost(meta, path);
-        } else if (item.type === "embed") {
-          goEmbed(item, path);
-        } else {
-          goText(item.name, path);
-        }
-      });
+      a.addEventListener("click", e => { e.preventDefault(); activate(); });
+      tr.querySelector("td.w-desc").style.cursor = "pointer";
+      tr.querySelector("td.w-desc").addEventListener("click", activate);
     }
     tbody.appendChild(tr);
+    // Mobile fallback row (hidden on desktop via media query).
+    if (item.desc) {
+      const dtr = document.createElement("tr");
+      dtr.className = "w-desc-row";
+      dtr.innerHTML = `<td colspan="4">${escape(item.desc)}</td>`;
+      if (external) {
+        dtr.innerHTML =
+          `<td colspan="4"><a href="${item.href}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">${escape(item.desc)}</a></td>`;
+      } else {
+        dtr.style.cursor = "pointer";
+        dtr.addEventListener("click", activate);
+      }
+      tbody.appendChild(dtr);
+    }
   });
 }
 
@@ -1067,9 +1136,12 @@ async function openPost(meta, fromP) {
   document.getElementById('content-window').innerHTML = '<div class="loading">fetching posts/' + meta.f + ' …</div>';
   document.title = meta.t;
 
+  // Cache-bust with the build tag so a stale CDN 404 on first deploy of a
+  // renamed post doesn't strand the reader on an "HTTP 404" page.
+  const url = 'posts/' + meta.f + '?v=' + encodeURIComponent(BUILD_TAG);
   try {
-    const res = await fetch('posts/' + meta.f);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' — ' + url);
     const raw = await res.text();
     const { meta: fm, body } = parseFrontmatter(raw);
     // Prefer title/date from the file's own frontmatter — the post file is
