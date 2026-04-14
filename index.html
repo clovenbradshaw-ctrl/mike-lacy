@@ -156,32 +156,34 @@ tr.w-count td {
 .v-filename { font-weight: 600; font-size: 13px; word-break: break-word; overflow-wrap: anywhere; }
 .v-meta { color: #555; font-size: 12px; }
 
-/* Post viewer — stack the title above the meta. Set in the same geometric
-   system-sans as the rest of the site, but larger, tighter, and given a
-   sliver more breathing room so the article opens with presence.
-   Weight 600 (not 700) reads cleaner at display sizes in most system UI
-   fonts, matching the crisp-but-quiet Phosphor-icons feel. */
+/* Post viewer — Substack-leaning: a generous serif title stacked over quiet
+   sans metadata, with room to breathe. The index of the site stays sans
+   (it's file-explorer chrome); the article itself switches typography so
+   reading feels like a publication, not a directory listing. */
 #viewer .v-chrome {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 #viewer .v-filename {
   display: block;
-  font-weight: 600;
-  font-size: 26px;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
+  font-family: Charter, "Source Serif Pro", "Iowan Old Style", "Apple Garamond", Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.18;
+  letter-spacing: -0.012em;
   color: #111;
-  margin: 10px 0 8px;
+  margin: 18px 0 10px;
 }
 #viewer .v-meta {
   display: block;
-  color: #555;
-  font-size: 12px;
+  color: #6b6b6b;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 @media (min-width: 768px) {
-  #viewer .v-filename { font-size: 34px; line-height: 1.15; }
+  #viewer .v-filename { font-size: 40px; line-height: 1.14; margin: 22px 0 12px; }
+  #viewer .v-meta { font-size: 14px; }
 }
 
 #content-window, #text-window {
@@ -229,35 +231,72 @@ tr.w-count td {
 #tv-body strong { font-weight: 600; }
 #tv-body em { font-style: italic; }
 
-#content-window { color: #111; }
+/* Reading body — serif stack in the Substack spirit: a warm, book-weight
+   transitional serif on devices that have Charter / Source Serif / Iowan,
+   falling back to Georgia. Sans-serif chrome stays on the index and the
+   article metadata, so the serif signals "you are reading now." */
+#content-window {
+  color: #1a1a1a;
+  font-family: Charter, "Source Serif Pro", "Iowan Old Style", "Apple Garamond", Georgia, "Times New Roman", serif;
+}
 #content-window p {
-  font-size: 16px; line-height: 1.6; margin-bottom: 1em; color: #111;
+  font-size: 18px; line-height: 1.7; margin: 0 0 1.15em; color: #1a1a1a;
   word-wrap: break-word; overflow-wrap: break-word;
 }
 #content-window a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(17,17,17,0.35);
   word-break: break-word; overflow-wrap: anywhere;
 }
+#content-window a:hover { text-decoration-color: #111; }
 #content-window blockquote {
-  border-left: 2px solid #bbb; margin: 1.2em 0; padding-left: 14px;
+  border-left: 3px solid #222; margin: 1.5em 0; padding: 0.1em 0 0.1em 18px;
   color: #333;
 }
-#content-window blockquote p { font-style: italic; }
+#content-window blockquote p { font-style: italic; font-size: 18px; line-height: 1.6; }
 #content-window h1, #content-window h2, #content-window h3, #content-window h4 {
-  font-weight: 600; letter-spacing: -0.01em;
-  margin: 1.6em 0 .4em; line-height: 1.25; color: #111;
+  font-family: inherit;
+  font-weight: 700; letter-spacing: -0.012em;
+  margin: 1.8em 0 .5em; line-height: 1.2; color: #111;
 }
-#content-window h1 { font-size: 22px; }
-#content-window h2 { font-size: 18px; }
-#content-window h3 { font-size: 16px; }
-#content-window figure { margin: 1.4em 0; max-width: 100%; }
-#content-window img { max-width: 100%; height: auto; display: block; }
-#content-window figcaption {
-  font-size: 11px; color: #555; margin-top: 4px;
+#content-window h1 { font-size: 26px; }
+#content-window h2 { font-size: 22px; }
+#content-window h3 { font-size: 19px; }
+#content-window hr { border: none; border-top: 1px solid #d6d6d6; margin: 2em auto; width: 40%; }
+
+/* Images: default to ~2/3 of the column, centered, with a zoom cursor so
+   readers know the shadowbox is available. On narrow viewports we let them
+   breathe full-width — 2/3 of a phone is too small to see. */
+#content-window figure { margin: 1.8em auto; max-width: 100%; text-align: center; }
+#content-window img {
+  display: block;
+  width: 66.6667%;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  cursor: zoom-in;
+  border-radius: 2px;
+}
+@media (max-width: 639px) {
+  #content-window img { width: 100%; }
+}
+#content-window figcaption,
+#content-window .image-caption {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: #6b6b6b;
+  line-height: 1.5;
+  margin-top: 8px;
+  text-align: center;
+  font-style: normal;
 }
 #content-window ul, #content-window ol {
-  font-size: 16px; line-height: 1.6; margin: 0 0 1em 1.3em;
+  font-size: 18px; line-height: 1.7; margin: 0 0 1.15em 1.4em;
 }
-#content-window li { margin-bottom: 0.35em; word-wrap: break-word; overflow-wrap: break-word; }
+#content-window li { margin-bottom: 0.45em; word-wrap: break-word; overflow-wrap: break-word; }
 #content-window pre {
   font-size: 12.5px;
   background: #f4f4f4; border: 1px solid #ddd;
@@ -271,9 +310,20 @@ tr.w-count td {
   word-break: break-word;
 }
 #content-window pre code { background: none; padding: 0; }
-#content-window img, #content-window video, #content-window iframe {
+#content-window video, #content-window iframe {
   max-width: 100%; height: auto; display: block;
 }
+/* Substack wraps images in an <a class="image-link"> that points to the
+   full-size asset. We intercept that click for the shadowbox, but keep the
+   anchor styled as a plain image (no underline, inherit block layout). */
+#content-window a.image-link,
+#content-window a.image-link:hover {
+  display: block;
+  text-decoration: none;
+  border: 0;
+}
+#content-window .captioned-image-container figure { text-align: center; }
+#content-window .captioned-image-container img { margin: 0 auto; }
 
 #e-frame { width: 100%; height: calc(100vh - 130px); min-height: 420px; border: 1px solid #999; background: #fff; margin-top: 8px; }
 
@@ -464,7 +514,9 @@ tr.w-count td {
   #content-window .subscription-widget-subscribe .button.primary { flex: 1 1 100%; }
 }
 
-/* Desktop: double the column width for comfortable reading on larger screens. */
+/* Desktop: a comfortable reading column. Sans-serif chrome (index, tables,
+   metadata) goes a touch bigger; the serif article body bumps up to the
+   ~19px Substack sits at, capped near 68ch so lines don't sprawl. */
 @media (min-width: 768px) {
   body { max-width: 960px; padding: 20px 24px 40px; font-size: 14px; }
   h1 { font-size: 18px; }
@@ -472,13 +524,16 @@ tr.w-count td {
   th, td { font-size: 14px; }
   #content-window p,
   #content-window ul,
-  #content-window ol { font-size: 17px; line-height: 1.65; }
-  #content-window h1 { font-size: 24px; }
-  #content-window h2 { font-size: 20px; }
-  #content-window h3 { font-size: 17px; }
+  #content-window ol { font-size: 19px; line-height: 1.72; }
+  #content-window h1 { font-size: 30px; }
+  #content-window h2 { font-size: 24px; }
+  #content-window h3 { font-size: 20px; }
+  #content-window blockquote p { font-size: 20px; }
   #text-window pre { font-size: 14px; max-width: 80ch; }
 
-  /* Cap reading-text blocks at ~80 characters wide for comfortable line length. */
+  /* Cap reading-text blocks near ~68ch — Substack-ish — so lines stay
+     scannable on wide screens. Figures are intentionally NOT capped so
+     they keep their 2/3 proportion relative to the full column. */
   #content-window p,
   #content-window ul,
   #content-window ol,
@@ -493,9 +548,53 @@ tr.w-count td {
   #content-window .subscription-widget-wrap-editor,
   #content-window .file-embed-wrapper,
   #content-window .button-wrapper {
-    max-width: 80ch;
+    max-width: 68ch;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
+
+/* ── Shadowbox / lightbox ─────────────────────────────────────────────────
+   Click any article image → full-size overlay. No dependencies, no
+   third-party JS; just a fixed overlay with the image centered and a
+   close-on-click / close-on-escape contract. */
+#lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,10,0.92);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: zoom-out;
+  padding: 24px;
+  animation: lb-fade 140ms ease-out;
+}
+#lightbox.open { display: flex; }
+#lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  border-radius: 2px;
+  cursor: zoom-out;
+}
+#lightbox .lb-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font: 600 22px/1 ui-sans-serif, system-ui, sans-serif;
+  color: #eee;
+  background: transparent;
+  border: 0;
+  padding: 6px 10px;
+  cursor: pointer;
+  opacity: 0.75;
+}
+#lightbox .lb-close:hover { opacity: 1; }
+@keyframes lb-fade { from { opacity: 0 } to { opacity: 1 } }
 </style>
 </head>
 <body>
@@ -551,6 +650,11 @@ tr.w-count td {
   <address class="server-sig"></address>
 </div>
 
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button type="button" class="lb-close" aria-label="Close image">×</button>
+  <img alt="">
+</div>
+
 <script>
 // ── posts manifest ───────────────────────────────────────────────────────────
 // Sourced from FEATURED.md + posts/ directory.
@@ -593,7 +697,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-14d";
+const BUILD_TAG = "2026-04-14e";
 const SERVER_SIG = "Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443 · build " + BUILD_TAG;
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("address.server-sig").forEach(el => {
@@ -1167,6 +1271,52 @@ async function openPost(meta, fromP) {
     document.getElementById('v-meta').textContent = meta.d + ' · error';
   }
 }
+
+// ── Shadowbox ────────────────────────────────────────────────────────────
+// Click any <img> in the article → overlay the full-size asset. Substack
+// wraps images in <a class="image-link" href="…full-size…">, so prefer that
+// href when present; otherwise fall back to img.currentSrc / img.src. We
+// intercept at the #content-window level so dynamically-rendered posts
+// don't each need their own handler.
+(function initLightbox() {
+  const box = document.getElementById('lightbox');
+  if (!box) return;
+  const lbImg = box.querySelector('img');
+  const closeBtn = box.querySelector('.lb-close');
+
+  function open(src, alt) {
+    lbImg.src = src;
+    lbImg.alt = alt || '';
+    box.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    box.classList.remove('open');
+    lbImg.src = '';
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('click', (e) => {
+    const cw = document.getElementById('content-window');
+    if (!cw || !cw.contains(e.target)) return;
+    const img = e.target.closest('img');
+    if (!img) return;
+    // Prefer the Substack-wrapped full-size link if it's an <a class="image-link">
+    const link = img.closest('a.image-link, a.image2, a.is-viewable-img');
+    const src = (link && link.href) || img.currentSrc || img.src;
+    if (!src) return;
+    e.preventDefault();
+    open(src, img.alt);
+  });
+
+  box.addEventListener('click', (e) => {
+    // Close when clicking the backdrop, close button, or the image itself.
+    if (e.target === box || e.target === lbImg || e.target === closeBtn) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && box.classList.contains('open')) close();
+  });
+})();
 
 // Initial load: URL hash wins (so shared/bookmarked links resolve correctly),
 // then saved history.state, then default to root.
