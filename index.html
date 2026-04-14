@@ -6,25 +6,39 @@
 <title>Index of /</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-x: hidden; }
 body {
   font-family: monospace;
   font-size: 13.5px;
   color: #000;
   background: #fff;
-  padding: 20px 24px 60px;
+  padding: 14px 14px 60px;
   max-width: 880px;
+  margin: 0 auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
-h1 { font-size: 18px; font-weight: bold; margin-bottom: 2px; }
+h1 { font-size: 17px; font-weight: bold; margin-bottom: 2px; line-height: 1.3; }
 hr { border: none; border-top: 1px solid #999; margin: 6px 0 10px; }
-table { width: 100%; border-collapse: collapse; }
+table { width: 100%; border-collapse: collapse; table-layout: auto; }
 th {
-  text-align: left; padding: 3px 20px 5px 0;
+  text-align: left; padding: 3px 10px 5px 0;
   border-bottom: 1px solid #999; font-weight: bold; white-space: nowrap;
 }
-td { padding: 4px 20px 4px 0; white-space: nowrap; vertical-align: top; }
+td { padding: 4px 10px 4px 0; vertical-align: top; word-break: break-word; }
+td a { word-break: break-word; overflow-wrap: anywhere; }
 td.desc { white-space: normal; color: #666; max-width: 340px; }
-td.size { text-align: right; min-width: 44px; padding-right: 28px; }
-td.date { color: #666; min-width: 110px; }
+td.size { text-align: right; min-width: 44px; padding-right: 14px; white-space: nowrap; }
+td.date { color: #666; min-width: 92px; white-space: nowrap; }
+
+/* Narrow-column / mobile-forward: hide non-essential columns, stack the title */
+@media (max-width: 680px) {
+  body { padding: 12px 12px 40px; font-size: 13px; }
+  h1 { font-size: 16px; }
+  th.date, th.size, th.desc,
+  td.date, td.size, td.desc { display: none; }
+  td { padding: 6px 6px 6px 0; }
+}
 a { color: #0000ee; text-decoration: underline; cursor: pointer; }
 a:visited { color: #551a8b; }
 a:hover { color: #cc0000; }
@@ -63,34 +77,45 @@ address {
   align-items: baseline; flex-wrap: wrap;
   gap: 8px; margin-bottom: 3px;
 }
-.v-filename { font-weight: bold; font-size: 14px; }
+.v-filename { font-weight: bold; font-size: 14px; word-break: break-word; overflow-wrap: anywhere; }
 .v-meta { color: #666; font-size: 12px; }
-.v-nav { display: flex; align-items: center; gap: 0; font-size: 12px; }
+.v-nav { display: flex; align-items: center; gap: 0; font-size: 12px; flex-wrap: wrap; }
 .v-nav a { color: #0000ee; padding: 0 3px; }
 .v-nav a.off { color: #bbb; pointer-events: none; text-decoration: none; }
 .v-nav span { margin: 0 8px; color: #444; }
 
 #content-window, #text-window {
   overflow-y: auto;
-  height: 560px;
+  overflow-x: hidden;
+  height: 70vh;
+  min-height: 420px;
+  max-height: 680px;
   border: 1px solid #ccc;
-  padding: 22px 26px;
+  padding: 18px 18px;
   margin-top: 8px;
   background: #fff;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 #text-window pre {
   white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
   font-family: monospace;
   font-size: 13.5px;
   line-height: 1.7;
 }
-#text-window pre a { color: #0000ee; }
+#text-window pre a { color: #0000ee; word-break: break-all; }
 
 #content-window p {
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 15px; line-height: 1.78; margin-bottom: 1.1em; color: #111;
+  font-size: 16px; line-height: 1.7; margin-bottom: 1.1em; color: #111;
+  word-wrap: break-word; overflow-wrap: break-word;
 }
-#content-window a { color: #0000ee; text-decoration: underline; }
+#content-window a {
+  color: #0000ee; text-decoration: underline;
+  word-break: break-word; overflow-wrap: anywhere;
+}
 #content-window a:visited { color: #551a8b; }
 #content-window a:hover { color: #cc0000; }
 #content-window blockquote {
@@ -110,23 +135,51 @@ address {
   font-family: monospace; font-size: 11px; color: #666; margin-top: 5px;
 }
 #content-window ul, #content-window ol {
-  font-family: Georgia, serif; font-size: 15px;
-  line-height: 1.75; margin: 0 0 1em 1.5em;
+  font-family: Georgia, serif; font-size: 16px;
+  line-height: 1.7; margin: 0 0 1em 1.3em;
+  padding-left: 0.2em;
 }
+#content-window li { margin-bottom: 0.4em; word-wrap: break-word; overflow-wrap: break-word; }
 #content-window pre {
   font-family: Menlo, Consolas, monospace; font-size: 12.5px;
   background: #f6f6f6; border: 1px solid #e0e0e0;
   padding: 10px 12px; overflow-x: auto; margin: 1em 0;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 #content-window code {
   font-family: Menlo, Consolas, monospace; font-size: 12.5px;
   background: #f2f2f2; padding: 1px 4px;
+  word-break: break-word;
 }
 #content-window pre code { background: none; padding: 0; }
+#content-window figure { max-width: 100%; }
+#content-window img, #content-window video, #content-window iframe {
+  max-width: 100%; height: auto; display: block;
+}
+
+#e-frame { width: 100%; height: 72vh; min-height: 480px; }
 
 .loading { color: #888; font-style: italic; padding: 20px; }
 .error { color: #a00; padding: 20px; }
+
+@media (max-width: 680px) {
+  #content-window, #text-window {
+    padding: 14px 14px;
+    height: 72vh;
+    min-height: 380px;
+    max-height: none;
+  }
+  #content-window p,
+  #content-window ul, #content-window ol { font-size: 15.5px; line-height: 1.65; }
+  #content-window h1 { font-size: 20px; }
+  #content-window h2 { font-size: 17px; }
+  #content-window h3 { font-size: 15px; }
+  #text-window pre { font-size: 13px; }
+  #e-frame { height: 78vh; min-height: 420px; }
+  .v-filename { font-size: 13.5px; }
+  .v-meta { font-size: 11.5px; }
+}
 </style>
 </head>
 <body>
@@ -146,7 +199,7 @@ address {
     <tbody id="dir-body"></tbody>
   </table>
   <hr>
-  <address>Apache/2.4.57 (Ubuntu) Server at mike-lacy.net Port 443</address>
+  <address>Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443</address>
 </div>
 
 <div id="viewer">
@@ -163,14 +216,14 @@ address {
   </div>
   <hr>
   <div id="content-window"></div>
-  <address>Apache/2.4.57 (Ubuntu) Server at mike-lacy.net Port 443</address>
+  <address>Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443</address>
 </div>
 
 <div id="textviewer">
   <h1 id="tv-title"></h1>
   <hr>
   <div id="text-window"><pre id="tv-body"></pre></div>
-  <address>Apache/2.4.57 (Ubuntu) Server at mike-lacy.net Port 443</address>
+  <address>Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443</address>
 </div>
 
 <div id="embedviewer">
@@ -180,9 +233,9 @@ address {
   </div>
   <hr>
   <iframe id="e-frame" src="about:blank"
-          style="width:100%;height:720px;border:1px solid #ccc;background:#fff;margin-top:8px"
+          style="border:1px solid #ccc;background:#fff;margin-top:8px"
           referrerpolicy="no-referrer" loading="lazy"></iframe>
-  <address>Apache/2.4.57 (Ubuntu) Server at mike-lacy.net Port 443</address>
+  <address>Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443</address>
 </div>
 
 <script>
@@ -268,15 +321,16 @@ substack:   <a href="https://readrichtext.substack.com" target="_blank">readrich
 evictions:  <a href="https://groundtruthnashville.org/evictions" target="_blank">groundtruthnashville.org/evictions</a>
 naibor:     <a href="https://clovenbradshaw-ctrl.github.io/naibor/" target="_blank">clovenbradshaw-ctrl.github.io/naibor</a>
 linkedin:   <a href="https://linkedin.com/in/miketlacy" target="_blank">linkedin.com/in/miketlacy</a>
-signal:     available on request
+email:      <a href="mailto:scores.patch.points@proton.me">scores.patch.points@proton.me</a>
+signal:     <a href="https://signal.me/#eu/0sH-qog826fh91_3ZkY3XycscZO93L8T2Bbf2kZ" target="_blank">signal.me/#eu/0sH-qog826fh91_3ZkY3XycscZO93L8T2Bbf2kZ</a>
 ──────────────────────────────────────────────────────────────`,
 
 "contact.txt": `contact
 ──────────────────────────────────────────────────────────────
 
 substack:  <a href="https://readrichtext.substack.com" target="_blank">readrichtext.substack.com</a>
-email:     michaeltlacy@gmail.com
-signal:    available — reach out via substack first
+email:     <a href="mailto:scores.patch.points@proton.me">scores.patch.points@proton.me</a>
+signal:    <a href="https://signal.me/#eu/0sH-qog826fh91_3ZkY3XycscZO93L8T2Bbf2kZ" target="_blank">signal.me → tap to open</a>
 linkedin:  <a href="https://linkedin.com/in/miketlacy" target="_blank">linkedin.com/in/miketlacy</a>
 
 If you have a tip, a records request to share, or information
@@ -296,10 +350,10 @@ Disallow: /drafts/
 # Surveillance vendors: you are not welcome here.
 
 # If you are a Metro staffer reading this on a work
-# device and something is wrong: michaeltlacy@gmail.com
-# Signal available on request.
+# device and something is wrong: scores.patch.points@proton.me
+# Signal: signal.me/#eu/0sH-qog826fh91_3ZkY3XycscZO93L8T2Bbf2kZ
 
-Sitemap: https://mike-lacy.net/sitemap.xml`,
+Sitemap: https://mikelacy.site/sitemap.xml`,
 
 };
 
@@ -324,7 +378,7 @@ function show(id) {
 function renderBreadcrumb(path, filename) {
   const bc = document.getElementById("breadcrumb");
   const parts = path === "/" ? [] : path.replace(/^\//, "").replace(/\/$/, "").split("/");
-  let html = '<a href="#" data-path="/">mike-lacy.net</a>';
+  let html = '<a href="#" data-path="/">mikelacy.site</a>';
   let built = "/";
   parts.forEach(part => {
     built = built === "/" ? "/" + part + "/" : built + part + "/";
