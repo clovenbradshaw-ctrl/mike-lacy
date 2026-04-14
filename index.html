@@ -53,15 +53,21 @@ col.c-desc { width: auto; }
 }
 /* Mobile: a fixed-column Apache index in 390px starves both Name and
    Description. Drop the Description column; the JS moves it to a second
-   row underneath so blurbs stay full-width and legible. */
+   row underneath so blurbs stay full-width and legible.
+   Note: colspan=4 on the desc-row td gives it full-width already — we
+   deliberately DO NOT use display:block here, because a display:block
+   cell inside a display:table-row renders inconsistently across browsers
+   and was causing the date in the row above to read as if it ran straight
+   into the description below. Keeping the cell as a normal table-cell
+   with clear vertical padding and a left indent that aligns it with the
+   title text (not the icon) fixes the run-on. */
 @media (max-width: 639px) {
   col.c-icon { width: 22px; }
   col.c-name { width: auto; }
   col.c-date { width: 88px; }
   td.w-desc, th.desc { display: none; }
   tr.w-desc-row td {
-    display: block;
-    padding: 2px 0 10px 0;
+    padding: 8px 0 12px 30px;
     color: #666;
     font-size: 13px;
     line-height: 1.5;
@@ -80,7 +86,10 @@ th {
   letter-spacing: 0.06em;
   color: #666;
 }
-th.date { text-align: right; padding-right: 12px; }
+th.date { text-align: right; padding-right: 20px; }
+/* Pull the Description header in by the same 20px the cells below use so
+   "DESCRIPTION" sits over the actual left edge of the description text. */
+th.desc { padding-left: 20px; }
 td { padding: 2px 6px 2px 0; vertical-align: top; word-break: break-word; }
 td a { word-break: break-word; overflow-wrap: anywhere; }
 /* Size column is a vestige of the original Apache-style header; hide it
@@ -123,14 +132,20 @@ td.w-date {
   color: #888;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  padding-right: 12px;
+  /* Generous right padding so the right-aligned date can never visually
+     butt up against the left edge of the Description column, even at the
+     tablet breakpoint where the date column narrows to 96px. */
+  padding-right: 20px;
   text-align: right;
 }
 td.w-desc {
   color: #666;
   font-size: 13px;
   line-height: 1.5;
-  padding: 12px 0 11px 14px;
+  /* 20px left padding pairs with the 20px right padding on w-date to give
+     an unmistakable ~40px gap between the date and the description — no
+     ambiguity about where one column ends and the next begins. */
+  padding: 12px 0 11px 20px;
   border-top: 1px dotted #ccc;
   vertical-align: top;
   word-break: normal;
@@ -848,7 +863,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-14g";
+const BUILD_TAG = "2026-04-14h";
 const SERVER_SIG = "Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443 · build " + BUILD_TAG;
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("address.server-sig").forEach(el => {
