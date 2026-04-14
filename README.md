@@ -55,5 +55,4 @@ He also develops EO — a framework for tracking how things change. Most databas
 - **Email:** scores.patch.points@proton.me
 - **Signal:** [message me here](https://signal.me/#eu/0sH-qog826fh91_3ZkY3XycscZO93L8T2Bbf2kZ)
 - **Substack:** [readrichtext.substack.com](https://readrichtext.substack.com)
-- **Ground Truth Nashville:** [groundtruthnashville.substack.com](https://groundtruthnashville.substack.com)
 - **LinkedIn:** [linkedin.com/in/miketlacy](https://linkedin.com/in/miketlacy)
