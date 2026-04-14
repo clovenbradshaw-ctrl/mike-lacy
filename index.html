@@ -680,10 +680,17 @@ tr.w-count td {
   }
 }
 #rt-widget .rtw { border: 1px solid #e0e0e0; border-radius: 12px; background: #fff; overflow: hidden; }
-#rt-widget .rtw-h { display: flex; align-items: center; justify-content: space-between; padding: 9px 13px; border-bottom: 1px solid #eee; }
-#rt-widget .rtw-hl { font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: #999; }
-#rt-widget .rtw-ha { display: flex; align-items: center; color: #999; text-decoration: none; }
+#rt-widget .rtw-h { display: flex; align-items: center; justify-content: space-between; padding: 9px 13px; border-bottom: 1px solid #eee; cursor: pointer; user-select: none; gap: 10px; }
+#rt-widget.collapsed .rtw-h { border-bottom: none; }
+#rt-widget .rtw-hl { font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: #999; flex-shrink: 0; }
+#rt-widget .rtw-latest { font-size: 11px; color: #666; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: none; }
+#rt-widget.collapsed .rtw-latest { display: block; }
+#rt-widget .rtw-toggle { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; color: #999; transition: transform .2s ease; flex-shrink: 0; }
+#rt-widget.collapsed .rtw-toggle { transform: rotate(-90deg); }
+#rt-widget .rtw-ha { display: flex; align-items: center; color: #999; text-decoration: none; flex-shrink: 0; }
 #rt-widget .rtw-ha:hover { color: #111; }
+#rt-widget #rt-body { max-height: 460px; overflow: hidden; transition: max-height .25s ease; }
+#rt-widget.collapsed #rt-body { max-height: 0; }
 #rt-widget .rtw-pi { padding: 9px 13px; border-bottom: 1px solid #eee; cursor: pointer; }
 #rt-widget .rtw-pi:hover { background: #f9f9f9; }
 #rt-widget .rtw-pi:last-child { border-bottom: none; }
@@ -802,10 +809,14 @@ tr.w-count td {
 <!-- Rich Text (Substack) right-side widget. Fetches the substack RSS feed
      via an n8n webhook proxy (RSS → JSON); on click, opens the post as an
      overlay modal that reuses #viewer so formatting matches /writing/ posts. -->
-<aside id="rt-widget" aria-label="Rich Text feed">
+<aside id="rt-widget" class="collapsed" aria-label="Rich Text feed">
   <div class="rtw">
-    <div class="rtw-h">
+    <div class="rtw-h" id="rtw-header" role="button" tabindex="0" aria-expanded="false" aria-controls="rt-body">
       <span class="rtw-hl">Rich Text</span>
+      <span class="rtw-latest" id="rtw-latest"></span>
+      <span class="rtw-toggle" aria-hidden="true">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
       <a href="https://readrichtext.substack.com" class="rtw-ha" target="_blank" rel="noopener" aria-label="Open on Substack">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 11L11 2M11 2H5.5M11 2V7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
@@ -1548,6 +1559,8 @@ async function openPost(meta, fromP) {
                || el.querySelector('description')?.textContent || ''
       }));
       if (!items.length) throw new Error('no items parsed');
+      const latestEl = document.getElementById('rtw-latest');
+      if (latestEl && items[0]) latestEl.textContent = items[0].title;
       renderList();
     } catch (e) {
       rtBody().innerHTML = `<div class="rtw-load">Error: ${esc(e.message)}</div>`;
@@ -1622,6 +1635,23 @@ async function openPost(meta, fromP) {
       show('listing');
     }
   }
+
+  // Header click toggles the collapsed state. The external-link anchor inside
+  // the header stops propagation so clicking the ↗ icon still opens Substack
+  // without triggering the toggle.
+  const widget = document.getElementById('rt-widget');
+  const header = document.getElementById('rtw-header');
+  const toggle = () => {
+    const collapsed = widget.classList.toggle('collapsed');
+    header.setAttribute('aria-expanded', String(!collapsed));
+  };
+  header.addEventListener('click', e => {
+    if (e.target.closest('.rtw-ha')) return;
+    toggle();
+  });
+  header.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
 
   document.getElementById('viewer-modal-close').addEventListener('click', closeModal);
   document.getElementById('viewer-backdrop').addEventListener('click', closeModal);
