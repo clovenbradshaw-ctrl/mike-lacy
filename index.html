@@ -210,13 +210,6 @@ address {
     <span class="v-filename" id="v-filename"></span>
     <span class="v-meta" id="v-meta"></span>
   </div>
-  <div class="v-chrome">
-    <div class="v-nav">
-      <a id="v-prev" href="#">&#8592; prev page</a>
-      <span id="v-counter">page 1 of 1</span>
-      <a id="v-next" href="#">next page &#8594;</a>
-    </div>
-  </div>
   <hr>
   <div id="content-window"></div>
   <address>Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443</address>
@@ -361,9 +354,6 @@ Sitemap: https://mikelacy.site/sitemap.xml`,
 };
 
 // ── state ────────────────────────────────────────────────────────────────────
-
-let htmlPages = [];
-let htmlPage = 0;
 
 // history management — so the browser back/forward buttons navigate the reader
 // Hash-encode the state into the URL so reload + direct linking work.
@@ -607,7 +597,7 @@ function openText(name, fromP) {
   document.title = name;
 }
 
-// ── html post sanitize + paginate ────────────────────────────────────────────
+// ── html post sanitize ───────────────────────────────────────────────────────
 
 function sanitize(html) {
   const doc = new DOMParser().parseFromString('<div id="r">' + html + '</div>', 'text/html');
@@ -626,35 +616,10 @@ function sanitize(html) {
   return root.innerHTML;
 }
 
-function paginate(html, chunkSize) {
-  const wrap = document.createElement('div');
-  wrap.innerHTML = html;
-  const kids = Array.from(wrap.children);
-  if (!kids.length) return [html];
-  const pages = [];
-  for (let i = 0; i < kids.length; i += chunkSize) {
-    const d = document.createElement('div');
-    kids.slice(i, i + chunkSize).forEach(el => d.appendChild(el.cloneNode(true)));
-    pages.push(d.innerHTML);
-  }
-  return pages;
-}
-
 function wordCount(html) {
   const d = document.createElement('div');
   d.innerHTML = html;
   return (d.textContent || '').split(/\s+/).filter(Boolean).length;
-}
-
-function renderHtmlPage(n) {
-  htmlPage = Math.max(0, Math.min(n, htmlPages.length - 1));
-  const w = document.getElementById('content-window');
-  w.innerHTML = htmlPages[htmlPage];
-  w.scrollTop = 0;
-  document.getElementById('v-counter').textContent =
-    'page ' + (htmlPage + 1) + ' of ' + htmlPages.length;
-  document.getElementById('v-prev').className = htmlPage === 0 ? 'off' : '';
-  document.getElementById('v-next').className = htmlPage === htmlPages.length - 1 ? 'off' : '';
 }
 
 async function openPost(meta, fromP) {
@@ -670,12 +635,13 @@ async function openPost(meta, fromP) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const raw = await res.text();
     const clean = sanitize(raw);
-    htmlPages = paginate(clean, 10);
     const wc = wordCount(raw);
     const mins = Math.max(1, Math.ceil(wc / 220));
     document.getElementById('v-meta').textContent =
       meta.d + ' · ' + wc.toLocaleString() + ' words · ~' + mins + ' min read';
-    renderHtmlPage(0);
+    const w = document.getElementById('content-window');
+    w.innerHTML = clean;
+    w.scrollTop = 0;
   } catch (err) {
     document.getElementById('content-window').innerHTML =
       '<div class="error">Could not load post.<br>' +
@@ -683,18 +649,8 @@ async function openPost(meta, fromP) {
       'Serve with <code>python3 -m http.server</code> and visit http://localhost:8000.<br><br>' +
       '<small>' + err.message + '</small></div>';
     document.getElementById('v-meta').textContent = meta.d + ' · error';
-    document.getElementById('v-counter').textContent = '';
-    document.getElementById('v-prev').className = 'off';
-    document.getElementById('v-next').className = 'off';
   }
 }
-
-document.getElementById('v-prev').addEventListener('click', e => {
-  e.preventDefault(); if (htmlPages.length) renderHtmlPage(htmlPage - 1);
-});
-document.getElementById('v-next').addEventListener('click', e => {
-  e.preventDefault(); if (htmlPages.length) renderHtmlPage(htmlPage + 1);
-});
 
 // Initial load: URL hash wins (so shared/bookmarked links resolve correctly),
 // then saved history.state, then default to root.
