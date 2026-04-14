@@ -11,71 +11,52 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { overflow-x: hidden; }
-html { height: 100%; background: #f3f1ec; }
+html { height: 100%; }
 body {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 13.5px;
-  color: #1c1c1c;
-  background: #fbfaf7;
-  padding: 18px 18px 40px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #000;
+  background: #fff;
+  padding: 14px 14px 32px;
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  border-left: 1px solid #e6e2d8;
-  border-right: 1px solid #e6e2d8;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
-h1 { font-size: 16px; font-weight: bold; margin-bottom: 2px; line-height: 1.35; letter-spacing: -0.01em; }
-hr { border: none; border-top: 1px solid #d8d3c6; margin: 8px 0 12px; }
+h1 { font-size: 16px; font-weight: bold; margin-bottom: 2px; }
+hr { border: none; border-top: 1px solid #999; margin: 6px 0 10px; }
 table { width: 100%; border-collapse: collapse; table-layout: auto; }
 th {
-  text-align: left; padding: 3px 10px 5px 0;
-  border-bottom: 1px solid #c9c3b2; font-weight: bold; white-space: nowrap;
-  font-size: 11px; letter-spacing: 0.04em; color: #4a4638; text-transform: uppercase;
+  text-align: left; padding: 2px 10px 3px 0;
+  font-weight: bold; white-space: nowrap;
+  font-size: 13px;
 }
-td { padding: 6px 6px 6px 0; vertical-align: top; word-break: break-word; }
+td { padding: 2px 6px 2px 0; vertical-align: top; word-break: break-word; }
 td a { word-break: break-word; overflow-wrap: anywhere; }
 /* Mobile-forward: non-essential columns hidden at every width */
 th.date, th.size, th.desc,
 td.date, td.size, td.desc { display: none; }
-a { color: #14489e; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
-a:visited { color: #5a2a7a; }
-a:hover { color: #a8321b; }
+a { cursor: pointer; }
 address {
-  font-style: normal; font-size: 11px; color: #8a8571;
-  margin-top: 14px; border-top: 1px solid #e6e2d8; padding-top: 7px;
-  letter-spacing: 0.01em;
+  font-style: italic; font-size: 12px; color: #555;
+  margin-top: 14px; padding-top: 6px;
 }
 
 .section-head td {
-  padding: 16px 0 4px;
+  padding: 12px 0 2px;
   font-weight: bold;
-  font-size: 11px;
-  color: #2a2720;
-  border-bottom: 1px solid #d8d3c6;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.tier-badge {
-  display: inline-block; font-size: 10px; color: #6a6556;
-  padding: 0 5px; margin-right: 6px;
-  vertical-align: 1px; border-radius: 2px;
-  background: #efece2; letter-spacing: 0.02em;
+  font-size: 13px;
+  color: #000;
 }
 
 #breadcrumb {
-  font-size: 11.5px;
-  margin-bottom: 12px;
-  line-height: 1.6;
-  letter-spacing: 0.01em;
+  font-size: 12px;
+  margin-bottom: 10px;
+  line-height: 1.5;
 }
-#breadcrumb a { color: #14489e; }
-#breadcrumb a:hover { color: #a8321b; }
-#breadcrumb .sep { color: #b8b29e; margin: 0 4px; }
-#breadcrumb .cur { color: #6a6556; }
+#breadcrumb .sep { color: #777; margin: 0 3px; }
+#breadcrumb .cur { color: #555; }
 
 #viewer, #textviewer, #embedviewer { display: none; }
 .v-chrome {
@@ -83,23 +64,16 @@ address {
   align-items: baseline; flex-wrap: wrap;
   gap: 8px; margin-bottom: 4px;
 }
-.v-filename { font-weight: bold; font-size: 13.5px; word-break: break-word; overflow-wrap: anywhere; letter-spacing: -0.005em; }
-.v-meta { color: #7a7566; font-size: 11.5px; }
-.v-nav { display: flex; align-items: center; gap: 0; font-size: 12px; flex-wrap: wrap; }
-.v-nav a { color: #14489e; padding: 0 3px; }
-.v-nav a.off { color: #c4beaa; pointer-events: none; text-decoration: none; }
-.v-nav span { margin: 0 8px; color: #4a4638; }
+.v-filename { font-weight: bold; font-size: 13px; word-break: break-word; overflow-wrap: anywhere; }
+.v-meta { color: #555; font-size: 12px; }
 
 #content-window, #text-window {
   overflow-y: auto;
   overflow-x: hidden;
-  height: calc(100vh - 150px);
-  min-height: 420px;
-  max-height: none;
-  border: 1px solid #e0dbcc;
-  padding: 22px 20px;
-  margin-top: 10px;
-  background: #fffdf8;
+  height: calc(100vh - 130px);
+  min-height: 380px;
+  padding: 16px 0 0;
+  margin-top: 8px;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -107,95 +81,84 @@ address {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: monospace;
   font-size: 13px;
-  line-height: 1.7;
-  color: #1c1c1c;
+  line-height: 1.6;
+  color: #000;
 }
-#text-window pre a { color: #14489e; word-break: break-word; overflow-wrap: anywhere; text-underline-offset: 2px; }
 
 #content-window p {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 16px; line-height: 1.72; margin-bottom: 1.15em; color: #1c1a14;
+  font-family: serif;
+  font-size: 16px; line-height: 1.6; margin-bottom: 1em; color: #000;
   word-wrap: break-word; overflow-wrap: break-word;
 }
 #content-window a {
-  color: #14489e; text-decoration: underline; text-underline-offset: 2px;
   word-break: break-word; overflow-wrap: anywhere;
 }
-#content-window a:visited { color: #5a2a7a; }
-#content-window a:hover { color: #a8321b; }
 #content-window blockquote {
-  border-left: 2px solid #b8b29e; margin: 1.5em 0; padding-left: 18px;
+  border-left: 2px solid #999; margin: 1.2em 0; padding-left: 14px;
 }
-#content-window blockquote p { font-style: italic; color: #3a3628; }
+#content-window blockquote p { font-style: italic; }
 #content-window h1, #content-window h2, #content-window h3, #content-window h4 {
-  font-family: Georgia, serif; font-weight: bold;
-  margin: 1.5em 0 .55em; line-height: 1.3; color: #14110a; letter-spacing: -0.01em;
+  font-family: serif; font-weight: bold;
+  margin: 1.3em 0 .4em; line-height: 1.3; color: #000;
 }
-#content-window h1 { font-size: 22px; }
-#content-window h2 { font-size: 18px; }
+#content-window h1 { font-size: 20px; }
+#content-window h2 { font-size: 17px; }
 #content-window h3 { font-size: 15px; }
-#content-window figure { margin: 1.6em 0; }
+#content-window figure { margin: 1.4em 0; max-width: 100%; }
 #content-window img { max-width: 100%; height: auto; display: block; }
 #content-window figcaption {
-  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; color: #7a7566; margin-top: 6px; letter-spacing: 0.01em;
+  font-family: monospace; font-size: 11px; color: #555; margin-top: 4px;
 }
 #content-window ul, #content-window ol {
-  font-family: Georgia, serif; font-size: 16px;
-  line-height: 1.72; margin: 0 0 1em 1.3em;
-  padding-left: 0.2em;
+  font-family: serif; font-size: 16px;
+  line-height: 1.6; margin: 0 0 1em 1.3em;
 }
-#content-window li { margin-bottom: 0.45em; word-wrap: break-word; overflow-wrap: break-word; }
+#content-window li { margin-bottom: 0.35em; word-wrap: break-word; overflow-wrap: break-word; }
 #content-window pre {
-  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
-  background: #f5f2e8; border: 1px solid #e6e2d4;
-  padding: 12px 14px; overflow-x: auto; margin: 1.1em 0;
+  font-family: monospace; font-size: 12.5px;
+  background: #f4f4f4; border: 1px solid #ddd;
+  padding: 10px 12px; overflow-x: auto; margin: 1em 0;
   white-space: pre-wrap;
   word-break: break-word;
-  border-radius: 2px;
 }
 #content-window code {
-  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
-  background: #f2efe4; padding: 1px 5px;
+  font-family: monospace; font-size: 12.5px;
+  background: #f4f4f4; padding: 0 3px;
   word-break: break-word;
-  border-radius: 2px;
 }
 #content-window pre code { background: none; padding: 0; }
-#content-window figure { max-width: 100%; }
 #content-window img, #content-window video, #content-window iframe {
   max-width: 100%; height: auto; display: block;
 }
 
-#e-frame { width: 100%; height: calc(100vh - 150px); min-height: 480px; }
+#e-frame { width: 100%; height: calc(100vh - 130px); min-height: 420px; border: 1px solid #999; background: #fff; margin-top: 8px; }
 
-.loading { color: #8a8571; font-style: italic; padding: 20px; }
-.error { color: #a8321b; padding: 20px; }
+.loading { color: #555; font-style: italic; padding: 16px 0; }
+.error { color: #a00; padding: 16px 0; }
 
 /* ── Substack-post embedded widgets ─────────────────────────────────────── */
 
 /* Subscribe form */
 #content-window .subscription-widget-wrap-editor,
-#content-window .subscription-widget-wrap { margin: 1.8em 0; }
+#content-window .subscription-widget-wrap { margin: 1.5em 0; }
 #content-window .subscription-widget {
-  background: #f5f2e8;
-  border: 1px solid #e0dbcc;
-  border-radius: 4px;
-  padding: 16px 18px;
+  border: 1px solid #999;
+  padding: 14px;
   text-align: center;
 }
-#content-window .subscription-widget .preamble { margin-bottom: 12px; }
+#content-window .subscription-widget .preamble { margin-bottom: 10px; }
 #content-window .subscription-widget .cta-caption {
-  font-family: Georgia, serif;
+  font-family: serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #3a3628;
   margin: 0;
   font-style: italic;
 }
 #content-window .subscription-widget-subscribe {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: stretch;
   flex-wrap: wrap;
   justify-content: center;
@@ -203,76 +166,49 @@ address {
 #content-window .subscription-widget-subscribe .email-input {
   flex: 1 1 220px;
   min-width: 0;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 13.5px;
-  padding: 9px 12px;
-  border: 1px solid #c9c3b2;
-  border-radius: 3px;
-  background: #fffdf8;
-  color: #1c1a14;
-  outline: none;
+  font-family: monospace;
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid #999;
+  background: #fff;
+  color: #000;
 }
-#content-window .subscription-widget-subscribe .email-input:focus {
-  border-color: #14489e;
-  box-shadow: 0 0 0 2px rgba(20, 72, 158, 0.15);
-}
-#content-window .subscription-widget-subscribe .email-input::placeholder { color: #8a8571; }
+#content-window .subscription-widget-subscribe .email-input::placeholder { color: #888; }
 #content-window .subscription-widget-subscribe .button.primary,
 #content-window .button.primary {
   display: inline-block;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-family: monospace;
   font-size: 13px;
   font-weight: bold;
-  letter-spacing: 0.03em;
-  padding: 9px 18px;
-  background: #14110a;
-  color: #fbfaf7;
-  border: 1px solid #14110a;
-  border-radius: 3px;
+  padding: 6px 14px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.12s ease;
-  -webkit-appearance: none;
-  appearance: none;
 }
-#content-window .subscription-widget-subscribe .button.primary:hover,
-#content-window .button.primary:hover { background: #a8321b; border-color: #a8321b; color: #fffdf8; }
 #content-window .fake-input-wrapper { display: none; }
 
 /* Button-wrapper (e.g. "Python Script" download) */
-#content-window .button-wrapper {
-  text-align: center;
-  margin: 1.6em 0;
-}
+#content-window .button-wrapper { margin: 1.4em 0; }
 #content-window .button-wrapper a.button.primary span { color: inherit; }
 #content-window .button-wrapper a.button.primary { text-decoration: none; }
 
-/* Bump h3 so section headings ("The Code & How To Use It") stand out */
-#content-window h3 {
-  font-size: 17px;
-  margin: 1.8em 0 .5em;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #e0dbcc;
-}
-
 /* Pullquotes */
 #content-window .pullquote {
-  font-family: Georgia, serif;
-  border-left: 3px solid #a8321b;
-  background: #f5f2e8;
-  margin: 1.6em 0;
-  padding: 12px 16px;
-  border-radius: 0 3px 3px 0;
+  font-family: serif;
+  border-left: 2px solid #999;
+  margin: 1.4em 0;
+  padding: 0 14px;
 }
 #content-window .pullquote p {
   font-size: 15px;
   line-height: 1.55;
   margin-bottom: 0.5em;
-  color: #3a3628;
   font-style: italic;
 }
 #content-window .pullquote p:last-child { margin-bottom: 0; }
-#content-window .pullquote strong { font-style: normal; color: #14110a; }
+#content-window .pullquote strong { font-style: normal; }
 
 /* Inline "digest" / recommended post embed */
 #content-window .digest-post-embed {
@@ -281,12 +217,11 @@ address {
 
 /* Image captions improved */
 #content-window .image-caption {
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-family: monospace;
   font-size: 11px;
-  color: #7a7566;
-  margin-top: 6px;
+  color: #555;
+  margin-top: 4px;
   text-align: center;
-  letter-spacing: 0.01em;
 }
 #content-window .captioned-image-container figure { text-align: center; }
 #content-window .captioned-image-container img { margin: 0 auto; }
@@ -303,7 +238,6 @@ address {
   height: 0;
   margin: 1.4em 0;
   background: #000;
-  border-radius: 3px;
   overflow: hidden;
 }
 #content-window .youtube-wrap .youtube-inner,
@@ -319,29 +253,8 @@ address {
 #content-window .native-video-embed:empty { display: none; }
 
 @media (max-width: 520px) {
-  #content-window .subscription-widget { padding: 14px; }
   #content-window .subscription-widget-subscribe .email-input { flex-basis: 100%; }
   #content-window .subscription-widget-subscribe .button.primary { flex: 1 1 100%; }
-  #content-window h3 { font-size: 16px; }
-  #content-window .pullquote p { font-size: 14.5px; }
-}
-
-/* Very small screens: drop the side borders and tighten padding */
-@media (max-width: 520px) {
-  body { padding: 14px 14px 32px; border-left: none; border-right: none; }
-  #content-window, #text-window {
-    padding: 16px 14px;
-    height: calc(100vh - 130px);
-    min-height: 380px;
-  }
-  #content-window p,
-  #content-window ul, #content-window ol { font-size: 15.5px; line-height: 1.7; }
-  #content-window h1 { font-size: 20px; }
-  #content-window h2 { font-size: 17px; }
-  #content-window h3 { font-size: 15px; }
-  #e-frame { height: calc(100vh - 130px); min-height: 420px; }
-  .v-filename { font-size: 13px; }
-  .v-meta { font-size: 11px; }
 }
 </style>
 </head>
@@ -389,7 +302,6 @@ address {
   </div>
   <hr>
   <iframe id="e-frame" src="about:blank"
-          style="border:1px solid #e0dbcc;background:#fffdf8;margin-top:10px"
           referrerpolicy="no-referrer" loading="lazy"></iframe>
   <address>Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443</address>
 </div>
