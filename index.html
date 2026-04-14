@@ -103,19 +103,21 @@ td.w-date {
   white-space: nowrap;
   color: #555;
   font-size: 12px;
-  text-align: right;
   font-variant-numeric: tabular-nums;
+  padding-right: 8px;
 }
-tr.w-desc td {
-  padding: 2px 0 10px 52px;
-  border-top: none;
+td.w-desc {
   color: #555;
   font-size: 12px;
   line-height: 1.45;
+  padding: 10px 0 2px 8px;
+  border-top: 1px dotted #ccc;
+  vertical-align: top;
 }
+tr.w-row.first-in-section td.w-desc { border-top: none; }
 @media (min-width: 768px) {
   td.w-main a { font-size: 15px; }
-  tr.w-desc td { font-size: 13px; }
+  td.w-desc { font-size: 13px; }
 }
 
 #breadcrumb {
@@ -803,7 +805,8 @@ function parentDirRow(onClick) {
   tr.innerHTML =
     `<td class="w-icon"><span class="w-thumb-fallback">📂</span></td>` +
     `<td class="w-main"><a href="#">Parent Directory</a></td>` +
-    `<td class="w-date">—</td>`;
+    `<td class="w-date">—</td>` +
+    `<td class="w-desc"></td>`;
   tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); onClick(); });
   return tr;
 }
@@ -831,7 +834,7 @@ function renderWriting() {
   [1,2,3,4].forEach((tier, tierIdx) => {
     const sec = document.createElement("tr");
     sec.className = "w-section" + (tierIdx === 0 ? " first" : "");
-    sec.innerHTML = `<td colspan="3">${tierNames[tier]}</td>`;
+    sec.innerHTML = `<td colspan="4">${tierNames[tier]}</td>`;
     tbody.appendChild(sec);
 
     const posts = POSTS.filter(p => p.tier === tier)
@@ -848,19 +851,13 @@ function renderWriting() {
       tr.innerHTML =
         `<td class="w-icon">${icon}</td>` +
         `<td class="w-main"><a href="#">${escape(p.t)}</a></td>` +
-        `<td class="w-date">${p.d}</td>`;
+        `<td class="w-date">${p.d}</td>` +
+        `<td class="w-desc">${p.desc ? escape(p.desc) : ''}</td>`;
       tr.querySelector("a").addEventListener("click", e => {
         e.preventDefault();
         goPost(p, "/writing/");
       });
       tbody.appendChild(tr);
-
-      if (p.desc) {
-        const dr = document.createElement("tr");
-        dr.className = "w-desc";
-        dr.innerHTML = `<td colspan="3">${escape(p.desc)}</td>`;
-        tbody.appendChild(dr);
-      }
     });
   });
 }
@@ -904,7 +901,8 @@ function render(path) {
     tr.innerHTML =
       `<td class="w-icon"><span class="w-thumb-fallback">${iconChar}</span></td>` +
       `<td class="w-main"><a href="#">${escape(displayName)}</a></td>` +
-      `<td class="w-date">${escape(item.date || "")}</td>`;
+      `<td class="w-date">${escape(item.date || "")}</td>` +
+      `<td class="w-desc">${item.desc ? escape(item.desc) : ''}</td>`;
 
     const a = tr.querySelector("a");
     if (external) {
@@ -929,13 +927,6 @@ function render(path) {
       });
     }
     tbody.appendChild(tr);
-
-    if (item.desc) {
-      const dr = document.createElement("tr");
-      dr.className = "w-desc";
-      dr.innerHTML = `<td colspan="3">${escape(item.desc)}</td>`;
-      tbody.appendChild(dr);
-    }
   });
 }
 
