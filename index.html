@@ -256,6 +256,14 @@ address {
   #content-window .subscription-widget-subscribe .email-input { flex-basis: 100%; }
   #content-window .subscription-widget-subscribe .button.primary { flex: 1 1 100%; }
 }
+
+/* Desktop: double the column width. Mobile-forward layout scales up
+   at a single breakpoint; nothing else about the design changes. */
+@media (min-width: 900px) {
+  body { max-width: 960px; padding: 20px 20px 40px; }
+  #content-window, #text-window { height: calc(100vh - 150px); }
+  #e-frame { height: calc(100vh - 150px); }
+}
 </style>
 </head>
 <body>
