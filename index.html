@@ -608,38 +608,6 @@ const dirs = {
 
 const files = {
 
-"README": `Mike Lacy
-Nashville, TN
-────────────────────────────────────────────
-
-Independent investigative journalist.
-Publisher of {Rich Text}. Civic technologist.
-Former city hall.
-
-{Rich Text} is Nashville's independent
-accountability newsletter — 4,000+ subscribers.
-Founder of Ground Truth Nashville.
-Nashville Scene "Best Metro Watchdog" 2025.
-
-I cover surveillance, housing, and power in
-Nashville municipal government. Who gets
-watched, who gets evicted, who gets contracts,
-and who decides. NDP. OHS. Downtown Partnership.
-The gap between what the city says and what it
-does.
-
-This site serves the 25 most consequential
-posts directly. No tracking, no cookies,
-no Substack chrome.
-Click a filename in /writing/ to read.
-
-────────────────────────────────────────────
-substack:  <a href="https://readrichtext.substack.com" target="_blank">readrichtext.substack.com</a>
-naibor:    <a href="https://clovenbradshaw-ctrl.github.io/naibor/" target="_blank">clovenbradshaw-ctrl.github.io/naibor</a>
-email:     <a href="mailto:scores.patch.points@proton.me">scores.patch.points@proton.me</a>
-signal:    <a href="https://signal.me/#eu/0sH-qog826fh91_3ZkY3XycscZO93L8T2Bbf2kZ" target="_blank">signal.me → tap to open</a>
-────────────────────────────────────────────`,
-
 "contact.txt": `contact
 ────────────────────────────────────────────
 
@@ -997,13 +965,21 @@ function openEmbed(item, fromP) {
 }
 
 function openText(name, fromP) {
-  const content = files[name] || "[no content]";
   show("textviewer");
   renderBreadcrumb(fromP, name);
   document.getElementById("tv-title").textContent = name;
-  document.getElementById("tv-body").innerHTML = content;
   document.getElementById("text-window").scrollTop = 0;
   document.title = name;
+  const body = document.getElementById("tv-body");
+  if (name === "README") {
+    body.textContent = "Loading…";
+    fetch("./README.md")
+      .then(r => r.ok ? r.text() : Promise.reject(r.status))
+      .then(txt => { body.textContent = txt; })
+      .catch(() => { body.textContent = "[README.md could not be loaded]"; });
+  } else {
+    body.innerHTML = files[name] || "[no content]";
+  }
 }
 
 // ── html post sanitize ───────────────────────────────────────────────────────
