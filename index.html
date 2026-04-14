@@ -634,6 +634,87 @@ tr.w-count td {
 }
 #lightbox .lb-close:hover { opacity: 1; }
 @keyframes lb-fade { from { opacity: 0 } to { opacity: 1 } }
+
+/* ── Rich Text (Substack) right-side widget ────────────────────────────────
+   A small floating feed card pinned to the upper-right. Only shows on
+   viewports with headroom (the main column is capped at 960px centered;
+   below ~1280px there isn't room without overlapping the index table). */
+#rt-widget { display: none; }
+@media (min-width: 1280px) {
+  #rt-widget {
+    display: block;
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    width: 300px;
+    z-index: 100;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+}
+#rt-widget .rtw { border: 1px solid #e0e0e0; border-radius: 12px; background: #fff; overflow: hidden; }
+#rt-widget .rtw-h { display: flex; align-items: center; justify-content: space-between; padding: 9px 13px; border-bottom: 1px solid #eee; }
+#rt-widget .rtw-hl { font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: #999; }
+#rt-widget .rtw-ha { display: flex; align-items: center; color: #999; text-decoration: none; }
+#rt-widget .rtw-ha:hover { color: #111; }
+#rt-widget .rtw-pi { padding: 9px 13px; border-bottom: 1px solid #eee; cursor: pointer; }
+#rt-widget .rtw-pi:hover { background: #f9f9f9; }
+#rt-widget .rtw-pi:last-child { border-bottom: none; }
+#rt-widget .rtw-pt { font-size: 13px; font-weight: 500; color: #111; margin: 0 0 2px; line-height: 1.3; }
+#rt-widget .rtw-pd { font-size: 11px; color: #aaa; margin: 0; }
+#rt-widget .rtw-f { display: flex; align-items: center; justify-content: space-between; padding: 7px 13px; border-top: 1px solid #eee; }
+#rt-widget .rtw-count { font-size: 11px; color: #aaa; }
+#rt-widget .rtw-n { background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; color: #666; font-size: 15px; line-height: 1; }
+#rt-widget .rtw-n:hover { background: #f2f2f2; }
+#rt-widget .rtw-n:disabled { opacity: .25; cursor: default; }
+#rt-widget .rtw-load { padding: 20px 13px; font-size: 12px; color: #aaa; text-align: center; }
+
+/* ── #viewer modal overlay mode ─────────────────────────────────────────────
+   When a Substack-widget item is clicked we reuse the existing #viewer +
+   #content-window so the formatting matches /writing/ posts exactly — just
+   overlay it as a modal rather than replacing the page. */
+#viewer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,10,0.6);
+  z-index: 9998;
+}
+#viewer-backdrop.open { display: block; }
+#viewer.modal-mode {
+  position: fixed;
+  inset: 24px;
+  background: #fff;
+  z-index: 9999;
+  overflow: auto;
+  padding: 28px 36px 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  border: 1px solid #bbb;
+  max-width: none;
+  margin: 0;
+}
+#viewer.modal-mode #content-window {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+#viewer-modal-close {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: transparent;
+  border: 0;
+  font: 600 22px/1 ui-sans-serif, system-ui, sans-serif;
+  color: #555;
+  cursor: pointer;
+  padding: 6px 10px;
+  z-index: 2;
+}
+#viewer.modal-mode #viewer-modal-close { display: block; }
+#viewer-modal-close:hover { color: #111; }
+@media (max-width: 639px) {
+  #viewer.modal-mode { inset: 8px; padding: 24px 14px 28px; }
+}
 </style>
 </head>
 <body>
@@ -662,6 +743,7 @@ tr.w-count td {
 </div>
 
 <div id="viewer">
+  <button type="button" id="viewer-modal-close" aria-label="Close">×</button>
   <div class="v-chrome">
     <span class="v-filename" id="v-filename"></span>
     <span class="v-meta" id="v-meta"></span>
@@ -688,6 +770,23 @@ tr.w-count td {
           referrerpolicy="no-referrer" loading="lazy"></iframe>
   <address class="server-sig"></address>
 </div>
+
+<!-- Rich Text (Substack) right-side widget. Fetches the substack RSS feed
+     via an n8n webhook proxy (RSS → JSON); on click, opens the post as an
+     overlay modal that reuses #viewer so formatting matches /writing/ posts. -->
+<aside id="rt-widget" aria-label="Rich Text feed">
+  <div class="rtw">
+    <div class="rtw-h">
+      <span class="rtw-hl">Rich Text</span>
+      <a href="https://readrichtext.substack.com" class="rtw-ha" target="_blank" rel="noopener" aria-label="Open on Substack">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 11L11 2M11 2H5.5M11 2V7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+    <div id="rt-body"><div class="rtw-load">Loading…</div></div>
+  </div>
+</aside>
+
+<div id="viewer-backdrop"></div>
 
 <div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
   <button type="button" class="lb-close" aria-label="Close image">×</button>
@@ -736,7 +835,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-14f";
+const BUILD_TAG = "2026-04-14g";
 const SERVER_SIG = "Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443 · build " + BUILD_TAG;
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("address.server-sig").forEach(el => {
@@ -1355,6 +1454,156 @@ async function openPost(meta, fromP) {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && box.classList.contains('open')) close();
   });
+})();
+
+// ── Rich Text (Substack) widget ─────────────────────────────────────────────
+// Fetches the substack RSS via an n8n webhook proxy (RSS → JSON) and renders
+// a small paginated feed card in the upper-right. Clicking an item opens the
+// post in an overlay modal that reuses #viewer + #content-window so the
+// formatting matches posts under /writing/.
+(function initRTWidget() {
+  const PROXY = 'https://n8n.intelechia.com/webhook/b5e89bf9-a8bb-43ef-b1de-ceac4b0d6f59';
+  const PER = 5;
+  let items = [], page = 0;
+
+  const rtBody = () => document.getElementById('rt-body');
+  const esc = s => String(s).replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+  const fmtDate = d => {
+    try { return new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }); }
+    catch (_) { return d; }
+  };
+
+  function renderList() {
+    const s = page * PER, sl = items.slice(s, s + PER);
+    const tot = items.length, tp = Math.max(1, Math.ceil(tot / PER));
+    let h = '<div>';
+    sl.forEach((item, i) => {
+      h += `<div class="rtw-pi" data-i="${s + i}">` +
+             `<p class="rtw-pt">${esc(item.title)}</p>` +
+             `<p class="rtw-pd">${esc(fmtDate(item.date))}</p>` +
+           `</div>`;
+    });
+    h += `</div>` +
+         `<div class="rtw-f">` +
+           `<span class="rtw-count">${s + 1}–${Math.min(s + PER, tot)} of ${tot}</span>` +
+           `<div style="display:flex;gap:1px">` +
+             `<button class="rtw-n" id="rtw-prev" ${page === 0 ? 'disabled' : ''} aria-label="Previous">&#8249;</button>` +
+             `<button class="rtw-n" id="rtw-next" ${page >= tp - 1 ? 'disabled' : ''} aria-label="Next">&#8250;</button>` +
+           `</div>` +
+         `</div>`;
+    rtBody().innerHTML = h;
+    document.querySelectorAll('#rt-widget .rtw-pi').forEach(el => {
+      el.addEventListener('click', () => openItemModal(items[+el.dataset.i]));
+    });
+    document.getElementById('rtw-prev')?.addEventListener('click', () => { page--; renderList(); });
+    document.getElementById('rtw-next')?.addEventListener('click', () => { page++; renderList(); });
+  }
+
+  async function load() {
+    try {
+      const r = await fetch(PROXY);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      const xmlStr = j.data || j.contents || j.body || Object.values(j)[0];
+      if (!xmlStr) throw new Error('no data field in response');
+      const xml = new DOMParser().parseFromString(xmlStr, 'text/xml');
+      const parseErr = xml.querySelector('parsererror');
+      if (parseErr) throw new Error('XML parse error');
+      const ns = 'http://purl.org/rss/1.0/modules/content/';
+      items = Array.from(xml.querySelectorAll('item')).map(el => ({
+        title:   el.querySelector('title')?.textContent?.trim() || '',
+        link:    el.querySelector('link')?.textContent?.trim() || el.querySelector('guid')?.textContent?.trim() || '',
+        date:    el.querySelector('pubDate')?.textContent || '',
+        content: el.getElementsByTagNameNS(ns, 'encoded')[0]?.textContent
+               || el.querySelector('description')?.textContent || ''
+      }));
+      if (!items.length) throw new Error('no items parsed');
+      renderList();
+    } catch (e) {
+      rtBody().innerHTML = `<div class="rtw-load">Error: ${esc(e.message)}</div>`;
+      console.error('[rt-widget]', e);
+    }
+  }
+
+  // ── modal overlay — reuses #viewer so posts get the same typography,
+  //    column widths, subscribe-box styling, and image handling as /writing/
+  //    posts. We snapshot whatever is currently in #viewer before hijacking
+  //    it so closing the modal restores the previous state perfectly.
+  let savedState = null;
+
+  function openItemModal(item) {
+    if (!item) return;
+    const viewer   = document.getElementById('viewer');
+    const backdrop = document.getElementById('viewer-backdrop');
+
+    const panes = ['listing','viewer','textviewer','embedviewer'];
+    const visiblePane = panes.find(p => document.getElementById(p).style.display !== 'none') || 'listing';
+    savedState = {
+      pane:        visiblePane,
+      filename:    document.getElementById('v-filename').textContent,
+      meta:        document.getElementById('v-meta').textContent,
+      contentHtml: document.getElementById('content-window').innerHTML,
+      title:       document.title,
+      scrollY:     window.scrollY,
+    };
+
+    const rawBody = item.content || '<p>No preview available.</p>';
+    const clean   = sanitize(rawBody);
+    const wc      = wordCount(rawBody);
+    const mins    = Math.max(1, Math.ceil(wc / 220));
+
+    document.getElementById('v-filename').textContent = item.title;
+    document.getElementById('v-meta').textContent =
+      fmtDate(item.date) + ' · ' + wc.toLocaleString() + ' words · ~' + mins + ' min read · Rich Text';
+    const cw = document.getElementById('content-window');
+    cw.innerHTML = clean + (item.link
+      ? `<p style="margin-top:2em;font-size:13px;color:#6b6b6b">` +
+          `<a href="${esc(item.link)}" target="_blank" rel="noopener">Read on Substack ↗</a>` +
+        `</p>`
+      : '');
+    cw.scrollTop = 0;
+    document.title = item.title;
+
+    backdrop.classList.add('open');
+    viewer.classList.add('modal-mode');
+    viewer.style.display = 'block';
+    viewer.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    const viewer   = document.getElementById('viewer');
+    const backdrop = document.getElementById('viewer-backdrop');
+    if (!viewer.classList.contains('modal-mode')) return;
+
+    viewer.classList.remove('modal-mode');
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+
+    if (savedState) {
+      document.getElementById('v-filename').textContent  = savedState.filename;
+      document.getElementById('v-meta').textContent      = savedState.meta;
+      document.getElementById('content-window').innerHTML = savedState.contentHtml;
+      document.title = savedState.title;
+      show(savedState.pane);
+      window.scrollTo(0, savedState.scrollY || 0);
+      savedState = null;
+    } else {
+      show('listing');
+    }
+  }
+
+  document.getElementById('viewer-modal-close').addEventListener('click', closeModal);
+  document.getElementById('viewer-backdrop').addEventListener('click', closeModal);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('viewer').classList.contains('modal-mode')) {
+      closeModal();
+    }
+  });
+
+  load();
 })();
 
 // Initial load: URL hash wins (so shared/bookmarked links resolve correctly),
