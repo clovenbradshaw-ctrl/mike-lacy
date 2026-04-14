@@ -172,6 +172,160 @@ address {
 .loading { color: #8a8571; font-style: italic; padding: 20px; }
 .error { color: #a8321b; padding: 20px; }
 
+/* ── Substack-post embedded widgets ─────────────────────────────────────── */
+
+/* Subscribe form */
+#content-window .subscription-widget-wrap-editor,
+#content-window .subscription-widget-wrap { margin: 1.8em 0; }
+#content-window .subscription-widget {
+  background: #f5f2e8;
+  border: 1px solid #e0dbcc;
+  border-radius: 4px;
+  padding: 16px 18px;
+  text-align: center;
+}
+#content-window .subscription-widget .preamble { margin-bottom: 12px; }
+#content-window .subscription-widget .cta-caption {
+  font-family: Georgia, serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #3a3628;
+  margin: 0;
+  font-style: italic;
+}
+#content-window .subscription-widget-subscribe {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+#content-window .subscription-widget-subscribe .email-input {
+  flex: 1 1 220px;
+  min-width: 0;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13.5px;
+  padding: 9px 12px;
+  border: 1px solid #c9c3b2;
+  border-radius: 3px;
+  background: #fffdf8;
+  color: #1c1a14;
+  outline: none;
+}
+#content-window .subscription-widget-subscribe .email-input:focus {
+  border-color: #14489e;
+  box-shadow: 0 0 0 2px rgba(20, 72, 158, 0.15);
+}
+#content-window .subscription-widget-subscribe .email-input::placeholder { color: #8a8571; }
+#content-window .subscription-widget-subscribe .button.primary,
+#content-window .button.primary {
+  display: inline-block;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.03em;
+  padding: 9px 18px;
+  background: #14110a;
+  color: #fbfaf7;
+  border: 1px solid #14110a;
+  border-radius: 3px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#content-window .subscription-widget-subscribe .button.primary:hover,
+#content-window .button.primary:hover { background: #a8321b; border-color: #a8321b; color: #fffdf8; }
+#content-window .fake-input-wrapper { display: none; }
+
+/* Button-wrapper (e.g. "Python Script" download) */
+#content-window .button-wrapper {
+  text-align: center;
+  margin: 1.6em 0;
+}
+#content-window .button-wrapper a.button.primary span { color: inherit; }
+#content-window .button-wrapper a.button.primary { text-decoration: none; }
+
+/* Bump h3 so section headings ("The Code & How To Use It") stand out */
+#content-window h3 {
+  font-size: 17px;
+  margin: 1.8em 0 .5em;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e0dbcc;
+}
+
+/* Pullquotes */
+#content-window .pullquote {
+  font-family: Georgia, serif;
+  border-left: 3px solid #a8321b;
+  background: #f5f2e8;
+  margin: 1.6em 0;
+  padding: 12px 16px;
+  border-radius: 0 3px 3px 0;
+}
+#content-window .pullquote p {
+  font-size: 15px;
+  line-height: 1.55;
+  margin-bottom: 0.5em;
+  color: #3a3628;
+  font-style: italic;
+}
+#content-window .pullquote p:last-child { margin-bottom: 0; }
+#content-window .pullquote strong { font-style: normal; color: #14110a; }
+
+/* Inline "digest" / recommended post embed */
+#content-window .digest-post-embed {
+  display: none; /* metadata-only node; has no rendered content without Substack JS */
+}
+
+/* Image captions improved */
+#content-window .image-caption {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: #7a7566;
+  margin-top: 6px;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+#content-window .captioned-image-container figure { text-align: center; }
+#content-window .captioned-image-container img { margin: 0 auto; }
+
+/* Hide non-functional image overlay action buttons (Substack restack/expand) */
+#content-window .image-link-expand,
+#content-window .pencraft.icon-container { display: none !important; }
+
+/* YouTube embeds */
+#content-window .youtube-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  margin: 1.4em 0;
+  background: #000;
+  border-radius: 3px;
+  overflow: hidden;
+}
+#content-window .youtube-wrap .youtube-inner,
+#content-window .youtube-wrap iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  border: 0;
+}
+
+/* Native video placeholder (shows nothing meaningful without JS) */
+#content-window .native-video-embed:empty { display: none; }
+
+@media (max-width: 520px) {
+  #content-window .subscription-widget { padding: 14px; }
+  #content-window .subscription-widget-subscribe .email-input { flex-basis: 100%; }
+  #content-window .subscription-widget-subscribe .button.primary { flex: 1 1 100%; }
+  #content-window h3 { font-size: 16px; }
+  #content-window .pullquote p { font-size: 14.5px; }
+}
+
 /* Very small screens: drop the side borders and tighten padding */
 @media (max-width: 520px) {
   body { padding: 14px 14px 32px; border-left: none; border-right: none; }
