@@ -10,93 +10,95 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { overflow-x: hidden; }
+html { height: 100%; background: #f3f1ec; }
 body {
-  font-family: monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 13.5px;
-  color: #000;
-  background: #fff;
-  padding: 14px 14px 60px;
-  max-width: 880px;
+  color: #1c1c1c;
+  background: #fbfaf7;
+  padding: 18px 18px 40px;
+  max-width: 480px;
   margin: 0 auto;
+  min-height: 100vh;
+  border-left: 1px solid #e6e2d8;
+  border-right: 1px solid #e6e2d8;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-h1 { font-size: 17px; font-weight: bold; margin-bottom: 2px; line-height: 1.3; }
-hr { border: none; border-top: 1px solid #999; margin: 6px 0 10px; }
+h1 { font-size: 16px; font-weight: bold; margin-bottom: 2px; line-height: 1.35; letter-spacing: -0.01em; }
+hr { border: none; border-top: 1px solid #d8d3c6; margin: 8px 0 12px; }
 table { width: 100%; border-collapse: collapse; table-layout: auto; }
 th {
   text-align: left; padding: 3px 10px 5px 0;
-  border-bottom: 1px solid #999; font-weight: bold; white-space: nowrap;
+  border-bottom: 1px solid #c9c3b2; font-weight: bold; white-space: nowrap;
+  font-size: 11px; letter-spacing: 0.04em; color: #4a4638; text-transform: uppercase;
 }
-td { padding: 4px 10px 4px 0; vertical-align: top; word-break: break-word; }
+td { padding: 6px 6px 6px 0; vertical-align: top; word-break: break-word; }
 td a { word-break: break-word; overflow-wrap: anywhere; }
-td.desc { white-space: normal; color: #666; max-width: 340px; }
-td.size { text-align: right; min-width: 44px; padding-right: 14px; white-space: nowrap; }
-td.date { color: #666; min-width: 92px; white-space: nowrap; }
-
-/* Narrow-column / mobile-forward: hide non-essential columns, stack the title */
-@media (max-width: 680px) {
-  body { padding: 12px 12px 40px; font-size: 13px; }
-  h1 { font-size: 16px; }
-  th.date, th.size, th.desc,
-  td.date, td.size, td.desc { display: none; }
-  td { padding: 6px 6px 6px 0; }
-}
-a { color: #0000ee; text-decoration: underline; cursor: pointer; }
-a:visited { color: #551a8b; }
-a:hover { color: #cc0000; }
+/* Mobile-forward: non-essential columns hidden at every width */
+th.date, th.size, th.desc,
+td.date, td.size, td.desc { display: none; }
+a { color: #14489e; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+a:visited { color: #5a2a7a; }
+a:hover { color: #a8321b; }
 address {
-  font-style: normal; font-size: 11.5px; color: #888;
-  margin-top: 12px; border-top: 1px solid #ddd; padding-top: 6px;
+  font-style: normal; font-size: 11px; color: #8a8571;
+  margin-top: 14px; border-top: 1px solid #e6e2d8; padding-top: 7px;
+  letter-spacing: 0.01em;
 }
 
 .section-head td {
-  padding: 14px 0 4px;
+  padding: 16px 0 4px;
   font-weight: bold;
-  font-size: 12px;
-  color: #000;
-  border-bottom: 1px solid #ccc;
-  letter-spacing: 0.05em;
+  font-size: 11px;
+  color: #2a2720;
+  border-bottom: 1px solid #d8d3c6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .tier-badge {
-  display: inline-block; font-size: 10px; color: #666;
-  border: 1px solid #bbb; padding: 0 4px; margin-right: 6px;
-  vertical-align: 1px; border-radius: 2px; background: #f4f4f4;
+  display: inline-block; font-size: 10px; color: #6a6556;
+  padding: 0 5px; margin-right: 6px;
+  vertical-align: 1px; border-radius: 2px;
+  background: #efece2; letter-spacing: 0.02em;
 }
 
 #breadcrumb {
-  font-size: 12px;
-  margin-bottom: 10px;
+  font-size: 11.5px;
+  margin-bottom: 12px;
   line-height: 1.6;
+  letter-spacing: 0.01em;
 }
-#breadcrumb a { color: #0000ee; }
-#breadcrumb a:hover { color: #cc0000; }
-#breadcrumb .sep { color: #999; margin: 0 3px; }
-#breadcrumb .cur { color: #444; }
+#breadcrumb a { color: #14489e; }
+#breadcrumb a:hover { color: #a8321b; }
+#breadcrumb .sep { color: #b8b29e; margin: 0 4px; }
+#breadcrumb .cur { color: #6a6556; }
 
 #viewer, #textviewer, #embedviewer { display: none; }
 .v-chrome {
   display: flex; justify-content: space-between;
   align-items: baseline; flex-wrap: wrap;
-  gap: 8px; margin-bottom: 3px;
+  gap: 8px; margin-bottom: 4px;
 }
-.v-filename { font-weight: bold; font-size: 14px; word-break: break-word; overflow-wrap: anywhere; }
-.v-meta { color: #666; font-size: 12px; }
+.v-filename { font-weight: bold; font-size: 13.5px; word-break: break-word; overflow-wrap: anywhere; letter-spacing: -0.005em; }
+.v-meta { color: #7a7566; font-size: 11.5px; }
 .v-nav { display: flex; align-items: center; gap: 0; font-size: 12px; flex-wrap: wrap; }
-.v-nav a { color: #0000ee; padding: 0 3px; }
-.v-nav a.off { color: #bbb; pointer-events: none; text-decoration: none; }
-.v-nav span { margin: 0 8px; color: #444; }
+.v-nav a { color: #14489e; padding: 0 3px; }
+.v-nav a.off { color: #c4beaa; pointer-events: none; text-decoration: none; }
+.v-nav span { margin: 0 8px; color: #4a4638; }
 
 #content-window, #text-window {
   overflow-y: auto;
   overflow-x: hidden;
-  height: 70vh;
+  height: calc(100vh - 150px);
   min-height: 420px;
-  max-height: 680px;
-  border: 1px solid #ccc;
-  padding: 18px 18px;
-  margin-top: 8px;
-  background: #fff;
+  max-height: none;
+  border: 1px solid #e0dbcc;
+  padding: 22px 20px;
+  margin-top: 10px;
+  background: #fffdf8;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -104,30 +106,31 @@ address {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
-  font-family: monospace;
-  font-size: 13.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
   line-height: 1.7;
+  color: #1c1c1c;
 }
-#text-window pre a { color: #0000ee; word-break: break-all; }
+#text-window pre a { color: #14489e; word-break: break-all; text-underline-offset: 2px; }
 
 #content-window p {
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 16px; line-height: 1.7; margin-bottom: 1.1em; color: #111;
+  font-size: 16px; line-height: 1.72; margin-bottom: 1.15em; color: #1c1a14;
   word-wrap: break-word; overflow-wrap: break-word;
 }
 #content-window a {
-  color: #0000ee; text-decoration: underline;
+  color: #14489e; text-decoration: underline; text-underline-offset: 2px;
   word-break: break-word; overflow-wrap: anywhere;
 }
-#content-window a:visited { color: #551a8b; }
-#content-window a:hover { color: #cc0000; }
+#content-window a:visited { color: #5a2a7a; }
+#content-window a:hover { color: #a8321b; }
 #content-window blockquote {
-  border-left: 3px solid #aaa; margin: 1.4em 0; padding-left: 18px;
+  border-left: 2px solid #b8b29e; margin: 1.5em 0; padding-left: 18px;
 }
-#content-window blockquote p { font-style: italic; color: #333; }
+#content-window blockquote p { font-style: italic; color: #3a3628; }
 #content-window h1, #content-window h2, #content-window h3, #content-window h4 {
   font-family: Georgia, serif; font-weight: bold;
-  margin: 1.4em 0 .5em; line-height: 1.3;
+  margin: 1.5em 0 .55em; line-height: 1.3; color: #14110a; letter-spacing: -0.01em;
 }
 #content-window h1 { font-size: 22px; }
 #content-window h2 { font-size: 18px; }
@@ -135,25 +138,27 @@ address {
 #content-window figure { margin: 1.6em 0; }
 #content-window img { max-width: 100%; height: auto; display: block; }
 #content-window figcaption {
-  font-family: monospace; font-size: 11px; color: #666; margin-top: 5px;
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; color: #7a7566; margin-top: 6px; letter-spacing: 0.01em;
 }
 #content-window ul, #content-window ol {
   font-family: Georgia, serif; font-size: 16px;
-  line-height: 1.7; margin: 0 0 1em 1.3em;
+  line-height: 1.72; margin: 0 0 1em 1.3em;
   padding-left: 0.2em;
 }
-#content-window li { margin-bottom: 0.4em; word-wrap: break-word; overflow-wrap: break-word; }
+#content-window li { margin-bottom: 0.45em; word-wrap: break-word; overflow-wrap: break-word; }
 #content-window pre {
-  font-family: Menlo, Consolas, monospace; font-size: 12.5px;
-  background: #f6f6f6; border: 1px solid #e0e0e0;
-  padding: 10px 12px; overflow-x: auto; margin: 1em 0;
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+  background: #f5f2e8; border: 1px solid #e6e2d4;
+  padding: 12px 14px; overflow-x: auto; margin: 1.1em 0;
   white-space: pre-wrap;
   word-break: break-word;
+  border-radius: 2px;
 }
 #content-window code {
-  font-family: Menlo, Consolas, monospace; font-size: 12.5px;
-  background: #f2f2f2; padding: 1px 4px;
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+  background: #f2efe4; padding: 1px 5px;
   word-break: break-word;
+  border-radius: 2px;
 }
 #content-window pre code { background: none; padding: 0; }
 #content-window figure { max-width: 100%; }
@@ -161,27 +166,27 @@ address {
   max-width: 100%; height: auto; display: block;
 }
 
-#e-frame { width: 100%; height: 72vh; min-height: 480px; }
+#e-frame { width: 100%; height: calc(100vh - 150px); min-height: 480px; }
 
-.loading { color: #888; font-style: italic; padding: 20px; }
-.error { color: #a00; padding: 20px; }
+.loading { color: #8a8571; font-style: italic; padding: 20px; }
+.error { color: #a8321b; padding: 20px; }
 
-@media (max-width: 680px) {
+/* Very small screens: drop the side borders and tighten padding */
+@media (max-width: 520px) {
+  body { padding: 14px 14px 32px; border-left: none; border-right: none; }
   #content-window, #text-window {
-    padding: 14px 14px;
-    height: 72vh;
+    padding: 16px 14px;
+    height: calc(100vh - 130px);
     min-height: 380px;
-    max-height: none;
   }
   #content-window p,
-  #content-window ul, #content-window ol { font-size: 15.5px; line-height: 1.65; }
+  #content-window ul, #content-window ol { font-size: 15.5px; line-height: 1.7; }
   #content-window h1 { font-size: 20px; }
   #content-window h2 { font-size: 17px; }
   #content-window h3 { font-size: 15px; }
-  #text-window pre { font-size: 13px; }
-  #e-frame { height: 78vh; min-height: 420px; }
-  .v-filename { font-size: 13.5px; }
-  .v-meta { font-size: 11.5px; }
+  #e-frame { height: calc(100vh - 130px); min-height: 420px; }
+  .v-filename { font-size: 13px; }
+  .v-meta { font-size: 11px; }
 }
 </style>
 </head>
@@ -229,7 +234,7 @@ address {
   </div>
   <hr>
   <iframe id="e-frame" src="about:blank"
-          style="border:1px solid #ccc;background:#fff;margin-top:8px"
+          style="border:1px solid #e0dbcc;background:#fffdf8;margin-top:10px"
           referrerpolicy="no-referrer" loading="lazy"></iframe>
   <address>Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443</address>
 </div>
