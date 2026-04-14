@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-04-14j -->
+<!-- build: 2026-04-14k -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -24,13 +24,15 @@ html { height: 100%; }
 body {
   /* One geometric system-sans stack for the whole site — in the spirit of
      Phosphor icons (even weight, crisp stroke, restrained). Every
-     descendant inherits this unless it explicitly overrides. */
+     descendant inherits this unless it explicitly overrides. The directory
+     listing itself opts into a monospace stack below so it reads as a raw
+     server autoindex. */
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 13px;
   color: #111;
   background: #fff;
   padding: 14px 14px 32px;
-  max-width: 900px;
+  max-width: 640px;
   margin: 0 auto;
   min-height: 100vh;
   word-wrap: break-word;
@@ -44,90 +46,140 @@ address {
   margin-top: 14px; padding-top: 6px;
 }
 
-/* ── Miller-column (Finder-style) directory index ──────────────────────────
-   Each directory in the active ancestor chain gets its own column panel, laid
-   out left-to-right. Clicking a folder in column N opens column N+1 to its
-   right. On narrow screens the flex container wraps so columns stack
-   top-to-bottom and everything stays visible. */
-#cols {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: flex-start;
+/* ── Apache-style directory index ───────────────────────────────────────────
+   A single table, monospaced, with bracketed icon tags ([DIR], [TXT], [EXT]…)
+   and a `----` separator under the header — the familiar mod_autoindex look
+   the server signature at the bottom of every page is already claiming. The
+   body type stack stays sans; the table explicitly opts into monospace so the
+   listing reads as a raw server index while headings and prose stay editorial. */
+#dir-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
 }
-.col {
-  flex: 0 0 260px;
-  min-width: 0;
-  border: 1px solid #e9e6df;
-  background: #fff;
+#dir-table a { font-family: inherit; }
+/* Three columns — icon tag, name, date. Body is capped at 640px so a
+   dedicated Description column would be starved; descriptions render on a
+   second full-width row under each entry with an inline "Description:" label. */
+col.c-icon { width: 46px; }
+col.c-name { width: auto; }
+col.c-date { width: 108px; }
+@media (max-width: 639px) {
+  col.c-icon { width: 42px; }
+  col.c-date { width: 88px; }
 }
-.col-head {
-  padding: 8px 10px;
+#dir-table thead th {
+  text-align: left;
+  padding: 2px 10px 3px 0;
+  font-weight: 600;
+  white-space: nowrap;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #666;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #111;
+}
+#dir-table thead th.date { text-align: right; padding-right: 20px; }
+#dir-table td {
+  padding: 2px 6px 2px 0;
+  vertical-align: top;
+  word-break: break-word;
+}
+#dir-table td a { word-break: break-word; overflow-wrap: anywhere; }
+/* Icon cell: bracketed Apache-style tag, muted so it reads as chrome not
+   content. Tabular numerals so the [   ] blank matches the occupied tags. */
+td.w-icon {
+  color: #888;
+  font-size: 11px;
+  letter-spacing: 0;
+  padding-right: 10px;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.col-entry {
-  display: grid;
-  grid-template-columns: 20px 1fr auto;
-  column-gap: 8px;
-  row-gap: 0;
-  padding: 8px 10px;
-  border-top: 1px dotted #e4e1d8;
-  cursor: pointer;
-  align-items: baseline;
-}
-.col-entry:first-child { border-top: none; }
-.col-entry:hover { background: #f7f5ef; }
-.col-entry.active { background: #efece3; }
-.col-entry.active .ce-caret { color: #111; }
-.ce-icon { line-height: 1.3; }
-.ce-name {
+
+/* ── /writing/ structured rows ──────────────────────────────────────────────
+   Same Apache-style index, just with breathing room so the title reads as
+   the primary line and the description sits beneath it as metadata. */
+.w-section td {
+  padding: 32px 0 6px;
+  border-top: 1px solid #111;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: #111;
+}
+.w-section.first td { border-top: none; padding-top: 10px; }
+tr.w-row td {
+  padding: 12px 0 11px;
+  border-top: 1px dotted #ccc;
+  vertical-align: top;
+}
+tr.w-row.first-in-section td { border-top: none; padding-top: 6px; }
+td.w-main { padding-right: 16px; }
+td.w-main a {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
   line-height: 1.35;
   color: #111;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+  text-decoration: underline;
 }
-.ce-name a { color: inherit; text-decoration: underline; }
-.ce-date {
-  font-size: 11px;
-  color: #888;
-  font-variant-numeric: tabular-nums;
+td.w-date {
   white-space: nowrap;
-}
-.ce-caret { color: #aaa; font-size: 11px; }
-.ce-desc {
-  grid-column: 2 / span 2;
+  color: #888;
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  padding-right: 0;
+  text-align: right;
+}
+/* Description row — full-width under each post, with an inline "Description:"
+   label so the text starts on the same line as the word. No border-top so it
+   visually belongs to the row above rather than to the next post. Sans-serif
+   so long blurbs breathe; the listing's monospace frame stays around it. */
+tr.w-desc-row td {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #666;
-  line-height: 1.45;
-  margin-top: 3px;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 0 0 12px 56px;
+  border-top: none;
+  vertical-align: top;
   word-break: normal;
   overflow-wrap: anywhere;
 }
-.col-section {
-  padding: 14px 10px 4px;
-  font-size: 11px;
+tr.w-desc-row .w-desc-label {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   font-weight: 600;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #111;
-  border-top: 1px solid #111;
-}
-.col-section.first { border-top: none; }
-.col-count {
-  padding: 10px;
+  letter-spacing: 0.06em;
   font-size: 11px;
-  color: #777;
-  border-top: 1px solid #111;
+  color: #666;
+  margin-right: 6px;
 }
-@media (max-width: 639px) {
-  .col { flex: 1 1 100%; }
+/* Parent Directory: navigation, not content. Mute it so it doesn't compete
+   with tier labels or post titles for attention. */
+tr.w-parent td { color: #aaa; }
+tr.w-parent td.w-main a {
+  color: #aaa;
+  text-decoration: none;
+  font-weight: 500;
+}
+/* Faint row-hover background: grayscale, matches page bg family — no accent,
+   no link color shift. Purely tactile cue that rows are clickable targets. */
+tr.w-row:hover td { background: #f4f2ec; }
+/* Footer count line — same muted tone as the Apache address signature. */
+tr.w-count td {
+  padding: 14px 0 2px;
+  font-size: 11px;
+  color: #555;
+  border-top: 1px solid #111;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+@media (min-width: 768px) {
+  td.w-main a { font-size: 15px; }
 }
 
 #breadcrumb {
@@ -716,7 +768,19 @@ address {
 <div id="listing">
   <h1 id="dir-title">Index of /</h1>
   <hr>
-  <div id="cols"></div>
+  <table id="dir-table">
+    <colgroup>
+      <col class="c-icon"><col class="c-name"><col class="c-date">
+    </colgroup>
+    <thead>
+      <tr>
+        <th class="icon">[ICO]</th>
+        <th class="name">Name</th>
+        <th class="date">Last modified</th>
+      </tr>
+    </thead>
+    <tbody id="dir-body"></tbody>
+  </table>
   <hr>
   <address class="server-sig"></address>
 </div>
@@ -818,7 +882,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-14j";
+const BUILD_TAG = "2026-04-14k";
 const SERVER_SIG = "Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443 · build " + BUILD_TAG;
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("address.server-sig").forEach(el => {
@@ -1003,195 +1067,185 @@ function renderBreadcrumb(path, filename) {
   });
 }
 
-// ── Miller-column directory render ──────────────────────────────────────────
-// The view state is still a single path; we expand that into an ancestor
-// chain ("/", "/writing/", …) and render one column per step, Finder-style.
-// Clicking a directory entry trims/extends the chain; clicking a file, post,
-// embed, or external link uses the existing viewer panes unchanged.
+// ── Apache-style directory render ───────────────────────────────────────────
+// A single table per directory, rendered in the shape mod_autoindex would
+// emit: bracketed icon tag, name, last-modified date — with descriptions on
+// a full-width row underneath each entry. /writing/ gets tier-section headers
+// inlined into the same tbody. Navigation, history, and viewer handoffs are
+// handled elsewhere — this function only paints the listing.
 
 const ESC = s => String(s).replace(/[&<>"']/g, c => (
   { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
 ));
 
-function stackFor(path) {
-  // Build ['/', '/a/', '/a/b/'] for a path like '/a/b/'. If a path segment
-  // isn't a known dir we stop there — the deepest known ancestor becomes the
-  // rightmost column.
-  const out = ["/"];
-  if (!path || path === "/") return out;
-  const parts = path.replace(/^\//, "").replace(/\/$/, "").split("/").filter(Boolean);
-  let cur = "/";
-  for (const p of parts) {
-    cur = cur + p + "/";
-    if (dirs[cur] || cur === "/writing/") out.push(cur);
-    else break;
-  }
-  return out;
-}
-
+// Bracketed Apache-style tag, monospaced and muted. Posts get a blank tag
+// because they read to users as articles, not files — but the tag slot is
+// reserved so the three-column grid stays aligned.
 function iconFor(type) {
-  return type === "dir"   ? "📁"
-       : type === "embed" ? "🧰"
-       : type === "link"  ? "🔗"
-       :                    "📄";
+  return type === "dir"   ? "[DIR]"
+       : type === "link"  ? "[EXT]"
+       : type === "embed" ? "[APP]"
+       : type === "file"  ? "[TXT]"
+       :                    "[   ]";
 }
 
-// Build one column DOM node for the given directory path. `nextPath` is the
-// path of the column immediately to the right (if any) — used to highlight
-// the entry that "opened" it.
-function columnFor(path, nextPath) {
-  const col = document.createElement("div");
-  col.className = "col";
-  col.dataset.path = path;
-
-  const head = document.createElement("div");
-  head.className = "col-head";
-  head.textContent = path === "/" ? "/" : path;
-  col.appendChild(head);
-
-  if (path === "/writing/") {
-    renderWritingInto(col);
-    return col;
-  }
-
-  const entries = dirs[path] || [];
-  entries.forEach(item => col.appendChild(entryRow(item, path, nextPath)));
-  return col;
+// Parent-directory row — styled consistently with the w-row layout so every
+// directory listing shares the same visual rhythm as /writing/.
+function parentDirRow(onClick) {
+  const tr = document.createElement("tr");
+  tr.className = "w-row w-parent first-in-section";
+  tr.innerHTML =
+    `<td class="w-icon">[UP ]</td>` +
+    `<td class="w-main"><a href="#">Parent Directory</a></td>` +
+    `<td class="w-date">—</td>`;
+  tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); onClick(); });
+  return tr;
 }
 
-// Single entry row inside a column. Handles dir / post / embed / file / link.
-function entryRow(item, path, nextPath) {
-  const external = item.type === "link";
-  const displayName = item.type === "dir" ? item.name + "/" : item.name;
-  const childPath = item.type === "dir"
-    ? (path === "/" ? "/" + item.name + "/" : path + item.name + "/")
-    : null;
-  const isActive = childPath && childPath === nextPath;
+// ── /writing/ custom view ────────────────────────────────────────────────────
 
-  const row = document.createElement("div");
-  row.className = "col-entry" + (isActive ? " active" : "");
+function renderWriting() {
+  show("listing");
+  document.title = "Index of /writing/";
+  document.getElementById("dir-title").textContent = "Index of /writing/";
+  const tbody = document.getElementById("dir-body");
+  tbody.innerHTML = "";
 
-  const icon = document.createElement("span");
-  icon.className = "ce-icon";
-  icon.textContent = iconFor(item.type);
-  row.appendChild(icon);
+  tbody.appendChild(parentDirRow(() => goDir("/")));
 
-  const name = document.createElement("span");
-  name.className = "ce-name";
-  if (external) {
-    const a = document.createElement("a");
-    a.href = item.href;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    a.textContent = displayName;
-    name.appendChild(a);
-  } else {
-    name.textContent = displayName;
-  }
-  row.appendChild(name);
-
-  const trailing = document.createElement("span");
-  if (item.type === "dir") {
-    trailing.className = "ce-caret";
-    trailing.textContent = "▸";
-  } else {
-    trailing.className = "ce-date";
-    trailing.textContent = item.date || "";
-  }
-  row.appendChild(trailing);
-
-  if (item.desc) {
-    const desc = document.createElement("span");
-    desc.className = "ce-desc";
-    desc.textContent = item.desc;
-    row.appendChild(desc);
-  }
-
-  const activate = () => {
-    if (item.type === "dir") {
-      goDir(childPath);
-    } else if (item.type === "post") {
-      const meta = POST_BY_FILE[item.file] || { f: item.file, t: item.name, d: item.date, desc: item.desc };
-      goPost(meta, path);
-    } else if (item.type === "embed") {
-      goEmbed(item, path);
-    } else if (item.type === "file") {
-      goText(item.name, path);
-    }
-  };
-
-  if (external) {
-    // Row click opens the external link too, so the whole tile is a target.
-    row.addEventListener("click", e => {
-      if (e.target.tagName === "A") return; // let the anchor handle its own click
-      window.open(item.href, "_blank", "noopener");
-    });
-  } else {
-    row.addEventListener("click", activate);
-  }
-  return row;
-}
-
-// /writing/ is special: posts are grouped into tier sections. We render
-// the same tier buckets inside its column, with each post as a col-entry.
-function renderWritingInto(col) {
   const tierNames = {
     1: "TIER 1 — POSTS THAT CHANGED NASHVILLE POLICY",
     2: "TIER 2 — MAJOR INVESTIGATIONS & EXTERNAL PUBLICATION",
     3: "TIER 3 — DEEP INVESTIGATIONS & SERIES ANCHORS",
     4: "TIER 4 — PHILOSOPHY, VOICE, IDENTITY",
   };
+
+  // Pre-group posts by tier so we can both (a) render counts in the section
+  // headers and (b) build the rows without iterating twice.
   const postsByTier = { 1:[], 2:[], 3:[], 4:[] };
   POSTS.forEach(p => { if (postsByTier[p.tier]) postsByTier[p.tier].push(p); });
   [1,2,3,4].forEach(t => postsByTier[t].sort((a,b) => b.d.localeCompare(a.d)));
 
   [1,2,3,4].forEach((tier, tierIdx) => {
-    const sec = document.createElement("div");
-    sec.className = "col-section" + (tierIdx === 0 ? " first" : "");
+    const posts = postsByTier[tier];
+    const sec = document.createElement("tr");
+    sec.className = "w-section" + (tierIdx === 0 ? " first" : "");
     sec.id = "t" + tier;
-    sec.textContent = tierNames[tier];
-    col.appendChild(sec);
+    sec.innerHTML = `<td colspan="3">${tierNames[tier]}</td>`;
+    tbody.appendChild(sec);
 
-    postsByTier[tier].forEach(p => {
-      col.appendChild(entryRow(
-        { type:"post", name:p.t, file:p.f, date:p.d, desc:p.desc },
-        "/writing/",
-        null
-      ));
+    posts.forEach((p, i) => {
+      // Row anchor id derived from post filename's slug portion. Invisible
+      // unless someone deep-links with "#p-<slug>"; no router impact because
+      // the hash router only matches "/writing/<file>" shapes.
+      const slug = p.f.replace(/^\d+\./, "").replace(/\.html$/, "").replace(/\.md$/, "");
+      const tr = document.createElement("tr");
+      tr.className = "w-row" + (i === 0 ? " first-in-section" : "");
+      tr.id = "p-" + slug;
+      tr.innerHTML =
+        `<td class="w-icon">${iconFor("post")}</td>` +
+        `<td class="w-main"><a href="#">${ESC(p.t)}</a></td>` +
+        `<td class="w-date">${p.d}</td>`;
+      const open = () => goPost(p, "/writing/");
+      tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); open(); });
+      tbody.appendChild(tr);
+      // Description row — full width under the post, prefixed with an inline
+      // "Description:" label so the text starts on the same line as the word.
+      // Clicking anywhere on the row opens the post.
+      if (p.desc) {
+        const dtr = document.createElement("tr");
+        dtr.className = "w-desc-row";
+        dtr.innerHTML =
+          `<td colspan="3"><span class="w-desc-label">Description:</span>${ESC(p.desc)}</td>`;
+        dtr.style.cursor = "pointer";
+        dtr.addEventListener("click", open);
+        tbody.appendChild(dtr);
+      }
     });
   });
 
+  // Footer count line — reads like something an index generator would print.
   const lastUpdated = POSTS.reduce((a, p) => p.d > a ? p.d : a, "");
-  const count = document.createElement("div");
-  count.className = "col-count";
-  count.textContent = `/writing/ — ${POSTS.length} entries, last updated ${lastUpdated}`;
-  col.appendChild(count);
+  const count = document.createElement("tr");
+  count.className = "w-count";
+  count.innerHTML =
+    `<td colspan="3">/writing/ — ${POSTS.length} entries, last updated ${lastUpdated}</td>`;
+  tbody.appendChild(count);
 }
 
+// ── generic directory render ─────────────────────────────────────────────────
+
 function render(path) {
-  // Unknown path falls back to root. /writing/ is valid even though it
-  // isn't in `dirs` — stackFor handles it explicitly.
-  if (path !== "/" && path !== "/writing/" && !dirs[path]) { render("/"); return; }
+  if (path === "/writing/") { renderWriting(); renderBreadcrumb(path, null); return; }
+
+  const entries = dirs[path];
+  if (!entries) { render("/"); return; }
 
   renderBreadcrumb(path, null);
   show("listing");
   document.title = "Index of " + path;
   document.getElementById("dir-title").textContent = "Index of " + path;
 
-  const stack = stackFor(path);
-  const cols = document.getElementById("cols");
-  cols.innerHTML = "";
-  stack.forEach((p, i) => {
-    const next = stack[i + 1] || null;
-    cols.appendChild(columnFor(p, next));
-  });
+  const tbody = document.getElementById("dir-body");
+  tbody.innerHTML = "";
 
-  // Scroll the rightmost column into view on narrow screens where columns
-  // stack vertically, so the user sees the new column they just opened.
-  const last = cols.lastElementChild;
-  if (last && stack.length > 1) {
-    last.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "end" });
+  const parent = parentOf(path);
+  const hasParent = parent !== null;
+  if (hasParent) {
+    tbody.appendChild(parentDirRow(() => goDir(parent)));
   }
+
+  entries.forEach((item, i) => {
+    const displayName = item.type === "dir" ? item.name + "/" : item.name;
+    const external = item.type === "link";
+
+    const tr = document.createElement("tr");
+    tr.className = "w-row" + (!hasParent && i === 0 ? " first-in-section" : "");
+    tr.innerHTML =
+      `<td class="w-icon">${iconFor(item.type)}</td>` +
+      `<td class="w-main"><a href="#">${ESC(displayName)}</a></td>` +
+      `<td class="w-date">${ESC(item.date || "")}</td>`;
+
+    const a = tr.querySelector("a");
+    const activate = () => {
+      if (item.type === "dir") {
+        const child = path === "/" ? "/" + item.name + "/" : path + item.name + "/";
+        goDir(child);
+      } else if (item.type === "post") {
+        const meta = POST_BY_FILE[item.file] || { f: item.file, t: item.name, d: item.date, desc: item.desc };
+        goPost(meta, path);
+      } else if (item.type === "embed") {
+        goEmbed(item, path);
+      } else {
+        goText(item.name, path);
+      }
+    };
+    if (external) {
+      a.href = item.href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      // No preventDefault — let the browser open the external link in a new tab.
+    } else {
+      a.addEventListener("click", e => { e.preventDefault(); activate(); });
+    }
+    tbody.appendChild(tr);
+    // Description row — full width under each entry, with an inline label
+    // so the text starts on the same line as the word "Description".
+    if (item.desc) {
+      const dtr = document.createElement("tr");
+      dtr.className = "w-desc-row";
+      const labelled = `<span class="w-desc-label">Description:</span>${ESC(item.desc)}`;
+      if (external) {
+        dtr.innerHTML =
+          `<td colspan="3"><a href="${item.href}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">${labelled}</a></td>`;
+      } else {
+        dtr.innerHTML = `<td colspan="3">${labelled}</td>`;
+        dtr.style.cursor = "pointer";
+        dtr.addEventListener("click", activate);
+      }
+      tbody.appendChild(dtr);
+    }
+  });
 }
 
 // ── text viewer ──────────────────────────────────────────────────────────────
