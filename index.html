@@ -9,6 +9,14 @@
 <meta http-equiv="Expires" content="0">
 <title>Index of /</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<!-- Archivo — a grotesque sans used only in the blog post viewer: slightly
+     angular, no-nonsense, carries editorial authority without the slab-serif
+     weight. Preconnect so the font handshake happens in parallel with the
+     first paint; font-display: swap in the @font-face declaration below means
+     system-ui renders first and Archivo folds in without a FOUT block. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { overflow-x: hidden; }
@@ -156,34 +164,37 @@ tr.w-count td {
 .v-filename { font-weight: 600; font-size: 13px; word-break: break-word; overflow-wrap: anywhere; }
 .v-meta { color: #555; font-size: 12px; }
 
-/* Post viewer — Substack-leaning: a generous serif title stacked over quiet
-   sans metadata, with room to breathe. The index of the site stays sans
-   (it's file-explorer chrome); the article itself switches typography so
-   reading feels like a publication, not a directory listing. */
+/* Post viewer — accountability-journalism grotesque: a tight 600-weight
+   sans title (Archivo where available, system-ui elsewhere) over a quiet,
+   tertiary metadata line. The slab-serif look read "literary magazine";
+   a sharper grotesque reads "beat reporter". The index chrome is already
+   sans, so the post viewer now shares one type system with it — the shift
+   in register comes from size, weight, and spacing, not a font swap. */
 #viewer .v-chrome {
   display: block;
   margin-bottom: 14px;
 }
 #viewer .v-filename {
   display: block;
-  font-family: Charter, "Source Serif Pro", "Iowan Old Style", "Apple Garamond", Georgia, "Times New Roman", serif;
-  font-weight: 700;
+  font-family: Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 600;
   font-size: 30px;
-  line-height: 1.18;
-  letter-spacing: -0.012em;
+  line-height: 1.15;
+  letter-spacing: -0.022em;
   color: #111;
   margin: 18px 0 10px;
 }
 #viewer .v-meta {
   display: block;
-  color: #6b6b6b;
-  font-size: 13px;
+  color: #8a8a8a;
+  font-size: 12.5px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
 }
 @media (min-width: 768px) {
-  #viewer .v-filename { font-size: 40px; line-height: 1.14; margin: 22px 0 12px; }
-  #viewer .v-meta { font-size: 14px; }
+  #viewer .v-filename { font-size: 40px; line-height: 1.12; letter-spacing: -0.024em; margin: 22px 0 12px; }
+  #viewer .v-meta { font-size: 13px; }
 }
 
 #content-window, #text-window {
@@ -231,24 +242,25 @@ tr.w-count td {
 #tv-body strong { font-weight: 600; }
 #tv-body em { font-style: italic; }
 
-/* Reading body — serif stack in the Substack spirit: a warm, book-weight
-   transitional serif on devices that have Charter / Source Serif / Iowan,
-   falling back to Georgia. Sans-serif chrome stays on the index and the
-   article metadata, so the serif signals "you are reading now." */
+/* Reading body — grotesque sans tuned for accountability reporting: short
+   lines skim fast, links don't fragment paragraphs (they inherit text color
+   with a 1px underline offset 3px off the baseline), and the whole column
+   uses one font so the eye isn't constantly switching registers between
+   body, headings, and inline UI widgets (subscribe, file-embed, pullquote). */
 #content-window {
   color: #1a1a1a;
-  font-family: Charter, "Source Serif Pro", "Iowan Old Style", "Apple Garamond", Georgia, "Times New Roman", serif;
+  font-family: Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 #content-window p {
-  font-size: 18px; line-height: 1.7; margin: 0 0 1.15em; color: #1a1a1a;
+  font-size: 16px; line-height: 1.7; margin: 0 0 1.15em; color: #1a1a1a;
   word-wrap: break-word; overflow-wrap: break-word;
 }
 #content-window a {
   color: inherit;
   text-decoration: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-  text-decoration-color: rgba(17,17,17,0.35);
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(17,17,17,0.4);
   word-break: break-word; overflow-wrap: anywhere;
 }
 #content-window a:hover { text-decoration-color: #111; }
@@ -256,15 +268,15 @@ tr.w-count td {
   border-left: 3px solid #222; margin: 1.5em 0; padding: 0.1em 0 0.1em 18px;
   color: #333;
 }
-#content-window blockquote p { font-style: italic; font-size: 18px; line-height: 1.6; }
+#content-window blockquote p { font-style: italic; font-size: 16px; line-height: 1.6; }
 #content-window h1, #content-window h2, #content-window h3, #content-window h4 {
   font-family: inherit;
-  font-weight: 700; letter-spacing: -0.012em;
+  font-weight: 600; letter-spacing: -0.018em;
   margin: 1.8em 0 .5em; line-height: 1.2; color: #111;
 }
-#content-window h1 { font-size: 26px; }
-#content-window h2 { font-size: 22px; }
-#content-window h3 { font-size: 19px; }
+#content-window h1 { font-size: 24px; }
+#content-window h2 { font-size: 20px; }
+#content-window h3 { font-size: 17px; }
 #content-window hr { border: none; border-top: 1px solid #d6d6d6; margin: 2em auto; width: 40%; }
 
 /* Images: default to ~2/3 of the column, centered, with a zoom cursor so
@@ -294,7 +306,7 @@ tr.w-count td {
   font-style: normal;
 }
 #content-window ul, #content-window ol {
-  font-size: 18px; line-height: 1.7; margin: 0 0 1.15em 1.4em;
+  font-size: 16px; line-height: 1.7; margin: 0 0 1.15em 1.4em;
 }
 #content-window li { margin-bottom: 0.45em; word-wrap: break-word; overflow-wrap: break-word; }
 #content-window pre {
@@ -332,27 +344,39 @@ tr.w-count td {
 
 /* ── Substack-post embedded widgets ─────────────────────────────────────── */
 
-/* Subscribe form */
+/* Subscribe form — a 3px left rule instead of a full border box. Gives the
+   CTA visual separation from body prose without a card/background that would
+   scream "advertisement." Action content sits on the left; the secondary
+   "follow on social" line inside .preamble drops a step in size + color so
+   the primary ask reads first. */
 #content-window .subscription-widget-wrap-editor,
 #content-window .subscription-widget-wrap { margin: 1.5em 0; }
 #content-window .subscription-widget {
-  border: 1px solid #999;
-  padding: 14px;
-  text-align: center;
+  border: none;
+  border-left: 3px solid #111;
+  padding: 6px 0 6px 18px;
+  text-align: left;
 }
-#content-window .subscription-widget .preamble { margin-bottom: 10px; }
-#content-window .subscription-widget .cta-caption {
-  font-size: 14px;
+#content-window .subscription-widget .preamble {
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #6b6b6b;
   line-height: 1.5;
-  margin: 0;
-  font-style: italic;
+}
+#content-window .subscription-widget .cta-caption {
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0 0 10px;
+  font-style: normal;
+  font-weight: 500;
+  color: #111;
 }
 #content-window .subscription-widget-subscribe {
   display: flex;
   gap: 6px;
   align-items: stretch;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
 }
 #content-window .subscription-widget-subscribe .email-input {
   flex: 1 1 220px;
@@ -377,6 +401,12 @@ tr.w-count td {
   border: 1px solid #111;
   text-decoration: none;
   cursor: pointer;
+  letter-spacing: 0.005em;
+}
+#content-window .subscription-widget-subscribe .button.primary:hover,
+#content-window .button.primary:hover {
+  background: #333;
+  border-color: #333;
 }
 #content-window .fake-input-wrapper { display: none; }
 
@@ -477,21 +507,30 @@ tr.w-count td {
   overflow-wrap: anywhere;
 }
 #content-window .file-embed-details-h2 {
-  font-size: 12px;
-  color: #555;
+  font-size: 11.5px;
+  color: #8a8a8a;
+  letter-spacing: 0.01em;
 }
+/* Download button: lighter outline rather than filled-black. At this size a
+   solid button dominates the card visually relative to what it is — a
+   secondary "here's the underlying file" offer. Outline keeps it tappable
+   and obvious without stealing the reader's eye from the article body. */
 #content-window .file-embed-button {
   flex: 0 0 auto;
   display: inline-block;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  padding: 6px 14px;
-  background: #111;
-  color: #fff;
+  padding: 5px 12px;
+  background: #fff;
+  color: #111;
   border: 1px solid #111;
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
+}
+#content-window .file-embed-button:hover {
+  background: #111;
+  color: #fff;
 }
 #content-window .file-embed-button-text { color: inherit; }
 /* Substack ships both wide+narrow buttons; show only one to avoid duplicates. */
@@ -524,11 +563,11 @@ tr.w-count td {
   th, td { font-size: 14px; }
   #content-window p,
   #content-window ul,
-  #content-window ol { font-size: 19px; line-height: 1.72; }
-  #content-window h1 { font-size: 30px; }
-  #content-window h2 { font-size: 24px; }
-  #content-window h3 { font-size: 20px; }
-  #content-window blockquote p { font-size: 20px; }
+  #content-window ol { font-size: 17px; line-height: 1.7; }
+  #content-window h1 { font-size: 28px; }
+  #content-window h2 { font-size: 22px; }
+  #content-window h3 { font-size: 18px; }
+  #content-window blockquote p { font-size: 17px; }
   #text-window pre { font-size: 14px; max-width: 80ch; }
 
   /* Cap reading-text blocks near ~68ch — Substack-ish — so lines stay
@@ -697,7 +736,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-14e";
+const BUILD_TAG = "2026-04-14f";
 const SERVER_SIG = "Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443 · build " + BUILD_TAG;
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("address.server-sig").forEach(el => {
