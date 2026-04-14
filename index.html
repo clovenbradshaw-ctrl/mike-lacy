@@ -34,9 +34,11 @@ th {
 }
 td { padding: 2px 6px 2px 0; vertical-align: top; word-break: break-word; }
 td a { word-break: break-word; overflow-wrap: anywhere; }
-/* Mobile-forward: non-essential columns hidden at every width */
-th.date, th.size, th.desc,
-td.date, td.size, td.desc { display: none; }
+/* Mobile-forward: only .size is hidden; .date + .desc are shown */
+th.size, td.size { display: none; }
+/* Description wraps under constrained column */
+td.desc { font-size: 12px; color: #555; line-height: 1.4; padding-top: 3px; }
+td.date { white-space: nowrap; color: #555; font-size: 12px; }
 a { cursor: pointer; }
 address {
   font-style: italic; font-size: 12px; color: #555;
@@ -372,7 +374,7 @@ address {
   <table>
     <thead><tr>
       <th colspan="2">Name</th>
-      <th class="date">Last modified</th>
+      <th class="date">Created</th>
       <th class="size">Size</th>
       <th class="desc">Description</th>
     </tr></thead>
@@ -415,34 +417,34 @@ address {
 // Sourced from FEATURED.md + posts/ directory.
 
 const POSTS = [
-  { f:"179891086.no-means-no-freddie-the-mayors-office.html",       t:"'No' means 'No', Freddie.",                                                      d:"2025-11-25", tier:1, desc:"Mayor's office / OHS accountability" },
-  { f:"174451008.metro-will-audit-the-office-of-homeless.html",     t:"Metro Will Audit The Office of Homeless Services",                               d:"2025-09-24", tier:1, desc:"official audit triggered" },
-  { f:"179971483.from-the-makers-of-fusus-literally.html",          t:"From the Makers of Fusus (literally): Meet \"LeoSight\"",                          d:"2025-11-26", tier:1, desc:"surveillance vendor / MOU" },
-  { f:"171344469.they-only-discovered-the-problem.html",            t:"They Only 'Discovered' the $500k Payment Issues When I Found It",                d:"2025-08-19", tier:1, desc:"NDP / BID / 21-year oversight gap" },
-  { f:"185390870.there-is-no-one-else-coming.html",                 t:"There Is No One Else Coming But Us.",                                            d:"2026-01-22", tier:1, desc:"surveillance vote · 20-15 rejection" },
+  { f:"179891086.no-means-no-freddie-the-mayors-office.html",       t:"'No' means 'No', Freddie.",                                                      d:"2025-11-25", tier:1, desc:"The mayor's office keeps resurrecting the FUSUS-style surveillance program Nashville already rejected — here's the latest push Council is being asked to approve." },
+  { f:"174451008.metro-will-audit-the-office-of-homeless.html",     t:"Metro Will Audit The Office of Homeless Services",                               d:"2025-09-24", tier:1, desc:"After a reader email campaign, Metro's Internal Audit Committee voted unanimously to open a financial audit of the Office of Homeless Services." },
+  { f:"179971483.from-the-makers-of-fusus-literally.html",          t:"From the Makers of Fusus (literally): Meet \"LeoSight\"",                          d:"2025-11-26", tier:1, desc:"Mayor O'Connell quietly signed a $15M surveillance MOU with the Nashville Downtown Partnership — same team, same vendors, new name: LeoSight." },
+  { f:"171344469.they-only-discovered-the-problem.html",            t:"They Only 'Discovered' the $500k Payment Issues When I Found It",                d:"2025-08-19", tier:1, desc:"OHS paid DePaul USA more than $500k without a valid contract, using direct vouchers to bypass Finance; they only \"discovered\" it once I started requesting records." },
+  { f:"185390870.there-is-no-one-else-coming.html",                 t:"There Is No One Else Coming But Us.",                                            d:"2026-01-22", tier:1, desc:"Metro Council rejected the surveillance MOU 20-15. No one in the mayor's office saved us. We did it ourselves, and we'll have to keep doing it." },
 
-  { f:"163865780.housing-last-the-rodeway-to-nowhere.html",         t:"Housing Last | The Rodeway to Nowhere",                                          d:"2025-05-18", tier:2, desc:"OHS · Rodeway Inn program" },
-  { f:"183810155.breaking-the-mayors-official-coordinating.html",   t:"Breaking: Nashville's Surveillance MOU Official Helped Build ICE's LexisNexis Pipeline", d:"2026-01-15", tier:2, desc:"LexisNexis / ICE data" },
-  { f:"144351154.i-kept-waiting-for-the-city-to-release.html",      t:"I Kept Waiting For The City To Release Metro Arts' Expense Report. So I Did It Myself.", d:"2024-05-15", tier:2, desc:"Metro Arts expenses" },
-  { f:"186553419.nashvilles-january-eviction-filings.html",         t:"Nashville's January Eviction Filings Skyrocket Despite Winter Storm",            d:"2026-02-02", tier:2, desc:"56% YoY surge · 3 attorneys / 68%" },
-  { f:"193411754.we-built-the-surveillance-app-nashvilles.html",    t:"We Built the Surveillance Tool Nashville's Leaders Have Been Asking For. Except It Tracks Them.", d:"2026-04-07", tier:2, desc:"NaiBOR launch" },
+  { f:"163865780.housing-last-the-rodeway-to-nowhere.html",         t:"Housing Last | The Rodeway to Nowhere",                                          d:"2025-05-18", tier:2, desc:"OHS shut down Old Tent City with no public plan; residents were quietly routed into a Rodeway Inn program that offered no path to permanent housing." },
+  { f:"183810155.breaking-the-mayors-official-coordinating.html",   t:"Breaking: Nashville's Surveillance MOU Official Helped Build ICE's LexisNexis Pipeline", d:"2026-01-15", tier:2, desc:"The mayor's official coordinating the $15M surveillance MOU spent six years at LexisNexis, whose $22.1M ICE contract pulls local jail data ICE can't otherwise get." },
+  { f:"144351154.i-kept-waiting-for-the-city-to-release.html",      t:"I Kept Waiting For The City To Release Metro Arts' Expense Report. So I Did It Myself.", d:"2024-05-15", tier:2, desc:"After Metro stalled, I FOIA'd every Metro Arts expense from July 2022 through Feb 2024 and published the full searchable database myself." },
+  { f:"186553419.nashvilles-january-eviction-filings.html",         t:"Nashville's January Eviction Filings Skyrocket Despite Winter Storm",            d:"2026-02-02", tier:2, desc:"While the ice storm knocked out power to ~500,000 residents, landlords filed a 56% YoY surge in eviction detainers — 68% of them filed by just three law firms." },
+  { f:"193411754.we-built-the-surveillance-app-nashvilles.html",    t:"We Built the Surveillance Tool Nashville's Leaders Have Been Asking For. Except It Tracks Them.", d:"2026-04-07", tier:2, desc:"NaiBOR — an open-source civic tool that surfaces what Metro officials actually do with their time, using the same methods they want to use on us. Be a neighbor, not a naibor." },
 
-  { f:"178456949.null_results-text-messages-reveal.html",           t:"{Null_Results}: Text Messages Reveal OHS Director Hand-Picked Families",         d:"2025-11-10", tier:3, desc:"OHS · Title VI" },
-  { f:"192747263.nashvilles-unauthorized-secret-police.html",       t:"Nashville's Unauthorized Secret Police Force",                                   d:"2026-04-02", tier:3, desc:"NDP / THP / NDMC PSO LLC" },
-  { f:"175051724.who-is-larry-ellison-and-what-does.html",          t:"Who Is Larry Ellison? And What Does Oracle Want From Nashville?",                d:"2025-10-22", tier:3, desc:"Oracle / municipal data" },
-  { f:"158662808.downtown-nashvilles-self-made-privacy.html",       t:"Downtown Nashville's Self-Made Privacy Crisis",                                  d:"2025-03-09", tier:3, desc:"LPRs / private surveillance" },
-  { f:"178549584.i-cannot-compromise-my-integrity.html",            t:"'I Cannot Compromise My Integrity': Case Manager Resigned After OHS Conflicts",  d:"2025-11-11", tier:3, desc:"OHS / whistleblower" },
-  { f:"144803108.strings-attached-the-history-of-the.html",         t:"Strings Attached: The History of the Metro Arts Commission & The Nashville Symphony", d:"2024-06-18", tier:3, desc:"arts funding / Bredesen / 1988–" },
-  { f:"180083598.misinformation-or-inconvenient-truth.html",        t:"Misinformation or Inconvenient Truth? What the Documents Actually Say",          d:"2025-12-01", tier:3, desc:"mayor's office rebuttal" },
-  { f:"167746148.why-we-have-to-talk-about-what-nashville.html",    t:"Why We Have To Talk About What Nashville Ignores",                               d:"2025-07-07", tier:3, desc:"essay / framing" },
+  { f:"178456949.null_results-text-messages-reveal.html",           t:"{Null_Results}: Text Messages Reveal OHS Director Hand-Picked Families",         d:"2025-11-10", tier:3, desc:"Text messages show OHS Director April Calvin personally selected which unhoused families received housing — bypassing the federally-mandated Coordinated Entry system." },
+  { f:"192747263.nashvilles-unauthorized-secret-police.html",       t:"Nashville's Unauthorized Secret Police Force",                                   d:"2026-04-02", tier:3, desc:"Off-duty state troopers police downtown under a \"confidential\" contract routed through NDP / CBID / NDMC PSO LLC — a secret, unauthorized force hiding in plain sight." },
+  { f:"175051724.who-is-larry-ellison-and-what-does.html",          t:"Who Is Larry Ellison? And What Does Oracle Want From Nashville?",                d:"2025-10-22", tier:3, desc:"Oracle is rebuilding Metro's finance system on Oracle Cloud. A look at Larry Ellison's \"TechnoFutilist\" doctrine and what he stands to gain from Nashville's data." },
+  { f:"158662808.downtown-nashvilles-self-made-privacy.html",       t:"Downtown Nashville's Self-Made Privacy Crisis",                                  d:"2025-03-09", tier:3, desc:"Downtown Nashville outsourced its privacy to private LPR networks and cloud surveillance vendors — a crisis manufactured by the people building it." },
+  { f:"178549584.i-cannot-compromise-my-integrity.html",            t:"'I Cannot Compromise My Integrity': Case Manager Resigned After OHS Conflicts",  d:"2025-11-11", tier:3, desc:"A Step Up case manager resigned in writing, saying the OHS partnership forced staff to watch clients be repeatedly re-victimized and re-traumatized." },
+  { f:"144803108.strings-attached-the-history-of-the.html",         t:"Strings Attached: The History of the Metro Arts Commission & The Nashville Symphony", d:"2024-06-18", tier:3, desc:"Commissioned history of how Metro Arts, the Metro Arts Commission, and the Nashville Symphony became entangled — traced back through Bredesen-era decisions." },
+  { f:"180083598.misinformation-or-inconvenient-truth.html",        t:"Misinformation or Inconvenient Truth? What the Documents Actually Say",          d:"2025-12-01", tier:3, desc:"The mayor's office labeled surveillance reporting \"misinformation.\" Here's the MOU, line by line, against what the administration is telling Council it does." },
+  { f:"167746148.why-we-have-to-talk-about-what-nashville.html",    t:"Why We Have To Talk About What Nashville Ignores",                               d:"2025-07-07", tier:3, desc:"Tennessee's real export isn't country music or healthcare — it's policy cruelty dressed up as responsibility, and Nashville has been shipping it nationwide." },
 
-  { f:"155251807.the-mlk-they-want-us-to-forget.html",              t:"The MLK They Want Us To Forget",                                                 d:"2025-01-20", tier:4, desc:"essay · republished Jan 2026" },
-  { f:"173677465.how-to-escape-tyranny-and-make-new.html",          t:"Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick",   d:"2025-09-16", tier:4, desc:"essay / voice piece" },
-  { f:"170694573.the-center-will-always-fold.html",                 t:"The Center Will Always Fold",                                                    d:"2025-08-12", tier:4, desc:"essay / political theory" },
-  { f:"189078200.the-great-correction-nyc-comedian.html",           t:"'The Great Correction' | My Convo w/ NYC Comedian Whitley Watson",               d:"2026-02-25", tier:4, desc:"audio post / conversation" },
-  { f:"188017123.nashville-eviction-tracker-open-source.html",      t:"Nashville Eviction Tracker: Open Source Code",                                   d:"2026-02-15", tier:4, desc:"2,243 lines of Python published" },
-  { f:"174259144.one-email-today-could-change-everything.html",     t:"1 Minute to Demand Accountability: Email the Audit Committee",                   d:"2025-09-22", tier:4, desc:"CTA / organizing" },
-  { f:"181860842.the-peoples-house-how-nashville-metro.html",       t:"The People's House: How Nashville Metro Council Is Reclaiming Oversight",        d:"2025-12-17", tier:4, desc:"Metro Council governance" },
+  { f:"155251807.the-mlk-they-want-us-to-forget.html",              t:"The MLK They Want Us To Forget",                                                 d:"2025-01-20", tier:4, desc:"The radical King of 1967 — who named racism, economic exploitation, and war as one problem — not the sanitized holiday version Nashville prefers." },
+  { f:"173677465.how-to-escape-tyranny-and-make-new.html",          t:"Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick",   d:"2025-09-16", tier:4, desc:"\"Stop showing your work. Do magic tricks.\" A piece on political analysis, sleight of hand, and how movements actually escape tyranny." },
+  { f:"170694573.the-center-will-always-fold.html",                 t:"The Center Will Always Fold",                                                    d:"2025-08-12", tier:4, desc:"Nashville calls itself progressive — a blue dot in a red state. The political center isn't a position; it's a pattern of folding, every time." },
+  { f:"189078200.the-great-correction-nyc-comedian.html",           t:"'The Great Correction' | My Convo w/ NYC Comedian Whitley Watson",               d:"2026-02-25", tier:4, desc:"A long conversation with NYC writer, filmmaker and comedian Whitley Watson about her half-serious, fully-plausible fantasy: \"the Great Correction.\"" },
+  { f:"188017123.nashville-eviction-tracker-open-source.html",      t:"Nashville Eviction Tracker: Open Source Code",                                   d:"2026-02-15", tier:4, desc:"2,243 lines of Python — the full open-source code behind the Nashville eviction tracker, released so anyone with more capacity can take it further." },
+  { f:"174259144.one-email-today-could-change-everything.html",     t:"1 Minute to Demand Accountability: Email the Audit Committee",                   d:"2025-09-22", tier:4, desc:"A one-minute CTA: email the Metro Audit Committee to support an audit of the Office of Homeless Services before Tuesday's vote." },
+  { f:"181860842.the-peoples-house-how-nashville-metro.html",       t:"The People's House: How Nashville Metro Council Is Reclaiming Oversight",        d:"2025-12-17", tier:4, desc:"Metro Council stripped the surveillance MOU, deferred it to January, and took the drafting pen back from the mayor's office — a run of wins for democratic oversight." },
 ];
 
 const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
