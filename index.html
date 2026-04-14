@@ -285,9 +285,9 @@ const dirs = {
     { type:"post", name:"eviction-tracker",       file:"188017123.nashville-eviction-tracker-open-source.html", date:"2026-02-15", desc:"groundtruthnashville.org/evictions — open-source post" },
     { type:"post", name:"naibor",                 file:"193411754.we-built-the-surveillance-app-nashvilles.html", date:"2026-04-07", desc:"clovenbradshaw-ctrl.github.io/naibor" },
     { type:"embed", name:"metro-invoice-viewer",  src:"https://clovenbradshaw-ctrl.github.io/53902028/",         date:"2025-10-27", desc:"OHS ARPA spending · BU 53902028 · 207 invoices · $3.06M · Aug'24–Oct'25" },
-    { type:"embed", name:"experiential-ontology", src:"https://experientialontology.org/",                       date:"2026-04-14", desc:"experientialontology.org" },
-    { type:"embed", name:"metro-budget",           src:"https://sites.google.com/view/changelognashville",        date:"2026-04-14", desc:"changelog nashville · metro budget" },
-    { type:"embed", name:"metro-arts-finances",    src:"https://sites.google.com/view/metro-arts-finances/home",  date:"2026-04-14", desc:"metro arts finances" },
+    { type:"link",  name:"experiential-ontology", href:"https://experientialontology.org/",                      date:"2026-04-14", desc:"experientialontology.org ↗" },
+    { type:"link",  name:"metro-budget",           href:"https://sites.google.com/view/changelognashville",       date:"2026-04-14", desc:"changelog nashville · metro budget ↗" },
+    { type:"link",  name:"metro-arts-finances",    href:"https://sites.google.com/view/metro-arts-finances/home", date:"2026-04-14", desc:"metro arts finances ↗" },
   ],
 };
 
@@ -557,23 +557,31 @@ function render(path) {
   }
 
   entries.forEach(item => {
-    const icon = item.type === "dir" ? "📁" : item.type === "embed" ? "🧰" : "📄";
+    const icon = item.type === "dir" ? "📁" : item.type === "embed" ? "🧰" : item.type === "link" ? "🔗" : "📄";
     const displayName = item.type === "dir" ? item.name + "/" : item.name;
     const tr = mkrow(icon, displayName, item.date, item.size, item.desc);
-    tr.querySelector("a").addEventListener("click", e => {
-      e.preventDefault();
-      if (item.type === "dir") {
-        const child = path === "/" ? "/" + item.name + "/" : path + item.name + "/";
-        goDir(child);
-      } else if (item.type === "post") {
-        const meta = POST_BY_FILE[item.file] || { f: item.file, t: item.name, d: item.date, desc: item.desc };
-        goPost(meta, path);
-      } else if (item.type === "embed") {
-        goEmbed(item, path);
-      } else {
-        goText(item.name, path);
-      }
-    });
+    const a = tr.querySelector("a");
+    if (item.type === "link") {
+      a.href = item.href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      // No preventDefault — let the browser open the external link in a new tab.
+    } else {
+      a.addEventListener("click", e => {
+        e.preventDefault();
+        if (item.type === "dir") {
+          const child = path === "/" ? "/" + item.name + "/" : path + item.name + "/";
+          goDir(child);
+        } else if (item.type === "post") {
+          const meta = POST_BY_FILE[item.file] || { f: item.file, t: item.name, d: item.date, desc: item.desc };
+          goPost(meta, path);
+        } else if (item.type === "embed") {
+          goEmbed(item, path);
+        } else {
+          goText(item.name, path);
+        }
+      });
+    }
     tbody.appendChild(tr);
   });
 }
