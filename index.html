@@ -931,21 +931,7 @@ that isn't getting covered: reach out.
 
 If it's sensitive, use Signal. I protect sources.`,
 
-"robots.txt": `User-agent: *
-Disallow: /private/
-Disallow: /drafts/
-
-# Nashville city officials: hello.
-# You have 7 business days to respond to a public
-# records request. The statute is clear. I have a calendar.
-
-# Surveillance vendors: you are not welcome here.
-
-# If you are a Metro staffer reading this on a work
-# device and something is wrong: scores.patch.points@proton.me
-# Signal: signal.me/#eu/0sH-qog826fh91_3ZkY3XycscZO93L8T2Bbf2kZ
-
-Sitemap: https://mikelacy.site/sitemap.xml`,
+// robots.txt is fetched live from ./robots.txt at render time — see openText().
 
 };
 
@@ -1280,8 +1266,19 @@ function openText(name, fromP) {
         });
       })
       .catch(() => { body.textContent = "[README.md could not be loaded]"; });
+  } else if (name === "robots.txt") {
+    // Fetch the real robots.txt from the site root so the viewer can't drift
+    // from what crawlers actually see.
+    body.innerHTML = '<p class="loading">Loading…</p>';
+    fetch("./robots.txt", { cache: "no-cache" })
+      .then(r => r.ok ? r.text() : Promise.reject(r.status))
+      .then(txt => {
+        const esc = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        body.innerHTML = "<pre>" + esc + "</pre>";
+      })
+      .catch(() => { body.textContent = "[robots.txt could not be loaded]"; });
   } else {
-    // Plain-text files (contact.txt, robots.txt) preserve whitespace.
+    // Plain-text files (contact.txt) preserve whitespace.
     body.innerHTML = "<pre>" + (files[name] || "[no content]") + "</pre>";
   }
 }
