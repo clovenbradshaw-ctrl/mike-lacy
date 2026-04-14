@@ -795,6 +795,19 @@ function sectionRow(label) {
 
 // ── /writing/ custom view ────────────────────────────────────────────────────
 
+// Parent-directory row, styled consistently with the w-row layout so every
+// directory listing shares the same visual rhythm as /writing/.
+function parentDirRow(onClick) {
+  const tr = document.createElement("tr");
+  tr.className = "w-row w-parent first-in-section";
+  tr.innerHTML =
+    `<td class="w-icon"><span class="w-thumb-fallback">📂</span></td>` +
+    `<td class="w-main"><a href="#">Parent Directory</a></td>` +
+    `<td class="w-date">—</td>`;
+  tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); onClick(); });
+  return tr;
+}
+
 function renderWriting() {
   show("listing");
   document.title = "Index of /writing/";
@@ -802,9 +815,7 @@ function renderWriting() {
   const tbody = document.getElementById("dir-body");
   tbody.innerHTML = "";
 
-  const up = mkrow("📂", "Parent Directory", "", "—", "");
-  up.querySelector("a").addEventListener("click", e => { e.preventDefault(); goDir("/"); });
-  tbody.appendChild(up);
+  tbody.appendChild(parentDirRow(() => goDir("/")));
 
   const tierNames = {
     1: "TIER 1 — POSTS THAT CHANGED NASHVILLE POLICY",
@@ -870,19 +881,33 @@ function render(path) {
   const tbody = document.getElementById("dir-body");
   tbody.innerHTML = "";
 
+  const escape = s => String(s).replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+
   const parent = parentOf(path);
-  if (parent !== null) {
-    const tr = mkrow("📂", "Parent Directory", "", "—", "");
-    tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); goDir(parent); });
-    tbody.appendChild(tr);
+  const hasParent = parent !== null;
+  if (hasParent) {
+    tbody.appendChild(parentDirRow(() => goDir(parent)));
   }
 
-  entries.forEach(item => {
-    const icon = item.type === "dir" ? "📁" : item.type === "embed" ? "🧰" : item.type === "link" ? "🔗" : "📄";
+  entries.forEach((item, i) => {
+    const iconChar = item.type === "dir"   ? "📁"
+                   : item.type === "embed" ? "🧰"
+                   : item.type === "link"  ? "🔗"
+                   :                          "📄";
     const displayName = item.type === "dir" ? item.name + "/" : item.name;
-    const tr = mkrow(icon, displayName, item.date, item.size, item.desc);
+    const external = item.type === "link";
+
+    const tr = document.createElement("tr");
+    tr.className = "w-row" + (!hasParent && i === 0 ? " first-in-section" : "");
+    tr.innerHTML =
+      `<td class="w-icon"><span class="w-thumb-fallback">${iconChar}</span></td>` +
+      `<td class="w-main"><a href="#">${escape(displayName)}</a></td>` +
+      `<td class="w-date">${escape(item.date || "")}</td>`;
+
     const a = tr.querySelector("a");
-    if (item.type === "link") {
+    if (external) {
       a.href = item.href;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
@@ -904,6 +929,13 @@ function render(path) {
       });
     }
     tbody.appendChild(tr);
+
+    if (item.desc) {
+      const dr = document.createElement("tr");
+      dr.className = "w-desc";
+      dr.innerHTML = `<td colspan="3">${escape(item.desc)}</td>`;
+      tbody.appendChild(dr);
+    }
   });
 }
 
