@@ -115,6 +115,24 @@ td.w-desc {
   vertical-align: top;
 }
 tr.w-row.first-in-section td.w-desc { border-top: none; }
+/* Faint row-hover background: grayscale, matches page bg family — no accent,
+   no link color shift. Purely tactile cue that rows are clickable targets. */
+tr.w-row:hover td { background: #f4f2ec; }
+/* Jump-to-tier row at the top of /writing/. Plain text, underlined links —
+   reads like a server-side listing convention, not a designed element. */
+tr.w-jump td {
+  padding: 10px 0 4px;
+  font-size: 12px;
+  color: #555;
+}
+tr.w-jump a { color: #000; }
+/* Footer count line for /writing/. Same muted tone as the Apache address. */
+tr.w-count td {
+  padding: 14px 0 2px;
+  font-size: 12px;
+  color: #555;
+  border-top: 1px solid #000;
+}
 @media (min-width: 768px) {
   td.w-main a { font-size: 15px; }
   td.w-desc { font-size: 13px; }
@@ -831,14 +849,37 @@ function renderWriting() {
     { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
   ));
 
+  // Pre-group posts by tier so we can both (a) render counts in the section
+  // headers and (b) build the jump-to row without iterating twice.
+  const postsByTier = { 1:[], 2:[], 3:[], 4:[] };
+  POSTS.forEach(p => { if (postsByTier[p.tier]) postsByTier[p.tier].push(p); });
+  [1,2,3,4].forEach(t => postsByTier[t].sort((a,b) => b.d.localeCompare(a.d)));
+
+  // Jump-to-tier row. Plain text + underlined links. Click handler does
+  // scrollIntoView instead of setting location.hash, because the app's hash
+  // router would interpret "#t1" as a path and bounce us back to "/".
+  const jump = document.createElement("tr");
+  jump.className = "w-jump";
+  jump.innerHTML =
+    `<td colspan="4">Jump to: ` +
+    [1,2,3,4].map(t => `<a href="#t${t}" data-tier="${t}">tier${t}</a>`).join(" / ") +
+    `</td>`;
+  jump.querySelectorAll("a[data-tier]").forEach(a => {
+    a.addEventListener("click", e => {
+      e.preventDefault();
+      const el = document.getElementById("t" + a.dataset.tier);
+      if (el) el.scrollIntoView({ block: "start" });
+    });
+  });
+  tbody.appendChild(jump);
+
   [1,2,3,4].forEach((tier, tierIdx) => {
+    const posts = postsByTier[tier];
     const sec = document.createElement("tr");
     sec.className = "w-section" + (tierIdx === 0 ? " first" : "");
-    sec.innerHTML = `<td colspan="4">${tierNames[tier]}</td>`;
+    sec.id = "t" + tier;
+    sec.innerHTML = `<td colspan="4">${tierNames[tier]}  (${posts.length})</td>`;
     tbody.appendChild(sec);
-
-    const posts = POSTS.filter(p => p.tier === tier)
-      .sort((a,b) => b.d.localeCompare(a.d));
 
     posts.forEach((p, i) => {
       const thumb = thumbUrl(p.f);
@@ -846,8 +887,13 @@ function renderWriting() {
         ? `<img class="w-thumb" src="${thumb}" alt="" loading="lazy" decoding="async">`
         : `<span class="w-thumb-fallback">📄</span>`;
 
+      // Row anchor id derived from post filename's slug portion. Invisible
+      // unless someone deep-links with "#p-<slug>"; no router impact because
+      // the hash router only matches "/writing/<file>" shapes.
+      const slug = p.f.replace(/^\d+\./, "").replace(/\.html$/, "");
       const tr = document.createElement("tr");
       tr.className = "w-row" + (i === 0 ? " first-in-section" : "");
+      tr.id = "p-" + slug;
       tr.innerHTML =
         `<td class="w-icon">${icon}</td>` +
         `<td class="w-main"><a href="#">${escape(p.t)}</a></td>` +
@@ -860,6 +906,14 @@ function renderWriting() {
       tbody.appendChild(tr);
     });
   });
+
+  // Footer count line. Reads like something an index generator would print.
+  const lastUpdated = POSTS.reduce((a, p) => p.d > a ? p.d : a, "");
+  const count = document.createElement("tr");
+  count.className = "w-count";
+  count.innerHTML =
+    `<td colspan="4">/writing/ — ${POSTS.length} entries, last updated ${lastUpdated}</td>`;
+  tbody.appendChild(count);
 }
 
 // ── generic directory render ─────────────────────────────────────────────────
