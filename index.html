@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Index of /</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -363,11 +366,62 @@ let htmlPages = [];
 let htmlPage = 0;
 
 // history management — so the browser back/forward buttons navigate the reader
+// Hash-encode the state into the URL so reload + direct linking work.
+function hashOf(s) {
+  if (!s) return '';
+  if (s.view === 'dir')   return '#' + (s.path || '/');
+  if (s.view === 'post')  return '#' + (s.fromP || '/writing/') + s.file;
+  if (s.view === 'text')  return '#' + (s.fromP || '/') + s.name;
+  if (s.view === 'embed') return '#' + (s.fromP || '/projects/') + s.name;
+  return '';
+}
+let suppressHashChange = false;
 function pushNav(state, replace) {
+  const h = hashOf(state);
   try {
-    if (replace) history.replaceState(state, '', '');
-    else history.pushState(state, '', '');
+    suppressHashChange = true;
+    if (replace) history.replaceState(state, '', h || location.pathname + location.search);
+    else history.pushState(state, '', h || location.pathname + location.search);
   } catch (_) { /* ignore — file:// can reject */ }
+  // Release suppression on next tick (hashchange fires async after URL mutation).
+  setTimeout(() => { suppressHashChange = false; }, 0);
+}
+// Decode a URL hash like "#/writing/FILE.html" back into a view state.
+function stateFromHash(h) {
+  if (!h || h === '#' || h === '#/') return { view:'dir', path:'/' };
+  let path = h.startsWith('#') ? h.slice(1) : h;
+  try { path = decodeURIComponent(path); } catch (_) { /* keep raw */ }
+  if (!path.startsWith('/')) path = '/' + path;
+
+  // Directory: trailing slash.
+  if (path.endsWith('/')) {
+    if (dirs[path] || path === '/writing/') return { view:'dir', path };
+    return { view:'dir', path:'/' };
+  }
+
+  // Split into parent directory + leaf.
+  const slash = path.lastIndexOf('/');
+  const fromP = path.slice(0, slash + 1);
+  const leaf  = path.slice(slash + 1);
+
+  // Post under /writing/ — leaf is the post filename.
+  if (fromP === '/writing/' && POST_BY_FILE[leaf]) {
+    return { view:'post', file:leaf, fromP };
+  }
+  // Entry under any known dir — could be post, embed, or directory.
+  const entries = dirs[fromP] || [];
+  const entry = entries.find(e => e.name === leaf || (e.file && e.file === leaf));
+  if (entry) {
+    if (entry.type === 'post')  return { view:'post',  file:entry.file, fromP };
+    if (entry.type === 'embed') return { view:'embed', name:entry.name, src:entry.src, date:entry.date, desc:entry.desc, fromP };
+    if (entry.type === 'file')  return { view:'text',  name:entry.name, fromP };
+    if (entry.type === 'dir')   return { view:'dir',   path:fromP + entry.name + '/' };
+  }
+  // Text file at root by bare name.
+  if (fromP === '/' && files.hasOwnProperty(leaf)) {
+    return { view:'text', name:leaf, fromP:'/' };
+  }
+  return { view:'dir', path:'/' };
 }
 function restoreFromState(s) {
   if (!s) { render('/', true); return; }
@@ -383,7 +437,15 @@ function restoreFromState(s) {
   }
   render('/', true);
 }
-window.addEventListener('popstate', e => restoreFromState(e.state));
+window.addEventListener('popstate', e => {
+  // If popstate carries our saved state, use it; otherwise derive from hash.
+  if (e.state && e.state.view) restoreFromState(e.state);
+  else restoreFromState(stateFromHash(location.hash));
+});
+window.addEventListener('hashchange', () => {
+  if (suppressHashChange) return;
+  restoreFromState(stateFromHash(location.hash));
+});
 
 function parentOf(path) {
   if (path === "/") return null;
@@ -634,14 +696,22 @@ document.getElementById('v-next').addEventListener('click', e => {
   e.preventDefault(); if (htmlPages.length) renderHtmlPage(htmlPage + 1);
 });
 
-// Initial load: if we already have a state (e.g. restored tab), honour it;
-// otherwise seed history with a root entry so popstate always has something to pop to.
-if (history.state && history.state.view) {
-  restoreFromState(history.state);
-} else {
+// Initial load: URL hash wins (so shared/bookmarked links resolve correctly),
+// then saved history.state, then default to root.
+(function init() {
+  if (location.hash && location.hash.length > 1) {
+    const s = stateFromHash(location.hash);
+    pushNav(s, true);
+    restoreFromState(s);
+    return;
+  }
+  if (history.state && history.state.view) {
+    restoreFromState(history.state);
+    return;
+  }
   pushNav({ view: 'dir', path: '/' }, true);
   render('/');
-}
+})();
 </script>
 </body>
 </html>
