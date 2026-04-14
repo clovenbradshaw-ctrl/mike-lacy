@@ -39,44 +39,17 @@ body {
 h1 { font-size: 16px; font-weight: 600; margin-bottom: 2px; letter-spacing: -0.01em; }
 hr { border: none; border-top: 1px solid #bbb; margin: 6px 0 10px; }
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-/* Fixed columns so long titles can't collapse the Description column into a
-   slender ribbon. File-explorer style: Name takes the lion's share, Created
-   is a tight tabular column, Description gets room to breathe. */
+/* Three columns — icon, name, date. The page body is capped at 480px so a
+   dedicated Description column always ends up starved. Instead, descriptions
+   render on a second row under each post with an inline "Description:" label
+   so the text starts on the same line as the word, and gets the full row
+   width to breathe. */
 col.c-icon { width: 28px; }
-col.c-name { width: 30%; }
+col.c-name { width: auto; }
 col.c-date { width: 108px; }
-col.c-desc { width: auto; }
-/* Tablet: pull the name column in a touch so Description stays the widest. */
-@media (max-width: 1023px) {
-  col.c-name { width: 34%; }
-  col.c-date { width: 96px; }
-}
-/* Mobile: a fixed-column Apache index in 390px starves both Name and
-   Description. Drop the Description column; the JS moves it to a second
-   row underneath so blurbs stay full-width and legible.
-   Note: colspan=4 on the desc-row td gives it full-width already — we
-   deliberately DO NOT use display:block here, because a display:block
-   cell inside a display:table-row renders inconsistently across browsers
-   and was causing the date in the row above to read as if it ran straight
-   into the description below. Keeping the cell as a normal table-cell
-   with clear vertical padding and a left indent that aligns it with the
-   title text (not the icon) fixes the run-on. */
 @media (max-width: 639px) {
   col.c-icon { width: 22px; }
-  col.c-name { width: auto; }
   col.c-date { width: 88px; }
-  td.w-desc, th.desc { display: none; }
-  tr.w-desc-row td {
-    padding: 8px 0 12px 30px;
-    color: #666;
-    font-size: 13px;
-    line-height: 1.5;
-    border-top: none;
-  }
-}
-/* Outside mobile, the fallback desc-row is hidden (we use the column). */
-@media (min-width: 640px) {
-  tr.w-desc-row { display: none; }
 }
 th {
   text-align: left; padding: 2px 10px 3px 0;
@@ -87,9 +60,6 @@ th {
   color: #666;
 }
 th.date { text-align: right; padding-right: 20px; }
-/* Pull the Description header in by the same 20px the cells below use so
-   "DESCRIPTION" sits over the actual left edge of the description text. */
-th.desc { padding-left: 20px; }
 td { padding: 2px 6px 2px 0; vertical-align: top; word-break: break-word; }
 td a { word-break: break-word; overflow-wrap: anywhere; }
 /* Size column is a vestige of the original Apache-style header; hide it
@@ -132,26 +102,30 @@ td.w-date {
   color: #888;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  /* Generous right padding so the right-aligned date can never visually
-     butt up against the left edge of the Description column, even at the
-     tablet breakpoint where the date column narrows to 96px. */
-  padding-right: 20px;
+  padding-right: 0;
   text-align: right;
 }
-td.w-desc {
+/* Description row — full-width under each post, with an inline "Description:"
+   label so the text starts on the same line as the word. No border-top so it
+   visually belongs to the row above rather than to the next post. */
+tr.w-desc-row td {
   color: #666;
   font-size: 13px;
   line-height: 1.5;
-  /* 20px left padding pairs with the 20px right padding on w-date to give
-     an unmistakable ~40px gap between the date and the description — no
-     ambiguity about where one column ends and the next begins. */
-  padding: 12px 0 11px 20px;
-  border-top: 1px dotted #ccc;
+  padding: 0 0 12px 30px;
+  border-top: none;
   vertical-align: top;
   word-break: normal;
   overflow-wrap: anywhere;
 }
-tr.w-row.first-in-section td.w-desc { border-top: none; }
+tr.w-desc-row .w-desc-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+  color: #666;
+  margin-right: 6px;
+}
 /* Parent Directory: navigation, not content. Mute it so it doesn't compete
    with tier labels or post titles for attention. */
 tr.w-parent td { color: #aaa; }
@@ -172,7 +146,6 @@ tr.w-count td {
 }
 @media (min-width: 768px) {
   td.w-main a { font-size: 15px; }
-  td.w-desc { font-size: 13px; }
 }
 
 #breadcrumb {
@@ -764,12 +737,10 @@ tr.w-count td {
       <col class="c-icon">
       <col class="c-name">
       <col class="c-date">
-      <col class="c-desc">
     </colgroup>
     <thead><tr>
       <th colspan="2">Name</th>
       <th class="date">Created</th>
-      <th class="desc">Description</th>
     </tr></thead>
     <tbody id="dir-body"></tbody>
   </table>
@@ -874,7 +845,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-14h";
+const BUILD_TAG = "2026-04-14i";
 const SERVER_SIG = "Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443 · build " + BUILD_TAG;
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("address.server-sig").forEach(el => {
@@ -1069,8 +1040,7 @@ function parentDirRow(onClick) {
   tr.innerHTML =
     `<td></td>` +
     `<td class="w-main"><a href="#">Parent Directory</a></td>` +
-    `<td class="w-date">—</td>` +
-    `<td class="w-desc">—</td>`;
+    `<td class="w-date">—</td>`;
   tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); onClick(); });
   return tr;
 }
@@ -1106,7 +1076,7 @@ function renderWriting() {
     const sec = document.createElement("tr");
     sec.className = "w-section" + (tierIdx === 0 ? " first" : "");
     sec.id = "t" + tier;
-    sec.innerHTML = `<td colspan="4">${tierNames[tier]}</td>`;
+    sec.innerHTML = `<td colspan="3">${tierNames[tier]}</td>`;
     tbody.appendChild(sec);
 
     posts.forEach((p, i) => {
@@ -1120,20 +1090,18 @@ function renderWriting() {
       tr.innerHTML =
         `<td></td>` +
         `<td class="w-main"><a href="#">${escape(p.t)}</a></td>` +
-        `<td class="w-date">${p.d}</td>` +
-        `<td class="w-desc">${p.desc ? escape(p.desc) : ''}</td>`;
+        `<td class="w-date">${p.d}</td>`;
       const open = () => goPost(p, "/writing/");
       tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); open(); });
-      tr.querySelector("td.w-desc").style.cursor = "pointer";
-      tr.querySelector("td.w-desc").addEventListener("click", open);
       tbody.appendChild(tr);
-      // Mobile fallback: when the Description column is hidden via media query,
-      // this second row drops the blurb full-width beneath the title so it
-      // stays legible on narrow viewports. Hidden on desktop by CSS.
+      // Description sits on its own full-width row under the post, prefixed
+      // with an inline "Description:" label so the text starts on the same
+      // line as the word. Clicking anywhere on the row opens the post.
       if (p.desc) {
         const dtr = document.createElement("tr");
         dtr.className = "w-desc-row";
-        dtr.innerHTML = `<td colspan="4">${escape(p.desc)}</td>`;
+        dtr.innerHTML =
+          `<td colspan="3"><span class="w-desc-label">Description:</span>${escape(p.desc)}</td>`;
         dtr.style.cursor = "pointer";
         dtr.addEventListener("click", open);
         tbody.appendChild(dtr);
@@ -1146,7 +1114,7 @@ function renderWriting() {
   const count = document.createElement("tr");
   count.className = "w-count";
   count.innerHTML =
-    `<td colspan="4">/writing/ — ${POSTS.length} entries, last updated ${lastUpdated}</td>`;
+    `<td colspan="3">/writing/ — ${POSTS.length} entries, last updated ${lastUpdated}</td>`;
   tbody.appendChild(count);
 }
 
@@ -1189,8 +1157,7 @@ function render(path) {
     tr.innerHTML =
       `<td class="w-icon"><span class="w-thumb-fallback">${iconChar}</span></td>` +
       `<td class="w-main"><a href="#">${escape(displayName)}</a></td>` +
-      `<td class="w-date">${escape(item.date || "")}</td>` +
-      `<td class="w-desc">${item.desc ? escape(item.desc) : ''}</td>`;
+      `<td class="w-date">${escape(item.date || "")}</td>`;
 
     const a = tr.querySelector("a");
     const activate = () => {
@@ -1213,19 +1180,19 @@ function render(path) {
       // No preventDefault — let the browser open the external link in a new tab.
     } else {
       a.addEventListener("click", e => { e.preventDefault(); activate(); });
-      tr.querySelector("td.w-desc").style.cursor = "pointer";
-      tr.querySelector("td.w-desc").addEventListener("click", activate);
     }
     tbody.appendChild(tr);
-    // Mobile fallback row (hidden on desktop via media query).
+    // Description row — full width under each entry, with an inline label
+    // so the text starts on the same line as the word "Description".
     if (item.desc) {
       const dtr = document.createElement("tr");
       dtr.className = "w-desc-row";
-      dtr.innerHTML = `<td colspan="4">${escape(item.desc)}</td>`;
+      const labelled = `<span class="w-desc-label">Description:</span>${escape(item.desc)}`;
       if (external) {
         dtr.innerHTML =
-          `<td colspan="4"><a href="${item.href}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">${escape(item.desc)}</a></td>`;
+          `<td colspan="3"><a href="${item.href}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">${labelled}</a></td>`;
       } else {
+        dtr.innerHTML = `<td colspan="3">${labelled}</td>`;
         dtr.style.cursor = "pointer";
         dtr.addEventListener("click", activate);
       }
