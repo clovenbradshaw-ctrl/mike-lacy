@@ -13,7 +13,7 @@
 html, body { overflow-x: hidden; }
 html { height: 100%; }
 body {
-  font-family: monospace;
+  font-family: sans-serif;
   font-size: 13px;
   color: #000;
   background: #fff;
@@ -81,14 +81,14 @@ address {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
-  font-family: monospace;
+  font-family: sans-serif;
   font-size: 13px;
   line-height: 1.6;
   color: #000;
 }
 
 #content-window p {
-  font-family: serif;
+  font-family: sans-serif;
   font-size: 16px; line-height: 1.6; margin-bottom: 1em; color: #000;
   word-wrap: break-word; overflow-wrap: break-word;
 }
@@ -100,7 +100,7 @@ address {
 }
 #content-window blockquote p { font-style: italic; }
 #content-window h1, #content-window h2, #content-window h3, #content-window h4 {
-  font-family: serif; font-weight: bold;
+  font-family: sans-serif; font-weight: bold;
   margin: 1.3em 0 .4em; line-height: 1.3; color: #000;
 }
 #content-window h1 { font-size: 20px; }
@@ -109,22 +109,22 @@ address {
 #content-window figure { margin: 1.4em 0; max-width: 100%; }
 #content-window img { max-width: 100%; height: auto; display: block; }
 #content-window figcaption {
-  font-family: monospace; font-size: 11px; color: #555; margin-top: 4px;
+  font-family: sans-serif; font-size: 11px; color: #555; margin-top: 4px;
 }
 #content-window ul, #content-window ol {
-  font-family: serif; font-size: 16px;
+  font-family: sans-serif; font-size: 16px;
   line-height: 1.6; margin: 0 0 1em 1.3em;
 }
 #content-window li { margin-bottom: 0.35em; word-wrap: break-word; overflow-wrap: break-word; }
 #content-window pre {
-  font-family: monospace; font-size: 12.5px;
+  font-family: sans-serif; font-size: 12.5px;
   background: #f4f4f4; border: 1px solid #ddd;
   padding: 10px 12px; overflow-x: auto; margin: 1em 0;
   white-space: pre-wrap;
   word-break: break-word;
 }
 #content-window code {
-  font-family: monospace; font-size: 12.5px;
+  font-family: sans-serif; font-size: 12.5px;
   background: #f4f4f4; padding: 0 3px;
   word-break: break-word;
 }
@@ -150,7 +150,7 @@ address {
 }
 #content-window .subscription-widget .preamble { margin-bottom: 10px; }
 #content-window .subscription-widget .cta-caption {
-  font-family: serif;
+  font-family: sans-serif;
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
@@ -166,7 +166,7 @@ address {
 #content-window .subscription-widget-subscribe .email-input {
   flex: 1 1 220px;
   min-width: 0;
-  font-family: monospace;
+  font-family: sans-serif;
   font-size: 13px;
   padding: 6px 8px;
   border: 1px solid #999;
@@ -177,7 +177,7 @@ address {
 #content-window .subscription-widget-subscribe .button.primary,
 #content-window .button.primary {
   display: inline-block;
-  font-family: monospace;
+  font-family: sans-serif;
   font-size: 13px;
   font-weight: bold;
   padding: 6px 14px;
@@ -196,7 +196,7 @@ address {
 
 /* Pullquotes */
 #content-window .pullquote {
-  font-family: serif;
+  font-family: sans-serif;
   border-left: 2px solid #999;
   margin: 1.4em 0;
   padding: 0 14px;
@@ -217,7 +217,7 @@ address {
 
 /* Image captions improved */
 #content-window .image-caption {
-  font-family: monospace;
+  font-family: sans-serif;
   font-size: 11px;
   color: #555;
   margin-top: 4px;
@@ -252,6 +252,77 @@ address {
 /* Native video placeholder (shows nothing meaningful without JS) */
 #content-window .native-video-embed:empty { display: none; }
 
+/* File-embed widget (PDF / attachment download cards) */
+#content-window .file-embed-wrapper { margin: 1.4em 0; }
+#content-window .file-embed-container-reader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #999;
+  background: #fafafa;
+  padding: 12px 14px;
+  border-radius: 4px;
+}
+#content-window .file-embed-container-top {
+  display: contents; /* let children participate in the flex row directly */
+}
+#content-window .file-embed-thumbnail-default {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+#content-window .file-embed-details {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#content-window .file-embed-details-h1 {
+  font-family: sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.3;
+  color: #000;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+#content-window .file-embed-details-h2 {
+  font-family: sans-serif;
+  font-size: 12px;
+  color: #555;
+}
+#content-window .file-embed-button {
+  flex: 0 0 auto;
+  display: inline-block;
+  font-family: sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 6px 14px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#content-window .file-embed-button-text { color: inherit; }
+/* Substack ships both wide+narrow buttons; show only one to avoid duplicates. */
+#content-window .file-embed-button.narrow { display: none; }
+@media (max-width: 520px) {
+  #content-window .file-embed-container-reader {
+    flex-wrap: wrap;
+  }
+  #content-window .file-embed-button.wide { display: none; }
+  #content-window .file-embed-button.narrow {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    margin-top: 4px;
+  }
+}
+
 @media (max-width: 520px) {
   #content-window .subscription-widget-subscribe .email-input { flex-basis: 100%; }
   #content-window .subscription-widget-subscribe .button.primary { flex: 1 1 100%; }
@@ -269,7 +340,25 @@ address {
   #content-window h1 { font-size: 24px; }
   #content-window h2 { font-size: 20px; }
   #content-window h3 { font-size: 17px; }
-  #text-window pre { font-size: 14px; }
+  #text-window pre { font-size: 14px; max-width: 80ch; }
+
+  /* Cap reading-text blocks at ~80 characters wide for comfortable line length. */
+  #content-window p,
+  #content-window ul,
+  #content-window ol,
+  #content-window blockquote,
+  #content-window h1,
+  #content-window h2,
+  #content-window h3,
+  #content-window h4,
+  #content-window pre,
+  #content-window .pullquote,
+  #content-window .subscription-widget-wrap,
+  #content-window .subscription-widget-wrap-editor,
+  #content-window .file-embed-wrapper,
+  #content-window .button-wrapper {
+    max-width: 80ch;
+  }
 }
 </style>
 </head>
