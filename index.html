@@ -52,6 +52,72 @@ address {
   color: #000;
 }
 
+/* ── /writing/ structured rows ──────────────────────────────────────────────
+   Still an Apache-style index — just with breathing room so the title reads
+   as the primary line and the description sits beneath it as metadata. */
+.w-section td {
+  padding: 22px 0 4px;
+  border-top: 1px solid #000;
+  font-weight: bold;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: #000;
+}
+.w-section.first td { border-top: none; padding-top: 10px; }
+tr.w-row td {
+  padding: 10px 0 2px;
+  border-top: 1px dotted #ccc;
+  vertical-align: top;
+}
+tr.w-row.first-in-section td { border-top: none; }
+td.w-icon {
+  width: 44px;
+  padding-right: 8px;
+}
+td.w-icon .w-thumb,
+td.w-icon .w-thumb-fallback {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border: 1px solid #999;
+  background: #eee;
+}
+td.w-icon .w-thumb-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #777;
+  background: #f4f4f4;
+}
+td.w-main { padding-right: 8px; }
+td.w-main a {
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #000;
+  text-decoration: underline;
+}
+td.w-date {
+  white-space: nowrap;
+  color: #555;
+  font-size: 12px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+tr.w-desc td {
+  padding: 2px 0 10px 52px;
+  border-top: none;
+  color: #555;
+  font-size: 12px;
+  line-height: 1.45;
+}
+@media (min-width: 768px) {
+  td.w-main a { font-size: 15px; }
+  tr.w-desc td { font-size: 13px; }
+}
+
 #breadcrumb {
   font-size: 12px;
   margin-bottom: 10px;
@@ -449,35 +515,72 @@ const POSTS = [
 
 const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 
+// First image from each post HTML (extracted from posts/*.html). Rendered as a
+// small uniform-shape thumbnail in /writing/. Sent through Substack's CDN
+// resizer so we're not pulling the full-size originals into the index.
+const POST_THUMB = {
+  "144351154.i-kept-waiting-for-the-city-to-release.html":   "https://substack-post-media.s3.amazonaws.com/public/images/55372f25-8e68-4e44-9b8b-d8299405612f_2140x1616.png",
+  "144803108.strings-attached-the-history-of-the.html":      "https://substack-post-media.s3.amazonaws.com/public/images/451fc68b-cd2c-4884-8ff3-e3663ecbcdf8_1024x1024.png",
+  "155251807.the-mlk-they-want-us-to-forget.html":           "https://substack-post-media.s3.amazonaws.com/public/images/628b9e58-ec15-45ae-bb6a-70bca7e02e68_1125x807.jpeg",
+  "158662808.downtown-nashvilles-self-made-privacy.html":    "https://substack-post-media.s3.amazonaws.com/public/images/d4859e43-c14a-40fd-8313-fb22dd91025f_1920x1080.png",
+  "163865780.housing-last-the-rodeway-to-nowhere.html":      "https://substack-post-media.s3.amazonaws.com/public/images/391eb2fa-f39a-40fc-8a9d-c4522e15689d_2000x1549.jpeg",
+  "167746148.why-we-have-to-talk-about-what-nashville.html": "https://substack-post-media.s3.amazonaws.com/public/images/584fa3c9-a59e-48fe-84a1-cfb8331bd89b_1154x776.webp",
+  "170694573.the-center-will-always-fold.html":              "https://substack-post-media.s3.amazonaws.com/public/images/94e1d284-3208-48e1-ad9c-bcc215d9ce73_2048x1036.png",
+  "171344469.they-only-discovered-the-problem.html":         "https://substack-post-media.s3.amazonaws.com/public/images/93d5654d-e280-4668-84fa-bb3159a9c6de_1920x1080.png",
+  "173677465.how-to-escape-tyranny-and-make-new.html":       "https://substack-post-media.s3.amazonaws.com/public/images/ae7ee584-d0a2-460d-b1ec-b39009dc42ce_3580x2152.png",
+  "174451008.metro-will-audit-the-office-of-homeless.html":  "https://substack-post-media.s3.amazonaws.com/public/images/04f1b77f-31ca-464a-93b1-12d5f0870657_996x1538.png",
+  "175051724.who-is-larry-ellison-and-what-does.html":       "https://substack-post-media.s3.amazonaws.com/public/images/a8d0d7d5-c6b8-4e3c-8e4a-ce87a72773a5_1456x1528.png",
+  "178456949.null_results-text-messages-reveal.html":        "https://substack-post-media.s3.amazonaws.com/public/images/ce09c208-8103-45de-a1c8-e0afb1698221_1920x1080.jpeg",
+  "178549584.i-cannot-compromise-my-integrity.html":         "https://substack-post-media.s3.amazonaws.com/public/images/8d745fa2-5a98-4144-87e0-963f04734a14_2890x1606.png",
+  "179891086.no-means-no-freddie-the-mayors-office.html":    "https://substack-post-media.s3.amazonaws.com/public/images/85346422-1718-4428-9948-4d53710893ed_500x500.png",
+  "179971483.from-the-makers-of-fusus-literally.html":       "https://substack-post-media.s3.amazonaws.com/public/images/56b45b6c-b0c8-49d1-a2cf-6eec4765b885_1920x1080.png",
+  "180083598.misinformation-or-inconvenient-truth.html":     "https://substack-post-media.s3.amazonaws.com/public/images/6c99407c-7d1c-45f4-9d6a-f49a3fd3bc1f_1024x319.png",
+  "181860842.the-peoples-house-how-nashville-metro.html":    "https://substack-post-media.s3.amazonaws.com/public/images/59ae61d4-f8d0-4738-a8a5-25bb778f6248_3102x1614.png",
+  "183810155.breaking-the-mayors-official-coordinating.html":"https://substack-post-media.s3.amazonaws.com/public/images/c2287453-4a8c-494b-b58a-1d1154e13c9e_1032x1654.png",
+  "185390870.there-is-no-one-else-coming.html":              "https://substack-post-media.s3.amazonaws.com/public/images/5fabaeda-af98-4029-9621-e2989157dc86_600x722.png",
+  "186553419.nashvilles-january-eviction-filings.html":      "https://substack-post-media.s3.amazonaws.com/public/images/4aa1feaf-2a8b-4e27-87d9-8531ea25fa69_2462x1182.png",
+  "188017123.nashville-eviction-tracker-open-source.html":   "https://substack-post-media.s3.amazonaws.com/public/images/2375f306-1e03-48e4-b5bd-5773eae7d8ed_2642x1392.png",
+  "189078200.the-great-correction-nyc-comedian.html":        "https://substack-post-media.s3.amazonaws.com/public/images/9e387b41-3cb7-4673-8db7-156954525a00_2040x1856.png",
+  "192747263.nashvilles-unauthorized-secret-police.html":    "https://substack-post-media.s3.amazonaws.com/public/images/0571bf65-1392-4f81-8623-b3d8a1402538_1920x1080.png",
+  "193411754.we-built-the-surveillance-app-nashvilles.html": "https://substack-post-media.s3.amazonaws.com/public/images/6105d9d2-6bff-434f-b7dc-e1bd3e0eaf7b_1000x1956.png",
+};
+function thumbUrl(file) {
+  const raw = POST_THUMB[file];
+  if (!raw) return null;
+  // Substack's CDN fetcher: square crop, cheap & consistent across originals.
+  return "https://substackcdn.com/image/fetch/$s_!,w_96,h_96,c_fill,f_auto,q_auto:good/"
+    + encodeURIComponent(raw);
+}
+
 // ── virtual filesystem ───────────────────────────────────────────────────────
 
 const dirs = {
   "/": [
-    { type:"dir",  name:"writing",   date:"2026-04-14", desc:"{Rich Text} · 25 featured posts from posts/" },
-    { type:"dir",  name:"projects",  date:"2026-04-07", desc:"civic tech" },
-    { type:"dir",  name:"experiential-ontology", date:"2026-04-14", desc:"EO · get started · 9 entries ↗" },
-    { type:"file", name:"README",    date:"2026-04-14", desc:"start here" },
-    { type:"file", name:"contact.txt", date:"2026-04-14", desc:"" },
-    { type:"file", name:"robots.txt", date:"2026-01-20", desc:"" },
+    { type:"dir",  name:"writing",   date:"2026-04-14", desc:"25 featured investigations from {Rich Text} — surveillance, housing, money, and power in Nashville" },
+    { type:"dir",  name:"projects",  date:"2026-04-07", desc:"Civic-tech tools and open data — eviction tracker, invoice viewer, NaiBOR, and related work" },
+    { type:"dir",  name:"experiential-ontology", date:"2026-04-14", desc:"EO — a framework for thinking about ground, figure, and pattern. 9 entry points ↗" },
+    { type:"file", name:"README",    date:"2026-04-14", desc:"Who I am, what this site is, how to reach me — start here" },
+    { type:"file", name:"contact.txt", date:"2026-04-14", desc:"Email, Signal, Substack — tips welcome, sources protected" },
+    { type:"file", name:"robots.txt", date:"2026-01-20", desc:"Notes for crawlers, Metro staff, and surveillance vendors" },
   ],
   "/experiential-ontology/": [
-    { type:"link", name:"experiential-ontology-eo",     href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"Experiential Ontology (EO) ↗" },
-    { type:"link", name:"ground-figure-pattern",        href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"Ground / Figure / Pattern ↗" },
-    { type:"link", name:"eo-handbook",                  href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"EO Handbook ↗" },
-    { type:"link", name:"the-three-triads",             href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"The Three Triads ↗" },
-    { type:"link", name:"the-eo-capacity-ground",       href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"The EO capacity ground ↗" },
-    { type:"link", name:"the-triadic-minimum",          href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"The Triadic Minimum ↗" },
-    { type:"link", name:"bivalent-compression",         href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"Bivalent Compression and Dimensional Poverty ↗" },
-    { type:"link", name:"eo-lexical-analysis",          href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"EO Lexical Analysis: Cross-Linguistic Clause Classification Study ↗" },
-    { type:"link", name:"the-experience-engine",        href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"The Experience Engine ↗" },
+    { type:"link", name:"experiential-ontology-eo",     href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"Overview of Experiential Ontology (EO) — what it is and why it exists ↗" },
+    { type:"link", name:"ground-figure-pattern",        href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"The core move: distinguishing the ground you stand on, the figure in view, and the pattern that links them ↗" },
+    { type:"link", name:"eo-handbook",                  href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"Practitioner's handbook — working definitions and how to apply EO in practice ↗" },
+    { type:"link", name:"the-three-triads",             href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"The three triads EO uses to describe how experience is structured ↗" },
+    { type:"link", name:"the-eo-capacity-ground",       href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"On the \"capacity ground\" — the conditions that have to be true before a figure can appear ↗" },
+    { type:"link", name:"the-triadic-minimum",          href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"The minimum triad required for any coherent account of experience ↗" },
+    { type:"link", name:"bivalent-compression",         href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"How two-valued (true/false, us/them) thinking collapses richer structure — dimensional poverty ↗" },
+    { type:"link", name:"eo-lexical-analysis",          href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"Cross-linguistic clause classification study — testing EO's triads against natural-language grammar ↗" },
+    { type:"link", name:"the-experience-engine",        href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"A generative model of how experiences are assembled from ground, figure, and pattern ↗" },
   ],
   "/projects/": [
-    { type:"post", name:"eviction-tracker",       file:"188017123.nashville-eviction-tracker-open-source.html", date:"2026-02-15", desc:"open-source post · 2,243 lines of Python" },
-    { type:"post", name:"naibor",                 file:"193411754.we-built-the-surveillance-app-nashvilles.html", date:"2026-04-07", desc:"clovenbradshaw-ctrl.github.io/naibor" },
-    { type:"embed", name:"metro-invoice-viewer",  src:"https://clovenbradshaw-ctrl.github.io/53902028/",         date:"2025-10-27", desc:"OHS ARPA spending · BU 53902028 · 207 invoices · $3.06M · Aug'24–Oct'25" },
-    { type:"link",  name:"experiential-ontology", href:"https://experientialontology.org/",                      date:"2026-04-14", desc:"experientialontology.org ↗" },
-    { type:"link",  name:"metro-budget",           href:"https://sites.google.com/view/changelognashville",       date:"2026-04-14", desc:"changelog nashville · metro budget ↗" },
-    { type:"link",  name:"metro-arts-finances",    href:"https://sites.google.com/view/metro-arts-finances/home", date:"2026-04-14", desc:"metro arts finances ↗" },
+    { type:"post", name:"eviction-tracker",       file:"188017123.nashville-eviction-tracker-open-source.html", date:"2026-02-15", desc:"Open-source scraper + dashboard for every eviction detainer filed in Davidson County — 2,243 lines of Python, released so anyone can run it" },
+    { type:"post", name:"naibor",                 file:"193411754.we-built-the-surveillance-app-nashvilles.html", date:"2026-04-07", desc:"Civic-tech web app that turns Metro's own surveillance methods back on Metro officials — what they do with their time, who they meet, how they vote" },
+    { type:"embed", name:"metro-invoice-viewer",  src:"https://clovenbradshaw-ctrl.github.io/53902028/",         date:"2025-10-27", desc:"Searchable archive of every Office of Homeless Services ARPA invoice (BU 53902028) — 207 invoices, $3.06M, Aug '24 – Oct '25" },
+    { type:"link",  name:"experiential-ontology", href:"https://experientialontology.org/",                      date:"2026-04-14", desc:"Long-running philosophy project — a framework for ground/figure/pattern. External site ↗" },
+    { type:"link",  name:"metro-budget",           href:"https://sites.google.com/view/changelognashville",       date:"2026-04-14", desc:"Changelog Nashville — annotated reading of the Metro operating budget, line by line. External site ↗" },
+    { type:"link",  name:"metro-arts-finances",    href:"https://sites.google.com/view/metro-arts-finances/home", date:"2026-04-14", desc:"Open investigation into Metro Arts Commission spending — invoices, contracts, board records. External site ↗" },
   ],
 };
 
@@ -710,18 +813,44 @@ function renderWriting() {
     4: "TIER 4 — PHILOSOPHY, VOICE, IDENTITY",
   };
 
-  [1,2,3,4].forEach(tier => {
-    tbody.appendChild(sectionRow(tierNames[tier]));
-    POSTS.filter(p => p.tier === tier)
-      .sort((a,b) => b.d.localeCompare(a.d))
-      .forEach(p => {
-        const tr = mkrow("📄", p.t, p.d, "—", p.desc);
-        tr.querySelector("a").addEventListener("click", e => {
-          e.preventDefault();
-          goPost(p, "/writing/");
-        });
-        tbody.appendChild(tr);
+  const escape = s => s.replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+
+  [1,2,3,4].forEach((tier, tierIdx) => {
+    const sec = document.createElement("tr");
+    sec.className = "w-section" + (tierIdx === 0 ? " first" : "");
+    sec.innerHTML = `<td colspan="3">${tierNames[tier]}</td>`;
+    tbody.appendChild(sec);
+
+    const posts = POSTS.filter(p => p.tier === tier)
+      .sort((a,b) => b.d.localeCompare(a.d));
+
+    posts.forEach((p, i) => {
+      const thumb = thumbUrl(p.f);
+      const icon = thumb
+        ? `<img class="w-thumb" src="${thumb}" alt="" loading="lazy" decoding="async">`
+        : `<span class="w-thumb-fallback">📄</span>`;
+
+      const tr = document.createElement("tr");
+      tr.className = "w-row" + (i === 0 ? " first-in-section" : "");
+      tr.innerHTML =
+        `<td class="w-icon">${icon}</td>` +
+        `<td class="w-main"><a href="#">${escape(p.t)}</a></td>` +
+        `<td class="w-date">${p.d}</td>`;
+      tr.querySelector("a").addEventListener("click", e => {
+        e.preventDefault();
+        goPost(p, "/writing/");
       });
+      tbody.appendChild(tr);
+
+      if (p.desc) {
+        const dr = document.createElement("tr");
+        dr.className = "w-desc";
+        dr.innerHTML = `<td colspan="3">${escape(p.desc)}</td>`;
+        tbody.appendChild(dr);
+      }
+    });
   });
 }
 
