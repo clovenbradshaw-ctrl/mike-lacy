@@ -1,6 +1,6 @@
-# Featured Posts — Top 25
+# Featured Posts — Top 24
 
-A curated index of the 25 most important posts, mapped to files in `posts/`.
+A curated index of the 24 most important posts, mapped to files in `posts/`.
 Grouped by tier, ordered by rank.
 
 ## Tier 1 — Posts that changed Nashville policy or triggered official action
@@ -60,12 +60,10 @@ Grouped by tier, ordered by rank.
     — [`posts/170694573.the-center-will-always-fold.html`](posts/170694573.the-center-will-always-fold.html)
 22. **"The Great Correction" | My Convo w/ NYC Comedian Whitley Watson** (Feb 25, 2026)
     — [`posts/189078200.the-great-correction-nyc-comedian.html`](posts/189078200.the-great-correction-nyc-comedian.html)
-23. **Nashville Eviction Tracker: Open Source Code** (Feb 15, 2026)
-    — [`posts/188017123.nashville-eviction-tracker-open-source.html`](posts/188017123.nashville-eviction-tracker-open-source.html)
-24. **1 Minute to Demand Accountability: Email the Audit Committee Now** (Sep 22, 2025)
+23. **1 Minute to Demand Accountability: Email the Audit Committee Now** (Sep 22, 2025)
     — [`posts/174259144.one-email-today-could-change-everything.html`](posts/174259144.one-email-today-could-change-everything.html)
       (title drift from ranking list; verified as the Sep 22 audit-committee CTA)
-25. **The People's House: How Nashville Metro Council Is Starting To Reclaim Democratic Oversight** (Dec 17, 2025)
+24. **The People's House: How Nashville Metro Council Is Starting To Reclaim Democratic Oversight** (Dec 17, 2025)
     — [`posts/181860842.the-peoples-house-how-nashville-metro.html`](posts/181860842.the-peoples-house-how-nashville-metro.html)
 
 ---
@@ -77,4 +75,4 @@ Grouped by tier, ordered by rank.
 - **#16** — Two "Strings Attached" files existed; kept `144803108` (70KB body) over the 3.7KB stub.
 - **#19** — Both the original and the 2026 repost were in the archive; kept the original as primary.
 - **#20** — Slug `how-to-escape-tyranny-and-make-new` doesn't match the current title; Substack retained the original slug after the post was retitled to "Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick." Confirmed via <https://readrichtext.substack.com/p/how-to-escape-tyranny-and-make-new>.
-- **#24** — Slug is "one-email-today-could-change-everything"; content confirms it's the Sep 22 audit-committee CTA.
+- **#23** — Slug is "one-email-today-could-change-everything"; content confirms it's the Sep 22 audit-committee CTA.
