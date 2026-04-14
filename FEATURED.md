@@ -57,9 +57,9 @@ Grouped by tier, ordered by rank.
     — [`posts/155251807.the-mlk-they-want-us-to-forget.html`](posts/155251807.the-mlk-they-want-us-to-forget.html)
       (2026 repost: [`posts/184842377.the-mlk-they-want-us-to-forget-e14.html`](posts/184842377.the-mlk-they-want-us-to-forget-e14.html))
 20. **Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick** (Sep 16, 2025)
-    — **NOT PRESENT IN ARCHIVE.** Referenced only in the 2025 year-end recap
-      ([`posts/181954620.rich-text-2025-by-the-numbers-all.html`](posts/181954620.rich-text-2025-by-the-numbers-all.html)).
-      If it's on Substack it was excluded from this export — needs to be re-exported and added.
+    — [`posts/173677465.how-to-escape-tyranny-and-make-new.html`](posts/173677465.how-to-escape-tyranny-and-make-new.html)
+      (Substack slug `how-to-escape-tyranny-and-make-new` predates a later title change;
+      URL: <https://readrichtext.substack.com/p/how-to-escape-tyranny-and-make-new>)
 21. **The Center Will Always Fold** (Aug 12, 2025)
     — [`posts/170694573.the-center-will-always-fold.html`](posts/170694573.the-center-will-always-fold.html)
 22. **"The Great Correction" | My Convo w/ NYC Comedian Whitley Watson** (Feb 25, 2026)
@@ -81,5 +81,5 @@ Grouped by tier, ordered by rank.
 - **#13** — Three "Larry Ellison" files at 116KB / 150KB / 124KB. Selected the largest (`175051724`) as the canonical; the others appear to be an earlier draft and a `-c6c` variant (typically a Substack edit fork).
 - **#16** — Two "Strings Attached" files. Selected `144803108` (70KB body) over `144782471` (3.7KB stub).
 - **#19** — Both the original and the 2026 repost are in the archive; original is primary.
-- **#20** — Missing from the zip. Suggest exporting it from Substack and dropping into `posts/` with the same `{id}.{slug}.html` convention.
+- **#20** — File slug `how-to-escape-tyranny-and-make-new` doesn't match the current title; Substack retained the original slug after the post was retitled to "Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick." Confirmed via the public URL.
 - **#24** — Filename slug is "one-email-today-could-change-everything"; content confirms it's the Sep 22 audit-committee CTA described in the ranking.
