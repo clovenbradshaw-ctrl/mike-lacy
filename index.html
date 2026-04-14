@@ -362,6 +362,29 @@ Sitemap: https://mikelacy.site/sitemap.xml`,
 let htmlPages = [];
 let htmlPage = 0;
 
+// history management — so the browser back/forward buttons navigate the reader
+function pushNav(state, replace) {
+  try {
+    if (replace) history.replaceState(state, '', '');
+    else history.pushState(state, '', '');
+  } catch (_) { /* ignore — file:// can reject */ }
+}
+function restoreFromState(s) {
+  if (!s) { render('/', true); return; }
+  if (s.view === 'dir')   { render(s.path || '/', true); return; }
+  if (s.view === 'post')  {
+    const meta = POST_BY_FILE[s.file] || { f:s.file, t:s.file, d:'', desc:'' };
+    openPost(meta, s.fromP || '/writing/', true); return;
+  }
+  if (s.view === 'text')  { openText(s.name, s.fromP || '/', true); return; }
+  if (s.view === 'embed') {
+    openEmbed({ name:s.name, src:s.src, date:s.date, desc:s.desc }, s.fromP || '/', true);
+    return;
+  }
+  render('/', true);
+}
+window.addEventListener('popstate', e => restoreFromState(e.state));
+
 function parentOf(path) {
   if (path === "/") return null;
   const parts = path.replace(/\/$/, "").split("/");
@@ -370,9 +393,20 @@ function parentOf(path) {
 }
 
 function show(id) {
+  // Explicit "block" — the stylesheet has `display:none` on #viewer/#textviewer/#embedviewer,
+  // so we cannot just clear the inline style or the pane stays hidden.
   ["listing","viewer","textviewer","embedviewer"].forEach(x => {
-    document.getElementById(x).style.display = x === id ? "" : "none";
+    document.getElementById(x).style.display = x === id ? "block" : "none";
   });
+}
+
+// ── nav wrappers: push a history entry, then show the view ───────────────────
+function goDir(path)             { pushNav({view:'dir',   path}); render(path); }
+function goPost(meta, fromP)     { pushNav({view:'post',  file:meta.f, fromP}); openPost(meta, fromP); }
+function goText(name, fromP)     { pushNav({view:'text',  name, fromP}); openText(name, fromP); }
+function goEmbed(item, fromP)    {
+  pushNav({view:'embed', name:item.name, src:item.src, date:item.date, desc:item.desc, fromP});
+  openEmbed(item, fromP);
 }
 
 function renderBreadcrumb(path, filename) {
@@ -387,7 +421,7 @@ function renderBreadcrumb(path, filename) {
   if (filename) html += '<span class="sep">/</span><span class="cur">' + filename + '</span>';
   bc.innerHTML = html;
   bc.querySelectorAll('a[data-path]').forEach(a => {
-    a.addEventListener('click', e => { e.preventDefault(); render(a.dataset.path); });
+    a.addEventListener('click', e => { e.preventDefault(); goDir(a.dataset.path); });
   });
 }
 
@@ -419,7 +453,7 @@ function renderWriting() {
   tbody.innerHTML = "";
 
   const up = mkrow("📂", "Parent Directory", "", "—", "");
-  up.querySelector("a").addEventListener("click", e => { e.preventDefault(); render("/"); });
+  up.querySelector("a").addEventListener("click", e => { e.preventDefault(); goDir("/"); });
   tbody.appendChild(up);
 
   const tierNames = {
@@ -437,7 +471,7 @@ function renderWriting() {
         const tr = mkrow("📄", p.t, p.d, "—", p.desc);
         tr.querySelector("a").addEventListener("click", e => {
           e.preventDefault();
-          openPost(p, "/writing/");
+          goPost(p, "/writing/");
         });
         tbody.appendChild(tr);
       });
@@ -463,7 +497,7 @@ function render(path) {
   const parent = parentOf(path);
   if (parent !== null) {
     const tr = mkrow("📂", "Parent Directory", "", "—", "");
-    tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); render(parent); });
+    tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); goDir(parent); });
     tbody.appendChild(tr);
   }
 
@@ -475,14 +509,14 @@ function render(path) {
       e.preventDefault();
       if (item.type === "dir") {
         const child = path === "/" ? "/" + item.name + "/" : path + item.name + "/";
-        render(child);
+        goDir(child);
       } else if (item.type === "post") {
         const meta = POST_BY_FILE[item.file] || { f: item.file, t: item.name, d: item.date, desc: item.desc };
-        openPost(meta, path);
+        goPost(meta, path);
       } else if (item.type === "embed") {
-        openEmbed(item, path);
+        goEmbed(item, path);
       } else {
-        openText(item.name, path);
+        goText(item.name, path);
       }
     });
     tbody.appendChild(tr);
@@ -600,7 +634,14 @@ document.getElementById('v-next').addEventListener('click', e => {
   e.preventDefault(); if (htmlPages.length) renderHtmlPage(htmlPage + 1);
 });
 
-render("/");
+// Initial load: if we already have a state (e.g. restored tab), honour it;
+// otherwise seed history with a root entry so popstate always has something to pop to.
+if (history.state && history.state.view) {
+  restoreFromState(history.state);
+} else {
+  pushNav({ view: 'dir', path: '/' }, true);
+  render('/');
+}
 </script>
 </body>
 </html>
