@@ -155,6 +155,34 @@ tr.w-count td {
 .v-filename { font-weight: bold; font-size: 13px; word-break: break-word; overflow-wrap: anywhere; }
 .v-meta { color: #555; font-size: 12px; }
 
+/* Post viewer — stack the title above the meta and render it like a Substack
+   post headline (large, serif, high-contrast) rather than the small filename
+   label used by the embed / text viewers. The breadcrumb still shows the raw
+   filename for navigation; this is the article's title. */
+#viewer .v-chrome {
+  display: block;
+  margin-bottom: 10px;
+}
+#viewer .v-filename {
+  display: block;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: #000;
+  margin: 10px 0 8px;
+}
+#viewer .v-meta {
+  display: block;
+  color: #555;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 768px) {
+  #viewer .v-filename { font-size: 34px; line-height: 1.15; }
+}
+
 #content-window, #text-window {
   overflow-y: auto;
   overflow-x: hidden;
@@ -503,34 +531,34 @@ tr.w-count td {
 // Sourced from FEATURED.md + posts/ directory.
 
 const POSTS = [
-  { f:"179891086.no-means-no-freddie-the-mayors-office.html",       t:"'No' means 'No', Freddie.",                                                      d:"2025-11-25", tier:1, desc:"The mayor's office keeps resurrecting the FUSUS-style surveillance program Nashville already rejected — here's the latest push Council is being asked to approve." },
-  { f:"174451008.metro-will-audit-the-office-of-homeless.html",     t:"Metro Will Audit The Office of Homeless Services",                               d:"2025-09-24", tier:1, desc:"After a reader email campaign, Metro's Internal Audit Committee voted unanimously to open a financial audit of the Office of Homeless Services." },
-  { f:"179971483.from-the-makers-of-fusus-literally.html",          t:"From the Makers of Fusus (literally): Meet \"LeoSight\"",                          d:"2025-11-26", tier:1, desc:"Mayor O'Connell quietly signed a $15M surveillance MOU with the Nashville Downtown Partnership — same team, same vendors, new name: LeoSight." },
-  { f:"171344469.they-only-discovered-the-problem.html",            t:"They Only 'Discovered' the $500k Payment Issues When I Found It",                d:"2025-08-19", tier:1, desc:"OHS paid DePaul USA more than $500k without a valid contract, using direct vouchers to bypass Finance; they only \"discovered\" it once I started requesting records." },
-  { f:"185390870.there-is-no-one-else-coming.html",                 t:"There Is No One Else Coming But Us.",                                            d:"2026-01-22", tier:1, desc:"Metro Council rejected the surveillance MOU 20-15. No one in the mayor's office saved us. We did it ourselves, and we'll have to keep doing it." },
+  { f:"179891086.no-means-no-freddie-the-mayors-office.md",       t:"'No' means 'No', Freddie.",                                                      d:"2025-11-25", tier:1, desc:"The mayor's office keeps resurrecting the FUSUS-style surveillance program Nashville already rejected — here's the latest push Council is being asked to approve." },
+  { f:"174451008.metro-will-audit-the-office-of-homeless.md",     t:"Metro Will Audit The Office of Homeless Services",                               d:"2025-09-24", tier:1, desc:"After a reader email campaign, Metro's Internal Audit Committee voted unanimously to open a financial audit of the Office of Homeless Services." },
+  { f:"179971483.from-the-makers-of-fusus-literally.md",          t:"From the Makers of Fusus (literally): Meet \"LeoSight\"",                          d:"2025-11-26", tier:1, desc:"Mayor O'Connell quietly signed a $15M surveillance MOU with the Nashville Downtown Partnership — same team, same vendors, new name: LeoSight." },
+  { f:"171344469.they-only-discovered-the-problem.md",            t:"They Only 'Discovered' the $500k Payment Issues When I Found It",                d:"2025-08-19", tier:1, desc:"OHS paid DePaul USA more than $500k without a valid contract, using direct vouchers to bypass Finance; they only \"discovered\" it once I started requesting records." },
+  { f:"185390870.there-is-no-one-else-coming.md",                 t:"There Is No One Else Coming But Us.",                                            d:"2026-01-22", tier:1, desc:"Metro Council rejected the surveillance MOU 20-15. No one in the mayor's office saved us. We did it ourselves, and we'll have to keep doing it." },
 
-  { f:"163865780.housing-last-the-rodeway-to-nowhere.html",         t:"Housing Last | The Rodeway to Nowhere",                                          d:"2025-05-18", tier:2, desc:"OHS shut down Old Tent City with no public plan; residents were quietly routed into a Rodeway Inn program that offered no path to permanent housing." },
-  { f:"183810155.breaking-the-mayors-official-coordinating.html",   t:"Breaking: Nashville's Surveillance MOU Official Helped Build ICE's LexisNexis Pipeline", d:"2026-01-15", tier:2, desc:"The mayor's official coordinating the $15M surveillance MOU spent six years at LexisNexis, whose $22.1M ICE contract pulls local jail data ICE can't otherwise get." },
-  { f:"144351154.i-kept-waiting-for-the-city-to-release.html",      t:"I Kept Waiting For The City To Release Metro Arts' Expense Report. So I Did It Myself.", d:"2024-05-15", tier:2, desc:"After Metro stalled, I FOIA'd every Metro Arts expense from July 2022 through Feb 2024 and published the full searchable database myself." },
-  { f:"186553419.nashvilles-january-eviction-filings.html",         t:"Nashville's January Eviction Filings Skyrocket Despite Winter Storm",            d:"2026-02-02", tier:2, desc:"While the ice storm knocked out power to ~500,000 residents, landlords filed a 56% YoY surge in eviction detainers — 68% of them filed by just three law firms." },
-  { f:"193411754.we-built-the-surveillance-app-nashvilles.html",    t:"We Built the Surveillance Tool Nashville's Leaders Have Been Asking For. Except It Tracks Them.", d:"2026-04-07", tier:2, desc:"NaiBOR — an open-source civic tool that surfaces what Metro officials actually do with their time, using the same methods they want to use on us. Be a neighbor, not a naibor." },
+  { f:"163865780.housing-last-the-rodeway-to-nowhere.md",         t:"Housing Last | The Rodeway to Nowhere",                                          d:"2025-05-18", tier:2, desc:"OHS shut down Old Tent City with no public plan; residents were quietly routed into a Rodeway Inn program that offered no path to permanent housing." },
+  { f:"183810155.breaking-the-mayors-official-coordinating.md",   t:"Breaking: Nashville's Surveillance MOU Official Helped Build ICE's LexisNexis Pipeline", d:"2026-01-15", tier:2, desc:"The mayor's official coordinating the $15M surveillance MOU spent six years at LexisNexis, whose $22.1M ICE contract pulls local jail data ICE can't otherwise get." },
+  { f:"144351154.i-kept-waiting-for-the-city-to-release.md",      t:"I Kept Waiting For The City To Release Metro Arts' Expense Report. So I Did It Myself.", d:"2024-05-15", tier:2, desc:"After Metro stalled, I FOIA'd every Metro Arts expense from July 2022 through Feb 2024 and published the full searchable database myself." },
+  { f:"186553419.nashvilles-january-eviction-filings.md",         t:"Nashville's January Eviction Filings Skyrocket Despite Winter Storm",            d:"2026-02-02", tier:2, desc:"While the ice storm knocked out power to ~500,000 residents, landlords filed a 56% YoY surge in eviction detainers — 68% of them filed by just three law firms." },
+  { f:"193411754.we-built-the-surveillance-app-nashvilles.md",    t:"We Built the Surveillance Tool Nashville's Leaders Have Been Asking For. Except It Tracks Them.", d:"2026-04-07", tier:2, desc:"NaiBOR — an open-source civic tool that surfaces what Metro officials actually do with their time, using the same methods they want to use on us. Be a neighbor, not a naibor." },
 
-  { f:"178456949.null_results-text-messages-reveal.html",           t:"{Null_Results}: Text Messages Reveal OHS Director Hand-Picked Families",         d:"2025-11-10", tier:3, desc:"Text messages show OHS Director April Calvin personally selected which unhoused families received housing — bypassing the federally-mandated Coordinated Entry system." },
-  { f:"192747263.nashvilles-unauthorized-secret-police.html",       t:"Nashville's Unauthorized Secret Police Force",                                   d:"2026-04-02", tier:3, desc:"Off-duty state troopers police downtown under a \"confidential\" contract routed through NDP / CBID / NDMC PSO LLC — a secret, unauthorized force hiding in plain sight." },
-  { f:"175051724.who-is-larry-ellison-and-what-does.html",          t:"Who Is Larry Ellison? And What Does Oracle Want From Nashville?",                d:"2025-10-22", tier:3, desc:"Oracle is rebuilding Metro's finance system on Oracle Cloud. A look at Larry Ellison's \"TechnoFutilist\" doctrine and what he stands to gain from Nashville's data." },
-  { f:"158662808.downtown-nashvilles-self-made-privacy.html",       t:"Downtown Nashville's Self-Made Privacy Crisis",                                  d:"2025-03-09", tier:3, desc:"Downtown Nashville outsourced its privacy to private LPR networks and cloud surveillance vendors — a crisis manufactured by the people building it." },
-  { f:"178549584.i-cannot-compromise-my-integrity.html",            t:"'I Cannot Compromise My Integrity': Case Manager Resigned After OHS Conflicts",  d:"2025-11-11", tier:3, desc:"A Step Up case manager resigned in writing, saying the OHS partnership forced staff to watch clients be repeatedly re-victimized and re-traumatized." },
-  { f:"144803108.strings-attached-the-history-of-the.html",         t:"Strings Attached: The History of the Metro Arts Commission & The Nashville Symphony", d:"2024-06-18", tier:3, desc:"Commissioned history of how Metro Arts, the Metro Arts Commission, and the Nashville Symphony became entangled — traced back through Bredesen-era decisions." },
-  { f:"180083598.misinformation-or-inconvenient-truth.html",        t:"Misinformation or Inconvenient Truth? What the Documents Actually Say",          d:"2025-12-01", tier:3, desc:"The mayor's office labeled surveillance reporting \"misinformation.\" Here's the MOU, line by line, against what the administration is telling Council it does." },
-  { f:"167746148.why-we-have-to-talk-about-what-nashville.html",    t:"Why We Have To Talk About What Nashville Ignores",                               d:"2025-07-07", tier:3, desc:"Tennessee's real export isn't country music or healthcare — it's policy cruelty dressed up as responsibility, and Nashville has been shipping it nationwide." },
+  { f:"178456949.null_results-text-messages-reveal.md",           t:"{Null_Results}: Text Messages Reveal OHS Director Hand-Picked Families",         d:"2025-11-10", tier:3, desc:"Text messages show OHS Director April Calvin personally selected which unhoused families received housing — bypassing the federally-mandated Coordinated Entry system." },
+  { f:"192747263.nashvilles-unauthorized-secret-police.md",       t:"Nashville's Unauthorized Secret Police Force",                                   d:"2026-04-02", tier:3, desc:"Off-duty state troopers police downtown under a \"confidential\" contract routed through NDP / CBID / NDMC PSO LLC — a secret, unauthorized force hiding in plain sight." },
+  { f:"175051724.who-is-larry-ellison-and-what-does.md",          t:"Who Is Larry Ellison? And What Does Oracle Want From Nashville?",                d:"2025-10-22", tier:3, desc:"Oracle is rebuilding Metro's finance system on Oracle Cloud. A look at Larry Ellison's \"TechnoFutilist\" doctrine and what he stands to gain from Nashville's data." },
+  { f:"158662808.downtown-nashvilles-self-made-privacy.md",       t:"Downtown Nashville's Self-Made Privacy Crisis",                                  d:"2025-03-09", tier:3, desc:"Downtown Nashville outsourced its privacy to private LPR networks and cloud surveillance vendors — a crisis manufactured by the people building it." },
+  { f:"178549584.i-cannot-compromise-my-integrity.md",            t:"'I Cannot Compromise My Integrity': Case Manager Resigned After OHS Conflicts",  d:"2025-11-11", tier:3, desc:"A Step Up case manager resigned in writing, saying the OHS partnership forced staff to watch clients be repeatedly re-victimized and re-traumatized." },
+  { f:"144803108.strings-attached-the-history-of-the.md",         t:"Strings Attached: The History of the Metro Arts Commission & The Nashville Symphony", d:"2024-06-18", tier:3, desc:"Commissioned history of how Metro Arts, the Metro Arts Commission, and the Nashville Symphony became entangled — traced back through Bredesen-era decisions." },
+  { f:"180083598.misinformation-or-inconvenient-truth.md",        t:"Misinformation or Inconvenient Truth? What the Documents Actually Say",          d:"2025-12-01", tier:3, desc:"The mayor's office labeled surveillance reporting \"misinformation.\" Here's the MOU, line by line, against what the administration is telling Council it does." },
+  { f:"167746148.why-we-have-to-talk-about-what-nashville.md",    t:"Why We Have To Talk About What Nashville Ignores",                               d:"2025-07-07", tier:3, desc:"Tennessee's real export isn't country music or healthcare — it's policy cruelty dressed up as responsibility, and Nashville has been shipping it nationwide." },
 
-  { f:"155251807.the-mlk-they-want-us-to-forget.html",              t:"The MLK They Want Us To Forget",                                                 d:"2025-01-20", tier:4, desc:"The radical King of 1967 — who named racism, economic exploitation, and war as one problem — not the sanitized holiday version Nashville prefers." },
-  { f:"173677465.how-to-escape-tyranny-and-make-new.html",          t:"Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick",   d:"2025-09-16", tier:4, desc:"\"Stop showing your work. Do magic tricks.\" A piece on political analysis, sleight of hand, and how movements actually escape tyranny." },
-  { f:"170694573.the-center-will-always-fold.html",                 t:"The Center Will Always Fold",                                                    d:"2025-08-12", tier:4, desc:"Nashville calls itself progressive — a blue dot in a red state. The political center isn't a position; it's a pattern of folding, every time." },
-  { f:"189078200.the-great-correction-nyc-comedian.html",           t:"'The Great Correction' | My Convo w/ NYC Comedian Whitley Watson",               d:"2026-02-25", tier:4, desc:"A long conversation with NYC writer, filmmaker and comedian Whitley Watson about her half-serious, fully-plausible fantasy: \"the Great Correction.\"" },
-  { f:"188017123.nashville-eviction-tracker-open-source.html",      t:"Nashville Eviction Tracker: Open Source Code",                                   d:"2026-02-15", tier:4, desc:"2,243 lines of Python — the full open-source code behind the Nashville eviction tracker, released so anyone with more capacity can take it further." },
-  { f:"174259144.one-email-today-could-change-everything.html",     t:"1 Minute to Demand Accountability: Email the Audit Committee",                   d:"2025-09-22", tier:4, desc:"A one-minute CTA: email the Metro Audit Committee to support an audit of the Office of Homeless Services before Tuesday's vote." },
-  { f:"181860842.the-peoples-house-how-nashville-metro.html",       t:"The People's House: How Nashville Metro Council Is Reclaiming Oversight",        d:"2025-12-17", tier:4, desc:"Metro Council stripped the surveillance MOU, deferred it to January, and took the drafting pen back from the mayor's office — a run of wins for democratic oversight." },
+  { f:"155251807.the-mlk-they-want-us-to-forget.md",              t:"The MLK They Want Us To Forget",                                                 d:"2025-01-20", tier:4, desc:"The radical King of 1967 — who named racism, economic exploitation, and war as one problem — not the sanitized holiday version Nashville prefers." },
+  { f:"173677465.how-to-escape-tyranny-and-make-new.md",          t:"Breaking: Local Political Analyst Has Existential Crisis, Writes Magic Trick",   d:"2025-09-16", tier:4, desc:"\"Stop showing your work. Do magic tricks.\" A piece on political analysis, sleight of hand, and how movements actually escape tyranny." },
+  { f:"170694573.the-center-will-always-fold.md",                 t:"The Center Will Always Fold",                                                    d:"2025-08-12", tier:4, desc:"Nashville calls itself progressive — a blue dot in a red state. The political center isn't a position; it's a pattern of folding, every time." },
+  { f:"189078200.the-great-correction-nyc-comedian.md",           t:"'The Great Correction' | My Convo w/ NYC Comedian Whitley Watson",               d:"2026-02-25", tier:4, desc:"A long conversation with NYC writer, filmmaker and comedian Whitley Watson about her half-serious, fully-plausible fantasy: \"the Great Correction.\"" },
+  { f:"188017123.nashville-eviction-tracker-open-source.md",      t:"Nashville Eviction Tracker: Open Source Code",                                   d:"2026-02-15", tier:4, desc:"2,243 lines of Python — the full open-source code behind the Nashville eviction tracker, released so anyone with more capacity can take it further." },
+  { f:"174259144.one-email-today-could-change-everything.md",     t:"1 Minute to Demand Accountability: Email the Audit Committee",                   d:"2025-09-22", tier:4, desc:"A one-minute CTA: email the Metro Audit Committee to support an audit of the Office of Homeless Services before Tuesday's vote." },
+  { f:"181860842.the-peoples-house-how-nashville-metro.md",       t:"The People's House: How Nashville Metro Council Is Reclaiming Oversight",        d:"2025-12-17", tier:4, desc:"Metro Council stripped the surveillance MOU, deferred it to January, and took the drafting pen back from the mayor's office — a run of wins for democratic oversight." },
 ];
 
 const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
@@ -539,30 +567,30 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // small uniform-shape thumbnail in /writing/. Sent through Substack's CDN
 // resizer so we're not pulling the full-size originals into the index.
 const POST_THUMB = {
-  "144351154.i-kept-waiting-for-the-city-to-release.html":   "https://substack-post-media.s3.amazonaws.com/public/images/55372f25-8e68-4e44-9b8b-d8299405612f_2140x1616.png",
-  "144803108.strings-attached-the-history-of-the.html":      "https://substack-post-media.s3.amazonaws.com/public/images/451fc68b-cd2c-4884-8ff3-e3663ecbcdf8_1024x1024.png",
-  "155251807.the-mlk-they-want-us-to-forget.html":           "https://substack-post-media.s3.amazonaws.com/public/images/628b9e58-ec15-45ae-bb6a-70bca7e02e68_1125x807.jpeg",
-  "158662808.downtown-nashvilles-self-made-privacy.html":    "https://substack-post-media.s3.amazonaws.com/public/images/d4859e43-c14a-40fd-8313-fb22dd91025f_1920x1080.png",
-  "163865780.housing-last-the-rodeway-to-nowhere.html":      "https://substack-post-media.s3.amazonaws.com/public/images/391eb2fa-f39a-40fc-8a9d-c4522e15689d_2000x1549.jpeg",
-  "167746148.why-we-have-to-talk-about-what-nashville.html": "https://substack-post-media.s3.amazonaws.com/public/images/584fa3c9-a59e-48fe-84a1-cfb8331bd89b_1154x776.webp",
-  "170694573.the-center-will-always-fold.html":              "https://substack-post-media.s3.amazonaws.com/public/images/94e1d284-3208-48e1-ad9c-bcc215d9ce73_2048x1036.png",
-  "171344469.they-only-discovered-the-problem.html":         "https://substack-post-media.s3.amazonaws.com/public/images/93d5654d-e280-4668-84fa-bb3159a9c6de_1920x1080.png",
-  "173677465.how-to-escape-tyranny-and-make-new.html":       "https://substack-post-media.s3.amazonaws.com/public/images/ae7ee584-d0a2-460d-b1ec-b39009dc42ce_3580x2152.png",
-  "174451008.metro-will-audit-the-office-of-homeless.html":  "https://substack-post-media.s3.amazonaws.com/public/images/04f1b77f-31ca-464a-93b1-12d5f0870657_996x1538.png",
-  "175051724.who-is-larry-ellison-and-what-does.html":       "https://substack-post-media.s3.amazonaws.com/public/images/a8d0d7d5-c6b8-4e3c-8e4a-ce87a72773a5_1456x1528.png",
-  "178456949.null_results-text-messages-reveal.html":        "https://substack-post-media.s3.amazonaws.com/public/images/ce09c208-8103-45de-a1c8-e0afb1698221_1920x1080.jpeg",
-  "178549584.i-cannot-compromise-my-integrity.html":         "https://substack-post-media.s3.amazonaws.com/public/images/8d745fa2-5a98-4144-87e0-963f04734a14_2890x1606.png",
-  "179891086.no-means-no-freddie-the-mayors-office.html":    "https://substack-post-media.s3.amazonaws.com/public/images/85346422-1718-4428-9948-4d53710893ed_500x500.png",
-  "179971483.from-the-makers-of-fusus-literally.html":       "https://substack-post-media.s3.amazonaws.com/public/images/56b45b6c-b0c8-49d1-a2cf-6eec4765b885_1920x1080.png",
-  "180083598.misinformation-or-inconvenient-truth.html":     "https://substack-post-media.s3.amazonaws.com/public/images/6c99407c-7d1c-45f4-9d6a-f49a3fd3bc1f_1024x319.png",
-  "181860842.the-peoples-house-how-nashville-metro.html":    "https://substack-post-media.s3.amazonaws.com/public/images/59ae61d4-f8d0-4738-a8a5-25bb778f6248_3102x1614.png",
-  "183810155.breaking-the-mayors-official-coordinating.html":"https://substack-post-media.s3.amazonaws.com/public/images/c2287453-4a8c-494b-b58a-1d1154e13c9e_1032x1654.png",
-  "185390870.there-is-no-one-else-coming.html":              "https://substack-post-media.s3.amazonaws.com/public/images/5fabaeda-af98-4029-9621-e2989157dc86_600x722.png",
-  "186553419.nashvilles-january-eviction-filings.html":      "https://substack-post-media.s3.amazonaws.com/public/images/4aa1feaf-2a8b-4e27-87d9-8531ea25fa69_2462x1182.png",
-  "188017123.nashville-eviction-tracker-open-source.html":   "https://substack-post-media.s3.amazonaws.com/public/images/2375f306-1e03-48e4-b5bd-5773eae7d8ed_2642x1392.png",
-  "189078200.the-great-correction-nyc-comedian.html":        "https://substack-post-media.s3.amazonaws.com/public/images/9e387b41-3cb7-4673-8db7-156954525a00_2040x1856.png",
-  "192747263.nashvilles-unauthorized-secret-police.html":    "https://substack-post-media.s3.amazonaws.com/public/images/0571bf65-1392-4f81-8623-b3d8a1402538_1920x1080.png",
-  "193411754.we-built-the-surveillance-app-nashvilles.html": "https://substack-post-media.s3.amazonaws.com/public/images/6105d9d2-6bff-434f-b7dc-e1bd3e0eaf7b_1000x1956.png",
+  "144351154.i-kept-waiting-for-the-city-to-release.md":   "https://substack-post-media.s3.amazonaws.com/public/images/55372f25-8e68-4e44-9b8b-d8299405612f_2140x1616.png",
+  "144803108.strings-attached-the-history-of-the.md":      "https://substack-post-media.s3.amazonaws.com/public/images/451fc68b-cd2c-4884-8ff3-e3663ecbcdf8_1024x1024.png",
+  "155251807.the-mlk-they-want-us-to-forget.md":           "https://substack-post-media.s3.amazonaws.com/public/images/628b9e58-ec15-45ae-bb6a-70bca7e02e68_1125x807.jpeg",
+  "158662808.downtown-nashvilles-self-made-privacy.md":    "https://substack-post-media.s3.amazonaws.com/public/images/d4859e43-c14a-40fd-8313-fb22dd91025f_1920x1080.png",
+  "163865780.housing-last-the-rodeway-to-nowhere.md":      "https://substack-post-media.s3.amazonaws.com/public/images/391eb2fa-f39a-40fc-8a9d-c4522e15689d_2000x1549.jpeg",
+  "167746148.why-we-have-to-talk-about-what-nashville.md": "https://substack-post-media.s3.amazonaws.com/public/images/584fa3c9-a59e-48fe-84a1-cfb8331bd89b_1154x776.webp",
+  "170694573.the-center-will-always-fold.md":              "https://substack-post-media.s3.amazonaws.com/public/images/94e1d284-3208-48e1-ad9c-bcc215d9ce73_2048x1036.png",
+  "171344469.they-only-discovered-the-problem.md":         "https://substack-post-media.s3.amazonaws.com/public/images/93d5654d-e280-4668-84fa-bb3159a9c6de_1920x1080.png",
+  "173677465.how-to-escape-tyranny-and-make-new.md":       "https://substack-post-media.s3.amazonaws.com/public/images/ae7ee584-d0a2-460d-b1ec-b39009dc42ce_3580x2152.png",
+  "174451008.metro-will-audit-the-office-of-homeless.md":  "https://substack-post-media.s3.amazonaws.com/public/images/04f1b77f-31ca-464a-93b1-12d5f0870657_996x1538.png",
+  "175051724.who-is-larry-ellison-and-what-does.md":       "https://substack-post-media.s3.amazonaws.com/public/images/a8d0d7d5-c6b8-4e3c-8e4a-ce87a72773a5_1456x1528.png",
+  "178456949.null_results-text-messages-reveal.md":        "https://substack-post-media.s3.amazonaws.com/public/images/ce09c208-8103-45de-a1c8-e0afb1698221_1920x1080.jpeg",
+  "178549584.i-cannot-compromise-my-integrity.md":         "https://substack-post-media.s3.amazonaws.com/public/images/8d745fa2-5a98-4144-87e0-963f04734a14_2890x1606.png",
+  "179891086.no-means-no-freddie-the-mayors-office.md":    "https://substack-post-media.s3.amazonaws.com/public/images/85346422-1718-4428-9948-4d53710893ed_500x500.png",
+  "179971483.from-the-makers-of-fusus-literally.md":       "https://substack-post-media.s3.amazonaws.com/public/images/56b45b6c-b0c8-49d1-a2cf-6eec4765b885_1920x1080.png",
+  "180083598.misinformation-or-inconvenient-truth.md":     "https://substack-post-media.s3.amazonaws.com/public/images/6c99407c-7d1c-45f4-9d6a-f49a3fd3bc1f_1024x319.png",
+  "181860842.the-peoples-house-how-nashville-metro.md":    "https://substack-post-media.s3.amazonaws.com/public/images/59ae61d4-f8d0-4738-a8a5-25bb778f6248_3102x1614.png",
+  "183810155.breaking-the-mayors-official-coordinating.md":"https://substack-post-media.s3.amazonaws.com/public/images/c2287453-4a8c-494b-b58a-1d1154e13c9e_1032x1654.png",
+  "185390870.there-is-no-one-else-coming.md":              "https://substack-post-media.s3.amazonaws.com/public/images/5fabaeda-af98-4029-9621-e2989157dc86_600x722.png",
+  "186553419.nashvilles-january-eviction-filings.md":      "https://substack-post-media.s3.amazonaws.com/public/images/4aa1feaf-2a8b-4e27-87d9-8531ea25fa69_2462x1182.png",
+  "188017123.nashville-eviction-tracker-open-source.md":   "https://substack-post-media.s3.amazonaws.com/public/images/2375f306-1e03-48e4-b5bd-5773eae7d8ed_2642x1392.png",
+  "189078200.the-great-correction-nyc-comedian.md":        "https://substack-post-media.s3.amazonaws.com/public/images/9e387b41-3cb7-4673-8db7-156954525a00_2040x1856.png",
+  "192747263.nashvilles-unauthorized-secret-police.md":    "https://substack-post-media.s3.amazonaws.com/public/images/0571bf65-1392-4f81-8623-b3d8a1402538_1920x1080.png",
+  "193411754.we-built-the-surveillance-app-nashvilles.md": "https://substack-post-media.s3.amazonaws.com/public/images/6105d9d2-6bff-434f-b7dc-e1bd3e0eaf7b_1000x1956.png",
 };
 function thumbUrl(file) {
   const raw = POST_THUMB[file];
@@ -595,8 +623,8 @@ const dirs = {
     { type:"link", name:"the-experience-engine",        href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"A generative model of how experiences are assembled from ground, figure, and pattern ↗" },
   ],
   "/projects/": [
-    { type:"post", name:"eviction-tracker",       file:"188017123.nashville-eviction-tracker-open-source.html", date:"2026-02-15", desc:"Open-source scraper + dashboard for every eviction detainer filed in Davidson County — 2,243 lines of Python, released so anyone can run it" },
-    { type:"post", name:"naibor",                 file:"193411754.we-built-the-surveillance-app-nashvilles.html", date:"2026-04-07", desc:"Civic-tech web app that turns Metro's own surveillance methods back on Metro officials — what they do with their time, who they meet, how they vote" },
+    { type:"post", name:"eviction-tracker",       file:"188017123.nashville-eviction-tracker-open-source.md", date:"2026-02-15", desc:"Open-source scraper + dashboard for every eviction detainer filed in Davidson County — 2,243 lines of Python, released so anyone can run it" },
+    { type:"post", name:"naibor",                 file:"193411754.we-built-the-surveillance-app-nashvilles.md", date:"2026-04-07", desc:"Civic-tech web app that turns Metro's own surveillance methods back on Metro officials — what they do with their time, who they meet, how they vote" },
     { type:"embed", name:"metro-invoice-viewer",  src:"https://clovenbradshaw-ctrl.github.io/53902028/",         date:"2025-10-27", desc:"Searchable archive of every Office of Homeless Services ARPA invoice (BU 53902028) — 207 invoices, $3.06M, Aug '24 – Oct '25" },
     { type:"link",  name:"experiential-ontology", href:"https://experientialontology.org/",                      date:"2026-04-14", desc:"Long-running philosophy project — a framework for ground/figure/pattern. External site ↗" },
     { type:"link",  name:"metro-budget",           href:"https://sites.google.com/view/changelognashville",       date:"2026-04-14", desc:"Changelog Nashville — annotated reading of the Metro operating budget, line by line. External site ↗" },
@@ -1007,6 +1035,25 @@ function wordCount(html) {
   return (d.textContent || '').split(/\s+/).filter(Boolean).length;
 }
 
+// Posts are stored as .md files with YAML-ish frontmatter followed by a raw
+// HTML body (we "embrace the HTML" rather than converting to MD syntax). Split
+// the frontmatter off so the body can go through the same sanitize pipeline.
+function parseFrontmatter(raw) {
+  const m = raw.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n([\s\S]*)$/);
+  if (!m) return { meta: {}, body: raw };
+  const meta = {};
+  m[1].split(/\r?\n/).forEach(line => {
+    const mm = line.match(/^([A-Za-z_][\w-]*)\s*:\s*(.*)$/);
+    if (!mm) return;
+    let v = mm[2].trim();
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+      v = v.slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, "'");
+    }
+    meta[mm[1]] = v;
+  });
+  return { meta, body: m[2] };
+}
+
 async function openPost(meta, fromP) {
   show("viewer");
   renderBreadcrumb(fromP, meta.f);
@@ -1019,11 +1066,18 @@ async function openPost(meta, fromP) {
     const res = await fetch('posts/' + meta.f);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const raw = await res.text();
-    const clean = sanitize(raw);
-    const wc = wordCount(raw);
+    const { meta: fm, body } = parseFrontmatter(raw);
+    // Prefer title/date from the file's own frontmatter — the post file is
+    // the source of truth; the manifest entry is just a fallback.
+    if (fm.title) {
+      document.getElementById('v-filename').textContent = fm.title;
+      document.title = fm.title;
+    }
+    const clean = sanitize(body);
+    const wc = wordCount(body);
     const mins = Math.max(1, Math.ceil(wc / 220));
     document.getElementById('v-meta').textContent =
-      meta.d + ' · ' + wc.toLocaleString() + ' words · ~' + mins + ' min read';
+      (fm.date || meta.d) + ' · ' + wc.toLocaleString() + ' words · ~' + mins + ' min read';
     const w = document.getElementById('content-window');
     w.innerHTML = clean;
     w.scrollTop = 0;
