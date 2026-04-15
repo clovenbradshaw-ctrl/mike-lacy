@@ -18,177 +18,258 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap">
 <style>
+/* ── Design tokens ────────────────────────────────────────────────────────
+   Dark terminal / autoindex palette. Low-contrast greens on near-black,
+   with teal as the only chromatic accent. Hairline 0.5px dividers
+   throughout so the grid reads as a file listing rather than a card UI. */
+:root {
+  --bg:         #0e0e0e;
+  --bg-hover:   #141410;
+  --fg:         #c9c5b8;
+  --fg-strong:  #e8e4d8;
+  --fg-name:    #ddd8c8;
+  --fg-muted:   #5c5c54;
+  --fg-faint:   #5a5a52;
+  --fg-dim:     #404038;
+  --fg-dimmer:  #3a3a32;
+  --fg-dimmest: #323228;
+  --fg-ghost:   #2e2e26;
+  --fg-ink:     #1c1c18;
+  --fg-ink-2:   #2a2a24;
+  --accent:       #7ab6a0;
+  --accent-hover: #9fd1be;
+  --accent-bg:    #2d4f46;
+  --accent-muted: #2e6657;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-sans: Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { overflow-x: hidden; }
-html { height: 100%; }
+html { height: 100%; background: var(--bg); }
 body {
-  /* One geometric system-sans stack for the whole site — in the spirit of
-     Phosphor icons (even weight, crisp stroke, restrained). Every
-     descendant inherits this unless it explicitly overrides. The directory
-     listing itself opts into a monospace stack below so it reads as a raw
-     server autoindex. */
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Monospace as the base — the whole shell reads as a raw server
+     autoindex. The article reader (#content-window) and post-viewer
+     title explicitly opt back into a grotesque sans for long-form
+     reading; everything else inherits mono. */
+  font-family: var(--font-mono);
   font-size: 13px;
-  color: #111;
-  background: #fff;
-  padding: 14px 14px 32px;
-  max-width: 640px;
+  color: var(--fg);
+  background: var(--bg);
+  padding: 2.5rem 2rem;
+  max-width: 960px;
   margin: 0 auto;
   min-height: 100vh;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
-h1 { font-size: 16px; font-weight: 600; margin-bottom: 2px; letter-spacing: -0.01em; }
-hr { border: none; border-top: 1px solid #bbb; margin: 6px 0 10px; }
-a { cursor: pointer; }
+h1 {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--fg-strong);
+  letter-spacing: -0.01em;
+  border-bottom: 0.5px solid var(--fg-ink-2);
+  padding-bottom: 1.25rem;
+  margin-bottom: 0;
+}
+hr { border: none; border-top: 0.5px solid var(--fg-ink); margin: 0; display: none; }
+a { cursor: pointer; color: var(--fg-name); }
 address {
-  font-style: italic; font-size: 12px; color: #555;
-  margin-top: 14px; padding-top: 6px;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--fg-dimmest);
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 0.5px solid var(--fg-ink);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  letter-spacing: 0.01em;
+}
+address .sig-accent { color: var(--accent-muted); }
+
+@media (max-width: 639px) {
+  body { padding: 1.75rem 14px 2rem; }
 }
 
-/* ── Apache-style directory index ───────────────────────────────────────────
-   A single table, monospaced, with bracketed icon tags ([DIR], [TXT], [EXT]…)
-   and a `----` separator under the header — the familiar mod_autoindex look
-   the server signature at the bottom of every page is already claiming. The
-   body type stack stays sans; the table explicitly opts into monospace so the
-   listing reads as a raw server index while headings and prose stay editorial. */
+/* ── Directory index — dark terminal ────────────────────────────────────────
+   A single table, monospaced, with unbracketed type badges (DIR, TXT, APP,
+   EXT) rendered as 0.5px-bordered pills. Rows are grid-like — three
+   columns (badge, name + description, date) — with hairline dividers and
+   a hover state that bleeds to the viewport edge for a tactile,
+   file-manager feel. The table is styled so tr.w-row reads as the mockup's
+   .entry block with a built-in second row for the description. */
 #dir-table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 12px;
-  line-height: 1.45;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
 }
 #dir-table a { font-family: inherit; }
-/* Three columns — icon tag, name, date. Body is capped at 640px so a
-   dedicated Description column would be starved; descriptions render on a
-   second full-width row under each entry with an inline "Description:" label. */
-col.c-icon { width: 46px; }
+/* Three columns — badge, name, date. Descriptions render on a second
+   full-width row under each entry (aligned with the name column via
+   left-padding) so long blurbs can breathe without cramping the grid. */
+col.c-icon { width: 58px; }
 col.c-name { width: auto; }
 col.c-date { width: 108px; }
 @media (max-width: 639px) {
-  col.c-icon { width: 42px; }
-  col.c-date { width: 88px; }
+  col.c-icon { width: 50px; }
+  col.c-date { width: 92px; }
 }
-#dir-table thead th {
-  text-align: left;
-  padding: 2px 10px 3px 0;
-  font-weight: 600;
-  white-space: nowrap;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #666;
-  border-bottom: 1px solid #111;
-}
-#dir-table thead th.date { text-align: right; padding-right: 20px; }
+/* Hide the table header — the mockup treats the listing as a content grid,
+   not a spreadsheet. The dir-title above already labels what the rows are. */
+#dir-table thead { display: none; }
 #dir-table td {
-  padding: 2px 6px 2px 0;
+  padding: 0;
   vertical-align: top;
   word-break: break-word;
 }
 #dir-table td a { word-break: break-word; overflow-wrap: anywhere; }
-/* Icon cell: bracketed Apache-style tag, muted so it reads as chrome not
-   content. Tabular numerals so the [   ] blank matches the occupied tags. */
+/* Type badge: unbracketed DIR/TXT/APP/EXT inside a 0.5px bordered pill.
+   Directory badges pick up the teal accent; everything else stays in the
+   neutral greyscale so DIRs read as the primary affordance. */
 td.w-icon {
-  color: #888;
-  font-size: 11px;
-  letter-spacing: 0;
-  padding-right: 10px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  color: var(--fg-dim);
+  padding-right: 14px;
+}
+td.w-icon .type-badge {
+  display: inline-block;
+  border: 0.5px solid var(--fg-ghost);
+  padding: 3px 5px;
+  border-radius: 3px;
+  color: var(--fg-dim);
+  min-width: 30px;
+  text-align: center;
+  margin-top: 3px;
+}
+td.w-icon .type-badge.dir {
+  color: var(--accent);
+  border-color: var(--accent-bg);
 }
 
-/* ── /writing/ structured rows ──────────────────────────────────────────────
-   Same Apache-style index, just with breathing room so the title reads as
-   the primary line and the description sits beneath it as metadata. */
+/* ── Row layout ─────────────────────────────────────────────────────────────
+   Each entry: badge | name (+description on the next row) | date. Hairline
+   0.5px dividers between rows. Section headers (tier labels in /writing/)
+   read as muted uppercase dividers. */
 .w-section td {
   padding: 32px 0 6px;
-  border-top: 1px solid #111;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  color: #111;
+  border-top: 0.5px solid var(--fg-ink);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
 }
 .w-section.first td { border-top: none; padding-top: 10px; }
 tr.w-row td {
-  padding: 12px 0 11px;
-  border-top: 1px dotted #ccc;
+  padding: 1rem 0 0;
+  border-top: 0.5px solid var(--fg-ink);
   vertical-align: top;
 }
-tr.w-row.first-in-section td { border-top: none; padding-top: 6px; }
+tr.w-row.first-in-section td { border-top: none; }
 td.w-main { padding-right: 16px; }
 td.w-main a {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-weight: 500;
   font-size: 14px;
   line-height: 1.35;
-  color: #111;
-  text-decoration: underline;
+  color: var(--fg-name);
+  text-decoration: none;
+  letter-spacing: -0.01em;
 }
+td.w-main a:hover { color: var(--accent); }
 td.w-date {
   white-space: nowrap;
-  color: #888;
-  font-size: 12px;
+  color: var(--fg-dimmer);
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
   padding-right: 0;
+  padding-top: 4px !important;
   text-align: right;
+  letter-spacing: 0.02em;
 }
-/* Description row — full-width under each post, with an inline "Description:"
-   label so the text starts on the same line as the word. No border-top so it
-   visually belongs to the row above rather than to the next post. Sans-serif
-   so long blurbs breathe; the listing's monospace frame stays around it. */
+/* Description row — full width under the entry, aligned with the name
+   column via left padding. The "Description:" inline label from the old
+   apache-style view is dropped; descriptions read as a plain subtitle. */
 tr.w-desc-row td {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #666;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--fg-muted);
+  font-size: 12px;
   line-height: 1.5;
-  padding: 0 0 12px 56px;
+  padding: 4px 0 1rem 72px;
   border-top: none;
   vertical-align: top;
   word-break: normal;
   overflow-wrap: anywhere;
+  max-width: 100%;
 }
-tr.w-desc-row .w-desc-label {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 11px;
-  color: #666;
-  margin-right: 6px;
+@media (max-width: 639px) {
+  tr.w-desc-row td { padding-left: 64px; }
 }
-/* Parent Directory: navigation, not content. Mute it so it doesn't compete
-   with tier labels or post titles for attention. */
-tr.w-parent td { color: #aaa; }
+tr.w-desc-row .w-desc-label { display: none; }
+/* Parent Directory — navigation chrome, keep it quiet. */
+tr.w-parent td { color: var(--fg-dim); }
 tr.w-parent td.w-main a {
-  color: #aaa;
+  color: var(--fg-dim);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 400;
 }
-/* Faint row-hover background: grayscale, matches page bg family — no accent,
-   no link color shift. Purely tactile cue that rows are clickable targets. */
-tr.w-row:hover td { background: #f4f2ec; }
-/* Footer count line — same muted tone as the Apache address signature. */
+tr.w-parent td.w-main a:hover { color: var(--accent); }
+/* Row hover — bleed the background to the edges of the body's inline
+   padding (2rem desktop, 14px on narrow viewports). Applied on the whole
+   row by negative-margining the first and last cells; since cells are
+   inside a single <tr>, we tint each td and let the color run edge-to-edge
+   via negative margins on the outermost cells. */
+tr.w-row { transition: background-color 120ms ease; }
+tr.w-row:hover td { background: var(--bg-hover); }
+tr.w-row:hover td.w-icon { box-shadow: -2rem 0 0 var(--bg-hover); }
+tr.w-row:hover td.w-date { box-shadow:  2rem 0 0 var(--bg-hover); }
+@media (max-width: 639px) {
+  tr.w-row:hover td.w-icon { box-shadow: -14px 0 0 var(--bg-hover); }
+  tr.w-row:hover td.w-date { box-shadow:  14px 0 0 var(--bg-hover); }
+}
+/* Footer count line — muted monospace, same family as the server sig. */
 tr.w-count td {
-  padding: 14px 0 2px;
+  padding: 1.25rem 0 2px;
   font-size: 11px;
-  color: #555;
-  border-top: 1px solid #111;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-}
-@media (min-width: 768px) {
-  td.w-main a { font-size: 15px; }
+  color: var(--fg-muted);
+  border-top: 0.5px solid var(--fg-ink);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
 }
 
+/* ── Breadcrumb → site label ────────────────────────────────────────────────
+   On the root, breadcrumb is empty; the site-label ("mikelacy.site") sits
+   above the title. The renderBreadcrumb() JS injects link children, which
+   we style as accent-teal. */
 #breadcrumb {
-  font-size: 12px;
-  margin-bottom: 10px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-bottom: 2rem;
   line-height: 1.5;
 }
-#breadcrumb .sep { color: #777; margin: 0 3px; }
-#breadcrumb .cur { color: #555; }
+#breadcrumb a { color: var(--accent); text-decoration: none; }
+#breadcrumb a:hover { color: var(--accent-hover); }
+#breadcrumb .sep { color: var(--fg-ghost); margin: 0 3px; }
+#breadcrumb .cur { color: var(--fg-muted); }
+.site-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-bottom: 2rem;
+}
+.site-label a { color: var(--accent); text-decoration: none; }
+.site-label a:hover { color: var(--accent-hover); }
 
 /* The listing stretches to the full 900px body so columns can breathe,
    but the reading viewers stay at a tighter column width for legibility. */
@@ -198,8 +279,8 @@ tr.w-count td {
   align-items: baseline; flex-wrap: wrap;
   gap: 8px; margin-bottom: 4px;
 }
-.v-filename { font-weight: 600; font-size: 13px; word-break: break-word; overflow-wrap: anywhere; }
-.v-meta { color: #555; font-size: 12px; }
+.v-filename { font-weight: 500; font-size: 13px; color: var(--fg-name); word-break: break-word; overflow-wrap: anywhere; }
+.v-meta { color: var(--fg-muted); font-size: 12px; }
 
 /* Post viewer — accountability-journalism grotesque: a tight 600-weight
    sans title (Archivo where available, system-ui elsewhere) over a quiet,
@@ -213,17 +294,17 @@ tr.w-count td {
 }
 #viewer .v-filename {
   display: block;
-  font-family: Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: 30px;
   line-height: 1.15;
   letter-spacing: -0.022em;
-  color: #111;
+  color: var(--fg-strong);
   margin: 18px 0 10px;
 }
 #viewer .v-meta {
   display: block;
-  color: #8a8a8a;
+  color: var(--fg-muted);
   font-size: 12.5px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -250,19 +331,19 @@ tr.w-count td {
   overflow-wrap: anywhere;
   font-size: 13px;
   line-height: 1.6;
-  color: #111;
+  color: var(--fg);
   margin: 0;
 }
 #tv-body {
   font-size: 15px;
   line-height: 1.6;
-  color: #111;
+  color: var(--fg);
   word-break: break-word;
   overflow-wrap: break-word;
 }
 #tv-body h1, #tv-body h2, #tv-body h3, #tv-body h4 {
   font-weight: 600; letter-spacing: -0.01em;
-  margin: 1.6em 0 .4em; line-height: 1.25; color: #111;
+  margin: 1.6em 0 .4em; line-height: 1.25; color: var(--fg-strong);
 }
 #tv-body h1 { font-size: 20px; }
 #tv-body h2 { font-size: 17px; }
@@ -270,13 +351,15 @@ tr.w-count td {
 #tv-body p  { margin: 0 0 1em; }
 #tv-body ul, #tv-body ol { margin: 0 0 1em 1.3em; }
 #tv-body li { margin-bottom: 0.35em; }
-#tv-body hr { border: none; border-top: 1px solid #ccc; margin: 1.4em 0; }
-#tv-body a  { word-break: break-word; overflow-wrap: anywhere; }
+#tv-body hr { border: none; border-top: 0.5px solid var(--fg-ink); margin: 1.4em 0; }
+#tv-body a  { color: var(--accent); word-break: break-word; overflow-wrap: anywhere; }
+#tv-body a:hover { color: var(--accent-hover); }
 #tv-body code {
-  background: #f4f4f4; padding: 0 3px;
+  background: var(--fg-ink); padding: 0 3px;
+  color: var(--fg-strong);
   font-size: 12.5px;
 }
-#tv-body strong { font-weight: 600; }
+#tv-body strong { font-weight: 600; color: var(--fg-strong); }
 #tv-body em { font-style: italic; }
 
 /* Reading body — grotesque sans tuned for accountability reporting: short
@@ -285,36 +368,36 @@ tr.w-count td {
    uses one font so the eye isn't constantly switching registers between
    body, headings, and inline UI widgets (subscribe, file-embed, pullquote). */
 #content-window {
-  color: #1a1a1a;
-  font-family: Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--fg-strong);
+  font-family: var(--font-sans);
 }
 #content-window p {
-  font-size: 16px; line-height: 1.7; margin: 0 0 1.15em; color: #1a1a1a;
+  font-size: 16px; line-height: 1.7; margin: 0 0 1.15em; color: var(--fg-strong);
   word-wrap: break-word; overflow-wrap: break-word;
 }
 #content-window a {
-  color: inherit;
+  color: var(--accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
-  text-decoration-color: rgba(17,17,17,0.4);
+  text-decoration-color: rgba(122,182,160,0.4);
   word-break: break-word; overflow-wrap: anywhere;
 }
-#content-window a:hover { text-decoration-color: #111; }
+#content-window a:hover { color: var(--accent-hover); text-decoration-color: var(--accent-hover); }
 #content-window blockquote {
-  border-left: 3px solid #222; margin: 1.5em 0; padding: 0.1em 0 0.1em 18px;
-  color: #333;
+  border-left: 3px solid var(--accent); margin: 1.5em 0; padding: 0.1em 0 0.1em 18px;
+  color: var(--fg);
 }
-#content-window blockquote p { font-style: italic; font-size: 16px; line-height: 1.6; }
+#content-window blockquote p { font-style: italic; font-size: 16px; line-height: 1.6; color: var(--fg); }
 #content-window h1, #content-window h2, #content-window h3, #content-window h4 {
   font-family: inherit;
   font-weight: 600; letter-spacing: -0.018em;
-  margin: 1.8em 0 .5em; line-height: 1.2; color: #111;
+  margin: 1.8em 0 .5em; line-height: 1.2; color: var(--fg-strong);
 }
 #content-window h1 { font-size: 24px; }
 #content-window h2 { font-size: 20px; }
 #content-window h3 { font-size: 17px; }
-#content-window hr { border: none; border-top: 1px solid #d6d6d6; margin: 2em auto; width: 40%; }
+#content-window hr { border: none; border-top: 0.5px solid var(--fg-ink); margin: 2em auto; width: 40%; }
 
 /* Images: default to ~2/3 of the column, centered, with a zoom cursor so
    readers know the shadowbox is available. On narrow viewports we let them
@@ -334,9 +417,9 @@ tr.w-count td {
 }
 #content-window figcaption,
 #content-window .image-caption {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-mono);
   font-size: 13px;
-  color: #6b6b6b;
+  color: var(--fg-muted);
   line-height: 1.5;
   margin-top: 8px;
   text-align: center;
@@ -348,14 +431,15 @@ tr.w-count td {
 #content-window li { margin-bottom: 0.45em; word-wrap: break-word; overflow-wrap: break-word; }
 #content-window pre {
   font-size: 12.5px;
-  background: #f4f4f4; border: 1px solid #ddd;
+  background: var(--fg-ink); border: 0.5px solid var(--fg-ink-2);
+  color: var(--fg-strong);
   padding: 10px 12px; overflow-x: auto; margin: 1em 0;
   white-space: pre-wrap;
   word-break: break-word;
 }
 #content-window code {
   font-size: 12.5px;
-  background: #f4f4f4; padding: 0 3px;
+  background: var(--fg-ink); color: var(--fg-strong); padding: 0 3px;
   word-break: break-word;
 }
 #content-window pre code { background: none; padding: 0; }
@@ -374,10 +458,10 @@ tr.w-count td {
 #content-window .captioned-image-container figure { text-align: center; }
 #content-window .captioned-image-container img { margin: 0 auto; }
 
-#e-frame { width: 100%; height: calc(100vh - 130px); min-height: 420px; border: 1px solid #999; background: #fff; margin-top: 8px; }
+#e-frame { width: 100%; height: calc(100vh - 130px); min-height: 420px; border: 0.5px solid var(--fg-ink-2); background: var(--bg); margin-top: 8px; }
 
-.loading { color: #555; font-style: italic; padding: 16px 0; }
-.error { color: #a00; padding: 16px 0; }
+.loading { color: var(--fg-muted); font-style: italic; padding: 16px 0; }
+.error { color: #d98f8f; padding: 16px 0; }
 
 /* ── Substack-post embedded widgets ─────────────────────────────────────── */
 
@@ -390,14 +474,14 @@ tr.w-count td {
 #content-window .subscription-widget-wrap { margin: 1.5em 0; }
 #content-window .subscription-widget {
   border: none;
-  border-left: 3px solid #111;
+  border-left: 3px solid var(--accent);
   padding: 6px 0 6px 18px;
   text-align: left;
 }
 #content-window .subscription-widget .preamble {
   margin-bottom: 10px;
   font-size: 13px;
-  color: #6b6b6b;
+  color: var(--fg-muted);
   line-height: 1.5;
 }
 #content-window .subscription-widget .cta-caption {
@@ -406,7 +490,7 @@ tr.w-count td {
   margin: 0 0 10px;
   font-style: normal;
   font-weight: 500;
-  color: #111;
+  color: var(--fg-strong);
 }
 #content-window .subscription-widget-subscribe {
   display: flex;
@@ -421,11 +505,11 @@ tr.w-count td {
   font: inherit;
   font-size: 13px;
   padding: 6px 8px;
-  border: 1px solid #999;
-  background: #fff;
-  color: #111;
+  border: 0.5px solid var(--fg-ink-2);
+  background: var(--fg-ink);
+  color: var(--fg-strong);
 }
-#content-window .subscription-widget-subscribe .email-input::placeholder { color: #888; }
+#content-window .subscription-widget-subscribe .email-input::placeholder { color: var(--fg-muted); }
 #content-window .subscription-widget-subscribe .button.primary,
 #content-window .button.primary {
   display: inline-block;
@@ -433,17 +517,17 @@ tr.w-count td {
   font-size: 13px;
   font-weight: 600;
   padding: 6px 14px;
-  background: #111;
-  color: #fff;
-  border: 1px solid #111;
+  background: var(--accent);
+  color: var(--bg);
+  border: 0.5px solid var(--accent);
   text-decoration: none;
   cursor: pointer;
   letter-spacing: 0.005em;
 }
 #content-window .subscription-widget-subscribe .button.primary:hover,
 #content-window .button.primary:hover {
-  background: #333;
-  border-color: #333;
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 #content-window .fake-input-wrapper { display: none; }
 
@@ -454,9 +538,10 @@ tr.w-count td {
 
 /* Pullquotes */
 #content-window .pullquote {
-  border-left: 2px solid #bbb;
+  border-left: 2px solid var(--fg-ink-2);
   margin: 1.4em 0;
   padding: 0 14px;
+  color: var(--fg);
 }
 #content-window .pullquote p {
   font-size: 15px;
@@ -475,7 +560,7 @@ tr.w-count td {
 /* Image captions improved */
 #content-window .image-caption {
   font-size: 11px;
-  color: #555;
+  color: var(--fg-muted);
   margin-top: 4px;
   text-align: center;
 }
@@ -514,8 +599,8 @@ tr.w-count td {
   display: flex;
   align-items: center;
   gap: 12px;
-  border: 1px solid #999;
-  background: #fafafa;
+  border: 0.5px solid var(--fg-ink-2);
+  background: var(--bg-hover);
   padding: 12px 14px;
   border-radius: 4px;
 }
@@ -539,13 +624,13 @@ tr.w-count td {
   font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
-  color: #111;
+  color: var(--fg-strong);
   word-break: break-word;
   overflow-wrap: anywhere;
 }
 #content-window .file-embed-details-h2 {
   font-size: 11.5px;
-  color: #8a8a8a;
+  color: var(--fg-muted);
   letter-spacing: 0.01em;
 }
 /* Download button: lighter outline rather than filled-black. At this size a
@@ -558,16 +643,17 @@ tr.w-count td {
   font-size: 12.5px;
   font-weight: 600;
   padding: 5px 12px;
-  background: #fff;
-  color: #111;
-  border: 1px solid #111;
+  background: transparent;
+  color: var(--accent);
+  border: 0.5px solid var(--accent-bg);
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
 }
 #content-window .file-embed-button:hover {
-  background: #111;
-  color: #fff;
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
 }
 #content-window .file-embed-button-text { color: inherit; }
 /* Substack ships both wide+narrow buttons; show only one to avoid duplicates. */
@@ -594,9 +680,9 @@ tr.w-count td {
    metadata) goes a touch bigger; the serif article body bumps up to the
    ~19px Substack sits at, capped near 68ch so lines don't sprawl. */
 @media (min-width: 768px) {
-  body { max-width: 960px; padding: 20px 24px 40px; font-size: 14px; }
+  body { max-width: 960px; padding: 2.5rem 2rem; font-size: 14px; }
   h1 { font-size: 18px; }
-  #breadcrumb { font-size: 13px; }
+  #breadcrumb { font-size: 11px; }
   th, td { font-size: 14px; }
   #content-window p,
   #content-window ul,
@@ -688,29 +774,29 @@ tr.w-count td {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 }
-#rt-widget .rtw { border: 1px solid #e0e0e0; border-radius: 12px; background: #fff; overflow: hidden; }
-#rt-widget .rtw-h { display: flex; align-items: center; justify-content: space-between; padding: 9px 13px; border-bottom: 1px solid #eee; cursor: pointer; user-select: none; gap: 10px; }
+#rt-widget .rtw { border: 0.5px solid var(--fg-ink-2); border-radius: 6px; background: var(--bg-hover); overflow: hidden; }
+#rt-widget .rtw-h { display: flex; align-items: center; justify-content: space-between; padding: 9px 13px; border-bottom: 0.5px solid var(--fg-ink); cursor: pointer; user-select: none; gap: 10px; }
 #rt-widget.collapsed .rtw-h { border-bottom: none; }
-#rt-widget .rtw-hl { font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: #999; flex-shrink: 0; }
-#rt-widget .rtw-latest { font-size: 11px; color: #666; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: none; }
+#rt-widget .rtw-hl { font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); flex-shrink: 0; }
+#rt-widget .rtw-latest { font-size: 11px; color: var(--fg-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: none; }
 #rt-widget.collapsed .rtw-latest { display: block; }
-#rt-widget .rtw-toggle { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; color: #999; transition: transform .2s ease; flex-shrink: 0; }
+#rt-widget .rtw-toggle { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; color: var(--fg-muted); transition: transform .2s ease; flex-shrink: 0; }
 #rt-widget.collapsed .rtw-toggle { transform: rotate(-90deg); }
-#rt-widget .rtw-ha { display: flex; align-items: center; color: #999; text-decoration: none; flex-shrink: 0; }
-#rt-widget .rtw-ha:hover { color: #111; }
+#rt-widget .rtw-ha { display: flex; align-items: center; color: var(--fg-muted); text-decoration: none; flex-shrink: 0; }
+#rt-widget .rtw-ha:hover { color: var(--accent); }
 #rt-widget #rt-body { max-height: 460px; overflow: hidden; transition: max-height .25s ease; }
 #rt-widget.collapsed #rt-body { max-height: 0; }
-#rt-widget .rtw-pi { padding: 9px 13px; border-bottom: 1px solid #eee; cursor: pointer; }
-#rt-widget .rtw-pi:hover { background: #f9f9f9; }
+#rt-widget .rtw-pi { padding: 9px 13px; border-bottom: 0.5px solid var(--fg-ink); cursor: pointer; }
+#rt-widget .rtw-pi:hover { background: var(--fg-ink); }
 #rt-widget .rtw-pi:last-child { border-bottom: none; }
-#rt-widget .rtw-pt { font-size: 13px; font-weight: 500; color: #111; margin: 0 0 2px; line-height: 1.3; }
-#rt-widget .rtw-pd { font-size: 11px; color: #aaa; margin: 0; }
-#rt-widget .rtw-f { display: flex; align-items: center; justify-content: space-between; padding: 7px 13px; border-top: 1px solid #eee; }
-#rt-widget .rtw-count { font-size: 11px; color: #aaa; }
-#rt-widget .rtw-n { background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; color: #666; font-size: 15px; line-height: 1; }
-#rt-widget .rtw-n:hover { background: #f2f2f2; }
+#rt-widget .rtw-pt { font-size: 13px; font-weight: 500; color: var(--fg-name); margin: 0 0 2px; line-height: 1.3; }
+#rt-widget .rtw-pd { font-size: 11px; color: var(--fg-dimmer); margin: 0; }
+#rt-widget .rtw-f { display: flex; align-items: center; justify-content: space-between; padding: 7px 13px; border-top: 0.5px solid var(--fg-ink); }
+#rt-widget .rtw-count { font-size: 11px; color: var(--fg-muted); }
+#rt-widget .rtw-n { background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; color: var(--fg-muted); font-size: 15px; line-height: 1; }
+#rt-widget .rtw-n:hover { background: var(--fg-ink); color: var(--accent); }
 #rt-widget .rtw-n:disabled { opacity: .25; cursor: default; }
-#rt-widget .rtw-load { padding: 20px 13px; font-size: 12px; color: #aaa; text-align: center; }
+#rt-widget .rtw-load { padding: 20px 13px; font-size: 12px; color: var(--fg-muted); text-align: center; }
 
 /* ── #viewer modal overlay mode ─────────────────────────────────────────────
    When a Substack-widget item is clicked we reuse the existing #viewer +
@@ -720,19 +806,20 @@ tr.w-count td {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(10,10,10,0.6);
+  background: rgba(0,0,0,0.75);
   z-index: 9998;
 }
 #viewer-backdrop.open { display: block; }
 #viewer.modal-mode {
   position: fixed;
   inset: 24px;
-  background: #fff;
+  background: var(--bg);
+  color: var(--fg);
   z-index: 9999;
   overflow: auto;
   padding: 28px 36px 40px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-  border: 1px solid #bbb;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  border: 0.5px solid var(--fg-ink-2);
   max-width: none;
   margin: 0;
 }
@@ -748,14 +835,14 @@ tr.w-count td {
   right: 14px;
   background: transparent;
   border: 0;
-  font: 600 22px/1 ui-sans-serif, system-ui, sans-serif;
-  color: #555;
+  font: 600 22px/1 var(--font-sans);
+  color: var(--fg-muted);
   cursor: pointer;
   padding: 6px 10px;
   z-index: 2;
 }
 #viewer.modal-mode #viewer-modal-close { display: block; }
-#viewer-modal-close:hover { color: #111; }
+#viewer-modal-close:hover { color: var(--accent); }
 @media (max-width: 639px) {
   #viewer.modal-mode { inset: 8px; padding: 24px 14px 28px; }
 }
@@ -883,10 +970,14 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
 const BUILD_TAG = "2026-04-14k";
-const SERVER_SIG = "Apache/2.4.57 (Ubuntu) Server at mikelacy.site Port 443 · build " + BUILD_TAG;
+const SERVER_SIG_LEFT = "Apache/2.4.57 (Ubuntu) · mikelacy.site:443";
+const SERVER_SIG_RIGHT = "build " + BUILD_TAG;
+// Back-compat shim for anything still reading SERVER_SIG as a flat string.
+const SERVER_SIG = SERVER_SIG_LEFT + " · " + SERVER_SIG_RIGHT;
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("address.server-sig").forEach(el => {
-    el.textContent = SERVER_SIG;
+    el.innerHTML = '<span class="sig-accent">' + SERVER_SIG_LEFT +
+                   '</span><span>' + SERVER_SIG_RIGHT + '</span>';
   });
 });
 
@@ -1078,15 +1169,20 @@ const ESC = s => String(s).replace(/[&<>"']/g, c => (
   { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
 ));
 
-// Bracketed Apache-style tag, monospaced and muted. Posts get a blank tag
-// because they read to users as articles, not files — but the tag slot is
-// reserved so the three-column grid stays aligned.
+// Unbracketed type badge inside a 0.5px-bordered pill (rendered by the
+// .type-badge CSS). Directories pick up the teal accent modifier so DIRs
+// read as the primary affordance in the listing. Posts get an empty badge
+// — they read as articles, not files — but the slot stays reserved so the
+// three-column grid keeps its alignment.
 function iconFor(type) {
-  return type === "dir"   ? "[DIR]"
-       : type === "link"  ? "[EXT]"
-       : type === "embed" ? "[APP]"
-       : type === "file"  ? "[TXT]"
-       :                    "[   ]";
+  const label =
+      type === "dir"   ? "DIR"
+    : type === "link"  ? "EXT"
+    : type === "embed" ? "APP"
+    : type === "file"  ? "TXT"
+    :                    "";
+  const cls = type === "dir" ? "type-badge dir" : "type-badge";
+  return `<span class="${cls}">${label}</span>`;
 }
 
 // Parent-directory row — styled consistently with the w-row layout so every
@@ -1095,7 +1191,7 @@ function parentDirRow(onClick) {
   const tr = document.createElement("tr");
   tr.className = "w-row w-parent first-in-section";
   tr.innerHTML =
-    `<td class="w-icon">[UP ]</td>` +
+    `<td class="w-icon"><span class="type-badge">UP</span></td>` +
     `<td class="w-main"><a href="#">Parent Directory</a></td>` +
     `<td class="w-date">—</td>`;
   tr.querySelector("a").addEventListener("click", e => { e.preventDefault(); onClick(); });
@@ -1611,7 +1707,7 @@ async function openPost(meta, fromP) {
       fmtDate(item.date) + ' · ' + wc.toLocaleString() + ' words · ~' + mins + ' min read · Rich Text';
     const cw = document.getElementById('content-window');
     cw.innerHTML = clean + (item.link
-      ? `<p style="margin-top:2em;font-size:13px;color:#6b6b6b">` +
+      ? `<p style="margin-top:2em;font-size:13px;color:var(--fg-muted)">` +
           `<a href="${esc(item.link)}" target="_blank" rel="noopener">Read on Substack ↗</a>` +
         `</p>`
       : '');
