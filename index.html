@@ -1831,6 +1831,10 @@ function buildWritingFragment() {
 // Each entry is dispatched to the right handler based on its type.
 function buildSubListingFragment(entries, path) {
   const frag = document.createDocumentFragment();
+  // Projects open in a new tab — each row becomes an external anchor whose
+  // href is the in-site hash route for that entry, so loading it in a new
+  // tab boots the site straight into the project's viewer (or external URL).
+  const openInNewTab = path === "/projects/";
   entries.forEach((item, i) => {
     let onActivate, external = false, href = null, badgeType = item.type;
     if (item.type === "dir") {
@@ -1845,6 +1849,15 @@ function buildSubListingFragment(entries, path) {
       href = item.href;
     } else {
       onActivate = () => goText(item.name, path);
+    }
+    if (openInNewTab && item.type !== "link") {
+      // Compute the hash route this entry would resolve to via stateFromHash().
+      let route;
+      if (item.type === "dir")        route = path + item.name + "/";
+      else if (item.type === "post")  route = path + item.file;
+      else                            route = path + item.name; // embed | file
+      external = true;
+      href = "#" + route;
     }
     frag.appendChild(buildExpRow({
       type: badgeType,
