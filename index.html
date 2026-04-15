@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026-04-14k -->
+<!-- build: 2026-04-15a -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -809,13 +809,20 @@ tr.w-count td {
 }
 #viewer-backdrop.open { display: block; }
 #viewer.modal-mode {
+  /* Narrow centered column — articles should feel like a reading modal
+     layered over the listing, not a full-bleed overlay. */
   position: fixed;
-  inset: 24px;
+  top: 32px;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(680px, calc(100vw - 32px));
+  inset: auto;
   background: var(--bg);
   color: var(--fg);
   z-index: 9999;
   overflow: auto;
-  padding: 28px 36px 40px;
+  padding: 28px 32px 40px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.7);
   border: 0.5px solid var(--fg-ink-2);
   max-width: none;
@@ -842,8 +849,176 @@ tr.w-count td {
 #viewer.modal-mode #viewer-modal-close { display: block; }
 #viewer-modal-close:hover { color: var(--accent); }
 @media (max-width: 639px) {
-  #viewer.modal-mode { inset: 8px; padding: 24px 14px 28px; }
+  #viewer.modal-mode {
+    top: 8px; bottom: 8px;
+    width: calc(100vw - 16px);
+    padding: 24px 14px 28px;
+  }
 }
+
+/* ── README preface ────────────────────────────────────────────────────────
+   Pinned above the directory listing on the root view. Renders the site's
+   README.md through the same markdown pipeline as the text viewer so "who is
+   this site" reads first, before visitors have to click anything. */
+#readme-preface {
+  display: none;
+  margin-bottom: 2.25rem;
+  padding-bottom: 2.25rem;
+  border-bottom: 0.5px solid var(--fg-ink-2);
+}
+#readme-preface.show { display: block; }
+#readme-preface h1,
+#readme-preface h2,
+#readme-preface h3 {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg-strong);
+  line-height: 1.25;
+}
+#readme-preface h1 { font-size: 20px; margin: 0 0 1rem; }
+#readme-preface h2 {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin: 1.6em 0 .6em;
+  font-weight: 500;
+}
+#readme-preface h3 { font-size: 14px; margin: 1.2em 0 .4em; }
+#readme-preface p {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--fg);
+  margin: 0 0 0.9em;
+}
+#readme-preface ul,
+#readme-preface ol {
+  font-size: 13.5px;
+  line-height: 1.65;
+  margin: 0 0 0.9em 1.3em;
+  color: var(--fg);
+}
+#readme-preface li { margin-bottom: 0.3em; }
+#readme-preface a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(122,182,160,0.35);
+}
+#readme-preface a:hover { color: var(--accent-hover); text-decoration-color: var(--accent-hover); }
+#readme-preface strong { color: var(--fg-strong); font-weight: 600; }
+#readme-preface em { font-style: italic; }
+#readme-preface hr { border: none; border-top: 0.5px solid var(--fg-ink); margin: 1.4em 0; }
+#readme-preface code {
+  background: var(--fg-ink);
+  color: var(--fg-strong);
+  padding: 0 3px;
+  font-size: 12.5px;
+}
+
+/* ── Inline expansion rows ────────────────────────────────────────────────
+   When a root-level entry is clicked we reveal its underlying content in
+   place instead of navigating. The expansion row spans all three columns,
+   left-padded to align with the name column so the content visually belongs
+   to the row above. */
+tr.w-expansion td {
+  padding: 2px 0 1.5rem 58px;
+  border-top: none;
+  background: rgba(255,255,255,0.012);
+  vertical-align: top;
+}
+@media (max-width: 639px) {
+  tr.w-expansion td { padding-left: 50px; }
+}
+tr.w-expansion .exp-wrap { padding-right: 8px; }
+tr.w-expansion .exp-section {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  font-weight: 500;
+  margin: 14px 0 6px;
+}
+tr.w-expansion .exp-section:first-child { margin-top: 2px; }
+tr.w-expansion .exp-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 92px;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 0.5px solid var(--fg-ink);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+tr.w-expansion .exp-row:hover { background: var(--bg-hover); }
+tr.w-expansion .exp-row.first { border-top: none; }
+tr.w-expansion .exp-badge {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 0.5px solid var(--badge-border);
+  padding: 3px 5px;
+  border-radius: 3px;
+  color: var(--fg-muted);
+  height: fit-content;
+  text-align: center;
+  margin-top: 1px;
+  min-width: 30px;
+}
+tr.w-expansion .exp-badge.dir  { color: var(--accent); border-color: var(--accent-bg); }
+tr.w-expansion .exp-body { min-width: 0; }
+tr.w-expansion .exp-name {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 13.5px;
+  color: var(--fg-name);
+  text-decoration: none;
+  display: block;
+  word-break: break-word;
+  letter-spacing: -0.01em;
+}
+tr.w-expansion .exp-row:hover .exp-name { color: var(--accent); }
+tr.w-expansion .exp-desc {
+  font-family: var(--font-mono);
+  color: var(--fg-desc);
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-top: 3px;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+tr.w-expansion .exp-date {
+  white-space: nowrap;
+  color: var(--fg-dimmer);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  padding-top: 3px;
+  letter-spacing: 0.02em;
+}
+tr.w-expansion .exp-pre {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--fg);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  padding-right: 8px;
+}
+tr.w-expansion .exp-pre a { color: var(--accent); }
+tr.w-expansion .exp-pre a:hover { color: var(--accent-hover); }
+tr.w-expansion .exp-loading {
+  color: var(--fg-muted);
+  font-style: italic;
+  font-size: 12.5px;
+  padding: 8px 0;
+}
+
+/* When a row is expanded, highlight its name so the open/closed state is
+   obvious at a glance without needing a caret column. */
+tr.w-row.is-expanded td.w-main a { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -851,6 +1026,10 @@ tr.w-count td {
 <div id="breadcrumb"></div>
 
 <div id="listing">
+  <!-- README preface — populated and shown only on the root view. Lives
+       inside #listing so it gets hidden automatically whenever the listing
+       is replaced by the post/text/embed viewers. -->
+  <div id="readme-preface" aria-label="About Mike Lacy"></div>
   <h1 id="dir-title">Index of /</h1>
   <hr>
   <table id="dir-table">
@@ -969,7 +1148,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-14k";
+const BUILD_TAG = "2026-04-15a";
 const SERVER_SIG_LEFT = "Apache/2.4.57 (Ubuntu) · mikelacy.site:443";
 const SERVER_SIG_RIGHT = "build " + BUILD_TAG;
 // Back-compat shim for anything still reading SERVER_SIG as a flat string.
@@ -1096,6 +1275,17 @@ function stateFromHash(h) {
   return { view:'dir', path:'/' };
 }
 function restoreFromState(s) {
+  // If the modal is currently open and the visitor is navigating anywhere
+  // other than another article, just close the modal — the pane behind it
+  // was captured in savedModalState and is already painted underneath, so we
+  // avoid an unnecessary re-render (which would lose inline expansions).
+  const viewer = document.getElementById('viewer');
+  const modalOpen = viewer && viewer.classList.contains('modal-mode');
+  if (modalOpen && (!s || s.view !== 'post')) {
+    closeArticleModal();
+    return;
+  }
+
   if (!s) { render('/', true); return; }
   if (s.view === 'dir')   { render(s.path || '/', true); return; }
   if (s.view === 'post')  {
@@ -1110,7 +1300,11 @@ function restoreFromState(s) {
   render('/', true);
 }
 window.addEventListener('popstate', e => {
-  // If popstate carries our saved state, use it; otherwise derive from hash.
+  // history.back()/forward() fires both popstate and hashchange. We handle
+  // the restore here; suppress the duplicate hashchange so it doesn't
+  // double-fire render('/') and wipe any inline expansions.
+  suppressHashChange = true;
+  setTimeout(() => { suppressHashChange = false; }, 0);
   if (e.state && e.state.view) restoreFromState(e.state);
   else restoreFromState(stateFromHash(location.hash));
 });
@@ -1270,9 +1464,52 @@ function renderWriting() {
   tbody.appendChild(count);
 }
 
+// ── README preface ──────────────────────────────────────────────────────────
+// Pinned above the root listing. Fetched once and cached; subsequent renders
+// just toggle the `show` class so there's no re-fetch thrash as the visitor
+// navigates in and out of the root.
+
+let README_CACHE = null;
+let README_FETCH = null;
+
+function renderReadmePreface() {
+  const host = document.getElementById("readme-preface");
+  if (!host) return;
+  host.classList.add("show");
+  if (README_CACHE !== null) { host.innerHTML = README_CACHE; return; }
+  if (README_FETCH) return; // fetch in flight, don't double-fire
+  host.innerHTML = '<p class="loading">Loading…</p>';
+  README_FETCH = fetch("./README.md", { cache: "no-cache" })
+    .then(r => r.ok ? r.text() : Promise.reject(r.status))
+    .then(txt => {
+      README_CACHE = renderMarkdown(txt);
+      host.innerHTML = README_CACHE;
+      host.querySelectorAll('a').forEach(a => {
+        const href = a.getAttribute('href') || '';
+        if (/^https?:/i.test(href)) { a.target = '_blank'; a.rel = 'noopener'; }
+        // Internal markdown links like ./projects/... stay as plain anchors;
+        // we don't hijack them because there's no in-app viewer for them yet.
+      });
+    })
+    .catch(() => { host.textContent = "[README.md could not be loaded]"; });
+}
+
+function hideReadmePreface() {
+  const host = document.getElementById("readme-preface");
+  if (host) host.classList.remove("show");
+}
+
+// ── inline-expansion state ──────────────────────────────────────────────────
+// Tracks which root-level entries are currently expanded so re-renders (e.g.
+// after a popstate back to root) restore the open state without the visitor
+// having to re-click.
+const expandedRoot = new Set();
+
 // ── generic directory render ─────────────────────────────────────────────────
 
 function render(path) {
+  if (path === "/") { renderRoot(); return; }
+  hideReadmePreface();
   if (path === "/writing/") { renderWriting(); renderBreadcrumb(path, null); return; }
 
   const entries = dirs[path];
@@ -1343,6 +1580,213 @@ function render(path) {
       tbody.appendChild(dtr);
     }
   });
+}
+
+// ── root render — README preface + expandable items ────────────────────────
+// Every entry under `/` becomes an accordion-style row: its content reveals
+// inline beneath the row rather than swapping the listing out for a new
+// view. This keeps the visitor oriented (README is always visible above) and
+// turns the front page into a single browsable document.
+//
+// README is hoisted above the listing as a preface and filtered out of the
+// rows below, since rendering it in both places would be redundant.
+
+function renderRoot() {
+  renderReadmePreface();
+  renderBreadcrumb("/", null);
+  show("listing");
+  document.title = "Index of /";
+  document.getElementById("dir-title").textContent = "Index of /";
+
+  const tbody = document.getElementById("dir-body");
+  tbody.innerHTML = "";
+
+  const entries = (dirs["/"] || []).filter(e => e.name !== "README");
+
+  entries.forEach((item, i) => {
+    const displayName = item.type === "dir" ? item.name + "/" : item.name;
+    const tr = document.createElement("tr");
+    tr.className = "w-row" + (i === 0 ? " first-in-section" : "");
+    tr.innerHTML =
+      `<td class="w-icon">${iconFor(item.type)}</td>` +
+      `<td class="w-main"><a href="#">${ESC(displayName)}</a></td>` +
+      `<td class="w-date">${ESC(item.date || "")}</td>`;
+
+    const a = tr.querySelector("a");
+    const toggle = () => toggleRootExpansion(item, tr);
+    a.addEventListener("click", e => { e.preventDefault(); toggle(); });
+    tbody.appendChild(tr);
+
+    let descRow = null;
+    if (item.desc) {
+      descRow = document.createElement("tr");
+      descRow.className = "w-desc-row";
+      descRow.innerHTML =
+        `<td colspan="3"><span class="w-desc-label">Description:</span>${ESC(item.desc)}</td>`;
+      descRow.style.cursor = "pointer";
+      descRow.addEventListener("click", toggle);
+      tbody.appendChild(descRow);
+    }
+
+    // Restore any previously-open expansion so navigating back to root
+    // preserves the visitor's place.
+    if (expandedRoot.has(item.name)) {
+      tr.classList.add("is-expanded");
+      insertExpansionRow(item, descRow || tr);
+    }
+  });
+}
+
+// Toggle handler: collapse an open expansion, or open a new one after the
+// row's description (or the row itself, for descriptionless entries).
+function toggleRootExpansion(item, row) {
+  const descRow = row.nextElementSibling && row.nextElementSibling.classList.contains("w-desc-row")
+    ? row.nextElementSibling
+    : null;
+  const anchor = descRow || row;
+  const maybeExp = anchor.nextElementSibling;
+
+  if (maybeExp && maybeExp.classList.contains("w-expansion") && maybeExp.dataset.name === item.name) {
+    maybeExp.remove();
+    row.classList.remove("is-expanded");
+    expandedRoot.delete(item.name);
+    return;
+  }
+  row.classList.add("is-expanded");
+  expandedRoot.add(item.name);
+  insertExpansionRow(item, anchor);
+}
+
+function insertExpansionRow(item, afterRow) {
+  const tr = document.createElement("tr");
+  tr.className = "w-expansion";
+  tr.dataset.name = item.name;
+  tr.innerHTML = `<td colspan="3"><div class="exp-wrap"></div></td>`;
+  afterRow.parentNode.insertBefore(tr, afterRow.nextSibling);
+  renderExpansionContent(item, tr.querySelector(".exp-wrap"));
+}
+
+// Build the inline content that appears when a root entry is expanded. Each
+// directory type gets its own sub-listing; plain text files render as a <pre>.
+function renderExpansionContent(item, container) {
+  if (item.type === "dir" && item.name === "writing") {
+    container.appendChild(buildWritingFragment());
+    return;
+  }
+  if (item.type === "dir") {
+    const subPath = "/" + item.name + "/";
+    container.appendChild(buildSubListingFragment(dirs[subPath] || [], subPath));
+    return;
+  }
+  if (item.type === "file" && item.name === "contact.txt") {
+    // files["contact.txt"] already contains the sanitized <a> tags we want.
+    container.innerHTML = `<pre class="exp-pre">${files["contact.txt"]}</pre>`;
+    return;
+  }
+  if (item.type === "file" && item.name === "robots.txt") {
+    container.innerHTML = `<div class="exp-loading">Loading…</div>`;
+    fetch("./robots.txt", { cache: "no-cache" })
+      .then(r => r.ok ? r.text() : Promise.reject(r.status))
+      .then(txt => {
+        const esc = txt.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        container.innerHTML = `<pre class="exp-pre">${esc}</pre>`;
+      })
+      .catch(() => { container.innerHTML = "<div class='exp-loading'>[robots.txt could not be loaded]</div>"; });
+    return;
+  }
+  container.innerHTML = `<div class="exp-loading">[no preview available]</div>`;
+}
+
+// /writing/ inlined — tiered sections, same structure as the standalone view.
+// Clicking any post opens the narrow article modal without a page swap.
+function buildWritingFragment() {
+  const frag = document.createDocumentFragment();
+  const tierNames = {
+    1: "TIER 1 — POSTS THAT CHANGED NASHVILLE POLICY",
+    2: "TIER 2 — MAJOR INVESTIGATIONS & EXTERNAL PUBLICATION",
+    3: "TIER 3 — DEEP INVESTIGATIONS & SERIES ANCHORS",
+    4: "TIER 4 — PHILOSOPHY, VOICE, IDENTITY",
+  };
+  const postsByTier = { 1:[], 2:[], 3:[], 4:[] };
+  POSTS.forEach(p => { if (postsByTier[p.tier]) postsByTier[p.tier].push(p); });
+  [1,2,3,4].forEach(t => postsByTier[t].sort((a,b) => b.d.localeCompare(a.d)));
+
+  [1,2,3,4].forEach(tier => {
+    const posts = postsByTier[tier];
+    if (!posts.length) return;
+    const h = document.createElement("div");
+    h.className = "exp-section";
+    h.textContent = tierNames[tier];
+    frag.appendChild(h);
+    posts.forEach((p, i) => frag.appendChild(buildExpRow({
+      type: "post",
+      name: p.t,
+      date: p.d,
+      desc: p.desc,
+      onActivate: () => goPost(p, "/writing/"),
+    }, i === 0)));
+  });
+  return frag;
+}
+
+// Generic sub-listing (used for /projects/ and /experiential-ontology/).
+// Each entry is dispatched to the right handler based on its type.
+function buildSubListingFragment(entries, path) {
+  const frag = document.createDocumentFragment();
+  entries.forEach((item, i) => {
+    let onActivate, external = false, href = null, badgeType = item.type;
+    if (item.type === "dir") {
+      onActivate = () => goDir(path + item.name + "/");
+    } else if (item.type === "post") {
+      const meta = POST_BY_FILE[item.file] || { f: item.file, t: item.name, d: item.date, desc: item.desc };
+      onActivate = () => goPost(meta, path);
+    } else if (item.type === "embed") {
+      onActivate = () => goEmbed(item, path);
+    } else if (item.type === "link") {
+      external = true;
+      href = item.href;
+    } else {
+      onActivate = () => goText(item.name, path);
+    }
+    frag.appendChild(buildExpRow({
+      type: badgeType,
+      name: item.name + (item.type === "dir" ? "/" : ""),
+      date: item.date,
+      desc: item.desc,
+      external, href, onActivate,
+    }, i === 0));
+  });
+  return frag;
+}
+
+// Single expanded-row DOM element. Shared by /writing/ and the generic sub
+// listings so both inherit the same hover/typography rhythm.
+function buildExpRow({ type, name, date, desc, external, href, onActivate }, first) {
+  const row = document.createElement(external ? "a" : "div");
+  row.className = "exp-row" + (first ? " first" : "");
+  if (external) {
+    row.href = href;
+    row.target = "_blank";
+    row.rel = "noopener noreferrer";
+    row.style.color = "inherit";
+    row.style.textDecoration = "none";
+  } else {
+    row.addEventListener("click", onActivate);
+  }
+  const badgeLabel =
+      type === "dir"   ? "DIR"
+    : type === "link"  ? "EXT"
+    : type === "embed" ? "APP"
+    : type === "file"  ? "TXT"
+    :                    "";
+  row.innerHTML =
+    `<span class="exp-badge${type === "dir" ? " dir" : ""}">${badgeLabel}</span>` +
+    `<div class="exp-body">` +
+      `<span class="exp-name">${ESC(name)}${external ? " ↗" : ""}</span>` +
+      (desc ? `<div class="exp-desc">${ESC(desc)}</div>` : "") +
+    `</div>` +
+    `<div class="exp-date">${ESC(date || "")}</div>`;
+  return row;
 }
 
 // ── text viewer ──────────────────────────────────────────────────────────────
@@ -1535,13 +1979,89 @@ function parseFrontmatter(raw) {
   return { meta, body: m[2] };
 }
 
+// ── shared article modal ────────────────────────────────────────────────────
+// A single narrow modal overlay used for every article — both the /writing/
+// corpus (openPost) and the Rich Text RSS items. Before the modal opens we
+// snapshot the current viewer state so closing the modal returns the visitor
+// exactly where they were (listing, sub-listing, prior post, etc).
+
+let savedModalState = null;
+
+function ensureListingBehindModal() {
+  // When the modal is triggered via a direct hash link (no backdrop pane yet
+  // rendered), we paint the root listing underneath so the close action has
+  // somewhere sensible to land.
+  const panes = ["listing","viewer","textviewer","embedviewer"];
+  const visible = panes.find(p => document.getElementById(p).style.display !== "none");
+  if (!visible || visible === "viewer") {
+    show("listing");
+    const body = document.getElementById("dir-body");
+    if (!body.children.length) renderRoot();
+  }
+}
+
+function openArticleModal({ filename, metaLine, html, title }) {
+  const viewer   = document.getElementById("viewer");
+  const backdrop = document.getElementById("viewer-backdrop");
+
+  if (!viewer.classList.contains("modal-mode")) {
+    ensureListingBehindModal();
+    const panes = ["listing","viewer","textviewer","embedviewer"];
+    const visiblePane = panes.find(p => document.getElementById(p).style.display !== "none") || "listing";
+    savedModalState = {
+      pane:        visiblePane,
+      filename:    document.getElementById("v-filename").textContent,
+      meta:        document.getElementById("v-meta").textContent,
+      contentHtml: document.getElementById("content-window").innerHTML,
+      title:       document.title,
+      scrollY:     window.scrollY,
+    };
+  }
+
+  document.getElementById("v-filename").textContent = filename || "";
+  document.getElementById("v-meta").textContent     = metaLine || "";
+  const cw = document.getElementById("content-window");
+  cw.innerHTML = html || "";
+  cw.scrollTop = 0;
+  if (title) document.title = title;
+
+  backdrop.classList.add("open");
+  viewer.classList.add("modal-mode");
+  viewer.style.display = "block";
+  viewer.scrollTop = 0;
+  document.body.style.overflow = "hidden";
+}
+
+function closeArticleModal() {
+  const viewer   = document.getElementById("viewer");
+  const backdrop = document.getElementById("viewer-backdrop");
+  if (!viewer.classList.contains("modal-mode")) return false;
+
+  viewer.classList.remove("modal-mode");
+  backdrop.classList.remove("open");
+  document.body.style.overflow = "";
+
+  if (savedModalState) {
+    document.getElementById("v-filename").textContent  = savedModalState.filename;
+    document.getElementById("v-meta").textContent      = savedModalState.meta;
+    document.getElementById("content-window").innerHTML = savedModalState.contentHtml;
+    document.title = savedModalState.title;
+    show(savedModalState.pane);
+    window.scrollTo(0, savedModalState.scrollY || 0);
+    savedModalState = null;
+  } else {
+    show("listing");
+  }
+  return true;
+}
+
 async function openPost(meta, fromP) {
-  show("viewer");
-  renderBreadcrumb(fromP, meta.f);
-  document.getElementById('v-filename').textContent = meta.t;
-  document.getElementById('v-meta').textContent = meta.d + ' · loading…';
-  document.getElementById('content-window').innerHTML = '<div class="loading">fetching posts/' + meta.f + ' …</div>';
-  document.title = meta.t;
+  openArticleModal({
+    filename: meta.t,
+    metaLine: (meta.d || "") + " · loading…",
+    html:     '<div class="loading">fetching posts/' + meta.f + ' …</div>',
+    title:    meta.t,
+  });
 
   // Cache-bust with the build tag so a stale CDN 404 on first deploy of a
   // renamed post doesn't strand the reader on an "HTTP 404" page.
@@ -1571,7 +2091,7 @@ async function openPost(meta, fromP) {
       'If you opened this file directly (file://), your browser may block fetch. ' +
       'Serve with <code>python3 -m http.server</code> and visit http://localhost:8000.<br><br>' +
       '<small>' + err.message + '</small></div>';
-    document.getElementById('v-meta').textContent = meta.d + ' · error';
+    document.getElementById('v-meta').textContent = (meta.d || '') + ' · error';
   }
 }
 
@@ -1694,73 +2214,37 @@ async function openPost(meta, fromP) {
     }
   }
 
-  // ── modal overlay — reuses #viewer so posts get the same typography,
-  //    column widths, subscribe-box styling, and image handling as /writing/
-  //    posts. We snapshot whatever is currently in #viewer before hijacking
-  //    it so closing the modal restores the previous state perfectly.
-  let savedState = null;
-
+  // Rich Text items are rendered through the shared article modal so they
+  //    inherit the same narrow-column typography as /writing/ posts. The only
+  //    RSS-specific bit is appending a "Read on Substack ↗" footer since the
+  //    feed's HTML body doesn't carry a canonical link of its own.
   function openItemModal(item) {
     if (!item) return;
-    const viewer   = document.getElementById('viewer');
-    const backdrop = document.getElementById('viewer-backdrop');
-
-    const panes = ['listing','viewer','textviewer','embedviewer'];
-    const visiblePane = panes.find(p => document.getElementById(p).style.display !== 'none') || 'listing';
-    savedState = {
-      pane:        visiblePane,
-      filename:    document.getElementById('v-filename').textContent,
-      meta:        document.getElementById('v-meta').textContent,
-      contentHtml: document.getElementById('content-window').innerHTML,
-      title:       document.title,
-      scrollY:     window.scrollY,
-    };
-
     const rawBody = item.content || '<p>No preview available.</p>';
     const clean   = sanitize(rawBody);
     const wc      = wordCount(rawBody);
     const mins    = Math.max(1, Math.ceil(wc / 220));
-
-    document.getElementById('v-filename').textContent = item.title;
-    document.getElementById('v-meta').textContent =
-      fmtDate(item.date) + ' · ' + wc.toLocaleString() + ' words · ~' + mins + ' min read · Rich Text';
-    const cw = document.getElementById('content-window');
-    cw.innerHTML = clean + (item.link
+    const footer  = item.link
       ? `<p style="margin-top:2em;font-size:13px;color:var(--fg-muted)">` +
           `<a href="${esc(item.link)}" target="_blank" rel="noopener">Read on Substack ↗</a>` +
         `</p>`
-      : '');
-    cw.scrollTop = 0;
-    document.title = item.title;
-
-    backdrop.classList.add('open');
-    viewer.classList.add('modal-mode');
-    viewer.style.display = 'block';
-    viewer.scrollTop = 0;
-    document.body.style.overflow = 'hidden';
+      : '';
+    openArticleModal({
+      filename: item.title,
+      metaLine: fmtDate(item.date) + ' · ' + wc.toLocaleString() + ' words · ~' + mins + ' min read · Rich Text',
+      html:     clean + footer,
+      title:    item.title,
+    });
   }
 
-  function closeModal() {
-    const viewer   = document.getElementById('viewer');
-    const backdrop = document.getElementById('viewer-backdrop');
-    if (!viewer.classList.contains('modal-mode')) return;
-
-    viewer.classList.remove('modal-mode');
-    backdrop.classList.remove('open');
-    document.body.style.overflow = '';
-
-    if (savedState) {
-      document.getElementById('v-filename').textContent  = savedState.filename;
-      document.getElementById('v-meta').textContent      = savedState.meta;
-      document.getElementById('content-window').innerHTML = savedState.contentHtml;
-      document.title = savedState.title;
-      show(savedState.pane);
-      window.scrollTo(0, savedState.scrollY || 0);
-      savedState = null;
-    } else {
-      show('listing');
-    }
-  }
+  // If the modal was opened via goPost (URL pushed to history), closing it
+  // should step back one entry so the URL and visible view stay in sync.
+  // If the modal came from the RT widget (no history push) we just tear it
+  // down in place.
+  const closeModal = () => {
+    if (history.state && history.state.view === 'post') history.back();
+    else closeArticleModal();
+  };
 
   // Header click toggles the collapsed state. The external-link anchor inside
   // the header stops propagation so clicking the ↗ icon still opens Substack
@@ -1795,7 +2279,15 @@ async function openPost(meta, fromP) {
 (function init() {
   if (location.hash && location.hash.length > 1) {
     const s = stateFromHash(location.hash);
-    pushNav(s, true);
+    // If the visitor deep-links to a post (modal view), seed a root entry
+    // underneath so closing the modal has somewhere to step back to instead
+    // of stranding them on a history dead-end.
+    if (s.view && s.view !== 'dir') {
+      pushNav({ view: 'dir', path: '/' }, true);
+      pushNav(s);
+    } else {
+      pushNav(s, true);
+    }
     restoreFromState(s);
     return;
   }
