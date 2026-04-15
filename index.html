@@ -201,7 +201,7 @@ td.w-date {
 /* Description row — full width under the entry, aligned with the name
    column via left padding. The "Description:" inline label from the old
    apache-style view is dropped; descriptions read as a plain subtitle. */
-tr.w-desc-row td {
+#dir-table tr.w-desc-row td {
   font-family: var(--font-mono);
   color: var(--fg-desc);
   font-size: 13px;
@@ -214,7 +214,7 @@ tr.w-desc-row td {
   max-width: 100%;
 }
 @media (max-width: 639px) {
-  tr.w-desc-row td { padding-left: 50px; }
+  #dir-table tr.w-desc-row td { padding-left: 50px; }
 }
 tr.w-desc-row .w-desc-label { display: none; }
 /* Parent Directory — navigation chrome, keep it quiet. */
