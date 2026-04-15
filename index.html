@@ -458,6 +458,45 @@ tr.w-count td {
 
 #e-frame { width: 100%; height: calc(100vh - 130px); min-height: 420px; border: 0.5px solid var(--fg-ink-2); background: var(--bg); margin-top: 8px; }
 
+/* ── embed (APP) viewer — full-bleed ───────────────────────────────────────
+   Apps aren't prose; the 560px reading column strangles them. When the
+   embedviewer is the active pane, break it out of the body's 960px cap
+   and span the full viewport so iframes (e.g. the invoice viewer) have
+   room to actually be used. The chrome (filename, meta, open-in-new-tab)
+   stays centered within the normal 960px rhythm so the header reads the
+   same as every other view. An "open in new tab ↗" link sits in the
+   chrome so visitors who'd rather use the app in its own window can. */
+#embedviewer {
+  max-width: none;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+#embedviewer > .v-chrome,
+#embedviewer > hr,
+#embedviewer > address.server-sig {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 639px) {
+  #embedviewer { padding: 0 14px; }
+}
+.v-open-ext {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+  margin-left: 10px;
+}
+.v-open-ext:hover { color: var(--accent-hover); }
+
 .loading { color: var(--fg-muted); font-style: italic; padding: 16px 0; }
 .error { color: #d98f8f; padding: 16px 0; }
 
@@ -1111,7 +1150,10 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
 <div id="embedviewer">
   <div class="v-chrome">
     <span class="v-filename" id="e-filename"></span>
-    <span class="v-meta" id="e-meta"></span>
+    <span class="v-meta">
+      <span id="e-meta"></span>
+      <a id="e-open-ext" class="v-open-ext" href="#" target="_blank" rel="noopener noreferrer">open in new tab ↗</a>
+    </span>
   </div>
   <hr>
   <iframe id="e-frame" src="about:blank"
@@ -1187,7 +1229,7 @@ const POST_BY_FILE = Object.fromEntries(POSTS.map(p => [p.f, p]));
 // into every <address class="server-sig"> on the page so you can tell at a
 // glance whether the running page came from the latest deploy or a cached
 // copy. Also surfaced in <!-- build --> so view-source confirms it too.
-const BUILD_TAG = "2026-04-15a";
+const BUILD_TAG = "2026-04-15b";
 const SERVER_SIG_LEFT = "Apache/2.4.57 (Ubuntu) · mikelacy.site:443";
 const SERVER_SIG_RIGHT = "build " + BUILD_TAG;
 // Back-compat shim for anything still reading SERVER_SIG as a flat string.
@@ -1852,6 +1894,10 @@ function openEmbed(item, fromP) {
   renderBreadcrumb(fromP, item.name);
   document.getElementById("e-filename").textContent = item.name;
   document.getElementById("e-meta").textContent = item.date + ' · ' + (item.desc || '');
+  // Point the "open in new tab" affordance at the app's source URL so
+  // visitors can pop the app out into its own window if they'd rather not
+  // run it inside the full-bleed embed viewer.
+  document.getElementById("e-open-ext").href = item.src;
   const frame = document.getElementById("e-frame");
   if (frame.src !== item.src) frame.src = item.src;
   document.title = item.name;
