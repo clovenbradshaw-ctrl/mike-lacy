@@ -851,12 +851,9 @@ tr.w-count td {
   /* Narrow centered column — articles should feel like a reading modal
      layered over the listing, not a full-bleed overlay. */
   position: fixed;
-  top: 32px;
-  bottom: 32px;
-  left: 50%;
+  inset: 32px auto 32px 50%;
   transform: translateX(-50%);
   width: min(680px, calc(100vw - 32px));
-  inset: auto;
   background: var(--bg);
   color: var(--fg);
   z-index: 9999;
