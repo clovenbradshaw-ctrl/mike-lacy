@@ -1004,6 +1004,7 @@ const dirs = {
     { type:"link", name:"the-experience-engine",        href:"https://experientialontology.org/",                                                 date:"2026-04-14", desc:"A generative model of how experiences are assembled from ground, figure, and pattern ↗" },
   ],
   "/projects/": [
+    { type:"file", name:"the-village",            date:"2023-11-01", desc:"Community collaboration platform designed inside Nashville's Mayor's Office of Community Safety — 40+ agencies, $5M across 50+ contracts, $2M federal DOJ grant" },
     { type:"post", name:"eviction-tracker",       file:"188017123.nashville-eviction-tracker-open-source.md", date:"2026-02-15", desc:"Open-source scraper + dashboard for every eviction detainer filed in Davidson County — 2,243 lines of Python, released so anyone can run it" },
     { type:"post", name:"naibor",                 file:"193411754.we-built-the-surveillance-app-nashvilles.md", date:"2026-04-07", desc:"Civic-tech web app that turns Metro's own surveillance methods back on Metro officials — what they do with their time, who they meet, how they vote" },
     { type:"embed", name:"metro-invoice-viewer",  src:"https://clovenbradshaw-ctrl.github.io/53902028/",         date:"2025-10-27", desc:"Searchable archive of every Office of Homeless Services ARPA invoice (BU 53902028) — 207 invoices, $3.06M, Aug '24 – Oct '25" },
@@ -1379,6 +1380,21 @@ function openText(name, fromP) {
         });
       })
       .catch(() => { body.textContent = "[README.md could not be loaded]"; });
+  } else if (name === "the-village") {
+    // Fetch the project page and render it through the same minimal markdown
+    // pipeline as README so the sub-page inherits the text-viewer chrome.
+    body.innerHTML = '<p class="loading">Loading…</p>';
+    fetch("./projects/the-village.md", { cache: "no-cache" })
+      .then(r => r.ok ? r.text() : Promise.reject(r.status))
+      .then(txt => {
+        body.innerHTML = renderMarkdown(txt);
+        body.querySelectorAll('a').forEach(a => {
+          if (a.href && /^https?:/i.test(a.getAttribute('href') || '')) {
+            a.target = '_blank'; a.rel = 'noopener';
+          }
+        });
+      })
+      .catch(() => { body.textContent = "[the-village.md could not be loaded]"; });
   } else if (name === "robots.txt") {
     // Fetch the real robots.txt from the site root so the viewer can't drift
     // from what crawlers actually see.
