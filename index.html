@@ -862,11 +862,42 @@ tr.w-count td {
    this site" reads first, before visitors have to click anything. */
 #readme-preface {
   display: none;
-  margin-bottom: 2.25rem;
-  padding-bottom: 2.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
   border-bottom: 0.5px solid var(--fg-ink-2);
 }
 #readme-preface.show { display: block; }
+#readme-preface.is-expanded {
+  margin-bottom: 2.25rem;
+  padding-bottom: 2.25rem;
+}
+#readme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+}
+#readme-toggle:hover { color: var(--accent); }
+#readme-toggle .readme-caret {
+  display: inline-flex;
+  transition: transform 0.15s ease;
+}
+#readme-preface.is-expanded #readme-toggle .readme-caret { transform: rotate(90deg); }
+#readme-body { margin-top: 1rem; }
+#readme-body[hidden] { display: none; }
+#readme-body > :first-child { margin-top: 0; }
+#readme-body > :last-child { margin-bottom: 0; }
 #readme-preface h1,
 #readme-preface h2,
 #readme-preface h3 {
@@ -1029,7 +1060,15 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
   <!-- README preface — populated and shown only on the root view. Lives
        inside #listing so it gets hidden automatically whenever the listing
        is replaced by the post/text/embed viewers. -->
-  <div id="readme-preface" aria-label="About Mike Lacy"></div>
+  <div id="readme-preface" aria-label="About Mike Lacy">
+    <button type="button" id="readme-toggle" aria-expanded="false" aria-controls="readme-body">
+      <span class="readme-caret" aria-hidden="true">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5L3.5 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span>About</span>
+    </button>
+    <div id="readme-body" hidden></div>
+  </div>
   <h1 id="dir-title">Index of /</h1>
   <hr>
   <table id="dir-table">
@@ -1474,25 +1513,42 @@ let README_FETCH = null;
 
 function renderReadmePreface() {
   const host = document.getElementById("readme-preface");
-  if (!host) return;
+  const body = document.getElementById("readme-body");
+  if (!host || !body) return;
   host.classList.add("show");
-  if (README_CACHE !== null) { host.innerHTML = README_CACHE; return; }
+  if (README_CACHE !== null) { body.innerHTML = README_CACHE; return; }
   if (README_FETCH) return; // fetch in flight, don't double-fire
-  host.innerHTML = '<p class="loading">Loading…</p>';
+  body.innerHTML = '<p class="loading">Loading…</p>';
   README_FETCH = fetch("./README.md", { cache: "no-cache" })
     .then(r => r.ok ? r.text() : Promise.reject(r.status))
     .then(txt => {
       README_CACHE = renderMarkdown(txt);
-      host.innerHTML = README_CACHE;
-      host.querySelectorAll('a').forEach(a => {
+      body.innerHTML = README_CACHE;
+      body.querySelectorAll('a').forEach(a => {
         const href = a.getAttribute('href') || '';
         if (/^https?:/i.test(href)) { a.target = '_blank'; a.rel = 'noopener'; }
         // Internal markdown links like ./projects/... stay as plain anchors;
         // we don't hijack them because there's no in-app viewer for them yet.
       });
     })
-    .catch(() => { host.textContent = "[README.md could not be loaded]"; });
+    .catch(() => { body.textContent = "[README.md could not be loaded]"; });
 }
+
+// Wire the collapsible About toggle. Starts collapsed on every load; the
+// expansion state isn't persisted because the preface is short and visitors
+// usually want the listing first.
+(function initReadmeToggle() {
+  const host = document.getElementById("readme-preface");
+  const btn = document.getElementById("readme-toggle");
+  const body = document.getElementById("readme-body");
+  if (!host || !btn || !body) return;
+  btn.addEventListener("click", () => {
+    const expanded = host.classList.toggle("is-expanded");
+    btn.setAttribute("aria-expanded", String(expanded));
+    if (expanded) body.removeAttribute("hidden");
+    else body.setAttribute("hidden", "");
+  });
+})();
 
 function hideReadmePreface() {
   const host = document.getElementById("readme-preface");
