@@ -8,7 +8,7 @@ He publishes [*{Rich Text}*](./projects/rich-text.md), Nashville's independent a
 
 ## Background
 
-Before journalism, he spent two years in the **Mayor's Office of Community Safety**, where he coordinated a $2M federal grant from the DOJ, managed a $5M multi-source budget across 50+ contracts, built a relational database integrating 40+ agencies, and designed ["The Village"](./projects/the-village.md) — a community collaboration platform. He left city hall in November 2023.
+Before journalism, he spent two years in the **Mayor's Office of Community Safety**, where he coordinated a $2M federal grant from the DOJ, managed a $5M multi-source budget across 50+ contracts, built a relational database integrating 40+ agencies, and designed ["The Village"](#/projects/the-village) — a community collaboration platform. He left city hall in November 2023.
 
 Before that, five years managing webinar and video streaming operations for Fortune 500 clients at **BrightTALK** in New York — JP Morgan, HSBC, Dell — running a 15-person global team, building demand generation pipelines, and designing low-code automation that cut production setup time by 90%.
 
