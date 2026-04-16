@@ -92,7 +92,7 @@ address .sig-accent { color: var(--accent-muted); }
 address .server-sig-build { color: var(--accent-muted); }
 
 @media (max-width: 639px) {
-  body { padding: 1.75rem 14px 2rem; }
+  body { padding: 1.75rem 12px 2rem; }
 }
 
 /* ── Directory index — dark terminal ────────────────────────────────────────
@@ -118,8 +118,8 @@ col.c-icon { width: 58px; }
 col.c-name { width: auto; }
 col.c-date { width: 108px; }
 @media (max-width: 639px) {
-  col.c-icon { width: 50px; }
-  col.c-date { width: 92px; }
+  col.c-icon { width: 42px; }
+  col.c-date { width: 74px; }
 }
 /* Hide the table header — the mockup treats the listing as a content grid,
    not a spreadsheet. The dir-title above already labels what the rows are. */
@@ -141,6 +141,9 @@ td.w-icon {
   font-variant-numeric: tabular-nums;
   color: var(--fg-dim);
   padding-right: 14px;
+}
+@media (max-width: 639px) {
+  td.w-icon { padding-right: 8px; }
 }
 td.w-icon .type-badge {
   display: inline-block;
@@ -178,6 +181,9 @@ tr.w-row td {
 }
 tr.w-row.first-in-section td { border-top: none; }
 td.w-main { padding-right: 16px; }
+@media (max-width: 639px) {
+  td.w-main { padding-right: 8px; }
+}
 td.w-main a {
   font-family: var(--font-mono);
   font-weight: 500;
@@ -214,7 +220,7 @@ td.w-date {
   max-width: 100%;
 }
 @media (max-width: 639px) {
-  #dir-table tr.w-desc-row td { padding-left: 50px; }
+  #dir-table tr.w-desc-row td { padding-left: 42px; }
 }
 tr.w-desc-row .w-desc-label { display: none; }
 /* Parent Directory — navigation chrome, keep it quiet. */
@@ -235,8 +241,8 @@ tr.w-row:hover td { background: var(--bg-hover); }
 tr.w-row:hover td.w-icon { box-shadow: -2rem 0 0 var(--bg-hover); }
 tr.w-row:hover td.w-date { box-shadow:  2rem 0 0 var(--bg-hover); }
 @media (max-width: 639px) {
-  tr.w-row:hover td.w-icon { box-shadow: -14px 0 0 var(--bg-hover); }
-  tr.w-row:hover td.w-date { box-shadow:  14px 0 0 var(--bg-hover); }
+  tr.w-row:hover td.w-icon { box-shadow: -12px 0 0 var(--bg-hover); }
+  tr.w-row:hover td.w-date { box-shadow:  12px 0 0 var(--bg-hover); }
 }
 /* Footer count line — muted monospace, same family as the server sig. */
 tr.w-count td {
@@ -986,13 +992,10 @@ tr.w-count td {
 }
 
 /* ── EO promo ─────────────────────────────────────────────────────────────
-   Compact teaser between the About dropdown and the directory listing.
-   Links to the local Operator Helix animation and the off-site EO wiki. */
+   Pinned between the About dropdown and the directory listing. Shows the
+   Operator Helix animation inline by default; the header row collapses the
+   frame without navigating away. */
 #eo-promo {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px 12px;
   margin-bottom: 1.5rem;
   padding: 0.85rem 0;
   border-top: 0.5px solid var(--fg-ink-2);
@@ -1001,6 +1004,34 @@ tr.w-count td {
   font-size: 14px;
   line-height: 1.5;
 }
+#eo-promo .eo-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+#eo-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#eo-toggle:hover { color: var(--accent); }
+#eo-toggle .eo-caret {
+  display: inline-flex;
+  transition: transform 0.15s ease;
+}
+#eo-promo.is-expanded #eo-toggle .eo-caret { transform: rotate(90deg); }
 #eo-promo .eo-tag {
   color: var(--accent-muted);
   font-size: 11px;
@@ -1040,6 +1071,23 @@ tr.w-count td {
 @media (max-width: 639px) {
   #eo-promo .eo-wiki { margin-left: 0; }
 }
+#eo-frame-wrap {
+  margin-top: 0.85rem;
+  border: 0.5px solid var(--fg-ink-2);
+  border-radius: 2px;
+  overflow: hidden;
+  background: #080808;
+}
+#eo-frame-wrap[hidden] { display: none; }
+#eo-frame-wrap iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+}
+@media (max-width: 639px) {
+  #eo-frame-wrap iframe { height: 360px; }
+}
 
 /* ── Inline expansion rows ────────────────────────────────────────────────
    When a root-level entry is clicked we reveal its underlying content in
@@ -1053,7 +1101,8 @@ tr.w-expansion td {
   vertical-align: top;
 }
 @media (max-width: 639px) {
-  tr.w-expansion td { padding-left: 50px; }
+  tr.w-expansion td { padding-left: 34px; }
+  tr.w-expansion .exp-wrap { padding-right: 0; }
 }
 tr.w-expansion .exp-wrap { padding-right: 8px; }
 tr.w-expansion .exp-section {
@@ -1073,6 +1122,13 @@ tr.w-expansion .exp-row {
   border-top: 0.5px solid var(--fg-ink);
   cursor: pointer;
   transition: background-color 120ms ease;
+}
+@media (max-width: 639px) {
+  tr.w-expansion .exp-row {
+    grid-template-columns: 36px 1fr 70px;
+    gap: 8px;
+  }
+  tr.w-expansion .exp-badge { padding: 3px 4px; min-width: 28px; }
 }
 tr.w-expansion .exp-row:hover { background: var(--bg-hover); }
 tr.w-expansion .exp-row.first { border-top: none; }
@@ -1161,11 +1217,21 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
     </button>
     <div id="readme-body" hidden></div>
   </div>
-  <aside id="eo-promo" aria-label="Experiential Ontology">
-    <span class="eo-tag">EO</span>
-    <a class="eo-title" href="eo-animation.html">The Operator Helix</a>
-    <span class="eo-desc">— an animation of EO's nine operators.</span>
-    <a class="eo-wiki" href="https://experientialontology.org/" target="_blank" rel="noopener">EO wiki ↗</a>
+  <aside id="eo-promo" class="is-expanded" aria-label="Experiential Ontology">
+    <div class="eo-header">
+      <button type="button" id="eo-toggle" aria-expanded="true" aria-controls="eo-frame-wrap" title="Collapse / expand">
+        <span class="eo-caret" aria-hidden="true">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5L3.5 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <span class="eo-tag">EO</span>
+      <a class="eo-title" href="eo-animation.html">The Operator Helix</a>
+      <span class="eo-desc">— an animation of EO's nine operators.</span>
+      <a class="eo-wiki" href="https://experientialontology.org/" target="_blank" rel="noopener">EO wiki ↗</a>
+    </div>
+    <div id="eo-frame-wrap">
+      <iframe src="eo-animation.html" title="The Operator Helix" loading="eager" scrolling="no"></iframe>
+    </div>
   </aside>
   <h1 id="dir-title">Index of /</h1>
   <hr>
@@ -1740,6 +1806,22 @@ function hideReadmePreface() {
   const host = document.getElementById("readme-preface");
   if (host) host.classList.remove("show");
 }
+
+// Wire the Operator Helix collapse toggle. Starts expanded so visitors see
+// the animation immediately; clicking the caret collapses the iframe in place
+// without tearing it down, so it resumes at the same cycle when re-opened.
+(function initEoToggle() {
+  const host = document.getElementById("eo-promo");
+  const btn = document.getElementById("eo-toggle");
+  const frame = document.getElementById("eo-frame-wrap");
+  if (!host || !btn || !frame) return;
+  btn.addEventListener("click", () => {
+    const expanded = host.classList.toggle("is-expanded");
+    btn.setAttribute("aria-expanded", String(expanded));
+    if (expanded) frame.removeAttribute("hidden");
+    else frame.setAttribute("hidden", "");
+  });
+})();
 
 // ── inline-expansion state ──────────────────────────────────────────────────
 // Tracks which root-level entries are currently expanded so re-renders (e.g.

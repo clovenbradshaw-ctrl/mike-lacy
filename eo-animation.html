@@ -6,8 +6,9 @@
 <title>The Operator Helix</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; }
   body { background: #080808; overflow: hidden; cursor: pointer; }
-  canvas { display: block; width: 100vw; height: 100vh; }
+  canvas { display: block; width: 100%; height: 100%; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400;1,9..40,700&family=Crimson+Pro:ital,wght@1,300&display=swap" rel="stylesheet">
@@ -32,14 +33,21 @@ let W, H, DPR;
 
 function resize() {
   DPR = window.devicePixelRatio || 1;
-  W = window.innerWidth;
-  H = window.innerHeight;
+  // Use the canvas's own laid-out size rather than window.inner* so the
+  // animation reads accurate dimensions inside an iframe on mobile, where
+  // window.innerWidth/Height can lie or report the parent viewport.
+  const rect = CV.getBoundingClientRect();
+  W = Math.max(1, rect.width);
+  H = Math.max(1, rect.height);
   CV.width = W * DPR;
   CV.height = H * DPR;
   X.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
 resize();
 window.addEventListener('resize', resize);
+// iOS Safari in iframes doesn't always fire resize when the parent lays out
+// the frame; a ResizeObserver on the canvas catches those late layouts.
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resize).observe(CV);
 
 // ==========================================
 // GEOMETRY — virtual coordinate space
@@ -847,8 +855,12 @@ function frame(now) {
   // ---- CHROME ----
   X.globalAlpha = 1;
 
+  // Viewport-responsive UI scale so text + margins read correctly in both a
+  // full-viewport load and a narrow embedded iframe (especially on mobile).
+  const UI = cl(Math.min(W, H) / 520, 0.55, 1.15);
+
   // Progress bar — top
-  const barY = 20;
+  const barY = Math.round(18 * UI) + 4;
   const barW = Math.min(W * 0.7, 420);
   const barX0 = (W - barW) / 2;
   const segW = barW / 9;
@@ -866,10 +878,10 @@ function frame(now) {
       : past
         ? `hsla(${h}, ${s}%, ${l}%, 0.25)`
         : 'rgba(255,255,255,0.03)';
-    X.fillRect(barX0 + i * segW + 1, barY, segW - 2, 2.5);
+    X.fillRect(barX0 + i * segW + 1, barY, segW - 2, 2 + UI * 1.2);
 
     // Label
-    X.font = `${active ? 500 : 300} 9px 'DM Sans', sans-serif`;
+    X.font = `${active ? 500 : 300} ${Math.round(14 * UI)}px 'DM Sans', sans-serif`;
     X.fillStyle = active
       ? `hsl(${h}, ${s}%, ${l}%)`
       : past
@@ -877,7 +889,7 @@ function frame(now) {
         : 'rgba(255,255,255,0.08)';
     X.textAlign = 'center';
     X.textBaseline = 'top';
-    X.fillText(op.key, barX0 + i * segW + segW / 2, barY + 8);
+    X.fillText(op.key, barX0 + i * segW + segW / 2, barY + 8 * UI);
   }
 
   // Operator info — bottom center
@@ -887,42 +899,48 @@ function frame(now) {
     const s = TRIAD_SAT[op.triad];
     const l = TRIAD_LIT[op.triad];
 
-    const infoY = H - 70;
+    const infoY = H - Math.round(90 * UI);
 
     // Glyph
-    X.font = `400 22px 'DM Sans', sans-serif`;
+    X.font = `400 ${Math.round(34 * UI)}px 'DM Sans', sans-serif`;
     X.fillStyle = `hsla(${h}, ${s}%, ${l}%, 0.85)`;
     X.textAlign = 'center';
     X.textBaseline = 'alphabetic';
-    X.fillText(op.glyph, W / 2 - 55, infoY);
+    X.fillText(op.glyph, W / 2 - 85 * UI, infoY);
 
     // Key
-    X.font = `500 12px 'DM Sans', sans-serif`;
+    X.font = `500 ${Math.round(19 * UI)}px 'DM Sans', sans-serif`;
     X.fillStyle = `hsla(${h}, ${s}%, ${l}%, 0.9)`;
-    X.fillText(op.key, W / 2 - 22, infoY);
+    X.fillText(op.key, W / 2 - 34 * UI, infoY);
 
     // Name
-    X.font = `300 11px 'DM Sans', sans-serif`;
+    X.font = `300 ${Math.round(17 * UI)}px 'DM Sans', sans-serif`;
     X.fillStyle = 'rgba(255,255,255,0.35)';
     X.textAlign = 'left';
-    X.fillText(op.name, W / 2 - 5, infoY);
+    X.fillText(op.name, W / 2 - 8 * UI, infoY);
 
-    // Description
-    X.font = `italic 300 15px 'Crimson Pro', Georgia, serif`;
+    // Description — shrink to fit the viewport so it never runs off the edge.
+    const descMax = W - 32;
+    let descSize = 23 * UI;
+    X.font = `italic 300 ${Math.round(descSize)}px 'Crimson Pro', Georgia, serif`;
+    while (descSize > 11 && X.measureText(op.desc).width > descMax) {
+      descSize -= 1;
+      X.font = `italic 300 ${Math.round(descSize)}px 'Crimson Pro', Georgia, serif`;
+    }
     X.fillStyle = 'rgba(255,255,255,0.45)';
     X.textAlign = 'center';
-    X.fillText(op.desc, W / 2, infoY + 24);
+    X.fillText(op.desc, W / 2, infoY + Math.round(30 * UI));
   }
 
   // Info line
-  X.font = `italic 400 10px 'DM Sans', sans-serif`;
+  X.font = `italic 400 ${Math.round(13 * UI)}px 'DM Sans', sans-serif`;
   X.fillStyle = '#555';
   X.textAlign = 'center';
   X.textBaseline = 'bottom';
   const nSlash = Math.max(1, step + 1);
   X.fillText(
     `cycle ${S.cycle}  \u00B7  ${step >= 0 ? OPS[step].glyph : '\u2205'}  \u00B7  ${Math.round(TRIAD_HUE[OPS[Math.max(0, step)].triad] + S.hueOff[OPS[Math.max(0, step)].triad])}\u00B0`,
-    W / 2, H - 14
+    W / 2, H - Math.round(12 * UI)
   );
 
   // ---- RIPPLES ----
