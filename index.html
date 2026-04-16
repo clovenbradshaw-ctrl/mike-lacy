@@ -1971,6 +1971,7 @@ function buildExpRow({ type, name, date, desc, external, href, onActivate }, fir
     : type === "link"  ? "EXT"
     : type === "embed" ? "APP"
     : type === "file"  ? "TXT"
+    : type === "post"  ? "POST"
     :                    "";
   row.innerHTML =
     `<span class="exp-badge${type === "dir" ? " dir" : ""}">${badgeLabel}</span>` +
