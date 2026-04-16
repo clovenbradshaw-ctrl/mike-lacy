@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Operator Helix</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #080808; overflow: hidden; cursor: pointer; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400;1,9..40,700&family=Crimson+Pro:ital,wght@1,300&display=swap" rel="stylesheet">
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+/*
+ * THE OPERATOR HELIX — Pure canvas, 60fps
+ *
+ * NUL → SIG → INS → SEG → CON → SYN → DEF → EVA → REC → ∅
+ *
+ * Everything painted on a single canvas. No DOM updates per frame.
+ * Smooth damped interpolation on all values.
+ * Each cycle mutates: hue drift, stroke jitter, timing.
+ * Click: entropy spike, immediate advance, ripple.
+ */
+
+const CV = document.getElementById('c');
+const X = CV.getContext('2d');
+let W, H, DPR;
+
+function resize() {
+  DPR = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  CV.width = W * DPR;
+  CV.height = H * DPR;
+  X.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ==========================================
+// GEOMETRY — virtual coordinate space
+// ==========================================
+const CX = 200, CY = 190, NUL_R = 40;
+const HALF = 75;
+const Rx = CX, Ry = CY;
+const Vx = CX, Vy = CY + HALF;
+const Hx = CX + HALF, Hy = CY;
+const FALL_Y = 50;
+const SW = 1.8;
+
+// Hypotenuse helpers
+const DSx = Hx - Vx, DSy = Hy - Vy;
+const DSlen = Math.sqrt(DSx * DSx + DSy * DSy);
+const Ux = DSx / DSlen, Uy = DSy / DSlen;
+const Nx = Uy, Ny = -Ux; // outward normal
+
+// Altitude foot on hypotenuse
+const VHx = Hx - Vx, VHy = Hy - Vy;
+const VRx = Rx - Vx, VRy = Ry - Vy;
+const tFoot = (VRx * VHx + VRy * VHy) / (VHx * VHx + VHy * VHy);
+const Fx = Vx + tFoot * VHx, Fy = Vy + tFoot * VHy;
+
+// ==========================================
+// OPERATORS
+// ==========================================
+const OPS = [
+  { key: 'NUL', glyph: '\u2205', name: 'Non-transformation', triad: 0, desc: 'Encounter without change. The ground before anything happens.' },
+  { key: 'SIG', glyph: '\u25CB', name: 'Attention',          triad: 0, desc: 'Salience without persistence. Attention that leaves no mark.' },
+  { key: 'INS', glyph: '\u25CF', name: 'Instantiation',      triad: 0, desc: 'Something exists that didn\u2019t before. The anchor.' },
+  { key: 'SEG', glyph: '\uFF5C', name: 'Segmentation',       triad: 1, desc: 'A boundary where there was none. One becomes two.' },
+  { key: 'CON', glyph: '\u22C8', name: 'Connection',         triad: 1, desc: 'Distinct things bound. Separate but linked.' },
+  { key: 'SYN', glyph: '\u25B3', name: 'Synthesis',          triad: 1, desc: 'Parts yield a whole that is none of them.' },
+  { key: 'DEF', glyph: '\u22A2', name: 'Definition',         triad: 2, desc: 'Terms are set. This is what holds.' },
+  { key: 'EVA', glyph: '\u22A8', name: 'Evaluation',         triad: 2, desc: 'Held against the terms. Does it satisfy?' },
+  { key: 'REC', glyph: '\u229B', name: 'Recontextualization', triad: 2, desc: 'The terms themselves change. Everything means differently.' },
+];
+
+// Triad base hues: existence=teal, structure=amber, significance=violet
+// Boosted saturation and lightness for visibility on dark background
+const TRIAD_HUE = [168, 38, 260];
+const TRIAD_SAT = [70, 80, 72];
+const TRIAD_LIT = [62, 60, 72];
+
+const DURS  = [2000, 3200, 2400, 2000, 3200, 3200, 3200, 7000, 6500];
+const HOLDS = [600,  400,  400,  200,  400,  500,  500,  400,  800];
+
+// ==========================================
+// TILING — pre-computed for EVA/REC
+// ==========================================
+function reflectPt(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay;
+  const l2 = dx * dx + dy * dy;
+  const t = ((px - ax) * dx + (py - ay) * dy) / l2;
+  return [2 * (ax + t * dx) - px, 2 * (ay + t * dy) - py];
+}
+
+function footOnLine(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay;
+  const t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
+  return [ax + t * dx, ay + t * dy];
+}
+
+function findRightAngle(v) {
+  for (let i = 0; i < 3; i++) {
+    const p = v[(i + 2) % 3], c = v[i], n = v[(i + 1) % 3];
+    if (Math.abs((p[0] - c[0]) * (n[0] - c[0]) + (p[1] - c[1]) * (n[1] - c[1])) < 1) return i;
+  }
+  return 0;
+}
+
+const TILES = [];
+(function buildTiles() {
+  const key = v => {
+    const cx = (v[0][0] + v[1][0] + v[2][0]) / 3;
+    const cy = (v[0][1] + v[1][1] + v[2][1]) / 3;
+    return `${Math.round(cx * 10)},${Math.round(cy * 10)}`;
+  };
+  const vis = new Set();
+  const q = [];
+  const seed = [[Rx, Ry], [Vx, Vy], [Hx, Hy]];
+  TILES.push({ verts: seed, dist: 0, growFrom: null, growTo: null });
+  vis.add(key(seed));
+  q.push(0);
+  let qi = 0;
+  while (qi < q.length && TILES.length < 45) {
+    const tri = TILES[q[qi++]];
+    const v = tri.verts;
+    for (let e = 0; e < 3; e++) {
+      const i1 = e, i2 = (e + 1) % 3, i3 = (e + 2) % 3;
+      const [rx, ry] = reflectPt(v[i3][0], v[i3][1], v[i1][0], v[i1][1], v[i2][0], v[i2][1]);
+      const nv = [[v[i1][0], v[i1][1]], [v[i2][0], v[i2][1]], [rx, ry]];
+      const k = key(nv);
+      if (!vis.has(k)) {
+        const nc = (nv[0][0] + nv[1][0] + nv[2][0]) / 3;
+        const nr = (nv[0][1] + nv[1][1] + nv[2][1]) / 3;
+        if (nc > 25 && nc < 375 && nr > 85 && nr < 335) {
+          vis.add(k);
+          TILES.push({
+            verts: nv, dist: tri.dist + 1,
+            growFrom: [(v[i1][0] + v[i2][0]) / 2, (v[i1][1] + v[i2][1]) / 2],
+            growTo: [rx, ry]
+          });
+          q.push(TILES.length - 1);
+        }
+      }
+    }
+  }
+  // Pre-compute right-angle vertex and altitude foot for each tile
+  for (const t of TILES) {
+    const ri = findRightAngle(t.verts);
+    t.ra = t.verts[ri];
+    const v1 = t.verts[(ri + 1) % 3], v2 = t.verts[(ri + 2) % 3];
+    t.foot = footOnLine(t.ra[0], t.ra[1], v1[0], v1[1], v2[0], v2[1]);
+  }
+})();
+const MAX_DIST = Math.max(...TILES.map(t => t.dist));
+
+// ==========================================
+// SMOOTH STATE
+// ==========================================
+const ease = t => t < 0 ? 0 : t > 1 ? 1 : 0.5 - 0.5 * Math.cos(t * Math.PI);
+const lerp = (a, b, t) => a + (b - a) * t;
+const cl = (v, lo, hi) => v < (lo||0) ? (lo||0) : v > (hi||1) ? (hi||1) : v;
+const damp = (cur, tgt, spd, dt) => lerp(cur, tgt, 1 - Math.exp(-spd * dt));
+
+const S = {
+  step: -1,
+  stepT: 0,
+  cycle: 0,
+  entropy: 0,
+
+  // Smooth camera
+  camX: CX, camY: CY, camZ: 1,
+
+  // Hue offsets per triad (mutate each cycle)
+  hueOff: [0, 0, 0],
+  swOff: 0,        // stroke width jitter
+
+  ripples: [],
+};
+
+// Camera targets per step
+const CAMS = [
+  [CX, CY, 1],
+  [CX, CY, 1],
+  [CX, CY, 0.9],
+  [CX, CY + 15, 0.78],
+  [CX + 12, CY + 20, 0.68],
+  [(Rx + Hx) / 2 - 10, (Ry + Vy) / 2 + 10, 0.55],
+  [(Rx + Hx) / 2 - 5, (Ry + Vy) / 2, 0.75],
+  [CX, CY, 0.65],          // 7 EVA — tiling spreads, need wide view
+  [CX, CY, 0.65],          // 8 REC — start matching EVA, zoom handled dynamically
+];
+
+// ==========================================
+// ADVANCE / MUTATE
+// ==========================================
+function advance(now) {
+  S.step++;
+  if (S.step >= 9) {
+    S.step = 0;
+    S.cycle++;
+    // Mutate each cycle
+    for (let i = 0; i < 3; i++) S.hueOff[i] += (Math.random() - 0.5) * 10;
+    S.swOff = (Math.random() - 0.5) * 0.3;
+  }
+  S.stepT = now;
+}
+
+// ==========================================
+// COLOR
+// ==========================================
+function col(triad, a) {
+  const h = TRIAD_HUE[triad] + S.hueOff[triad];
+  const s = TRIAD_SAT[triad];
+  const l = TRIAD_LIT[triad];
+  return a !== undefined
+    ? `hsla(${h}, ${s}%, ${l}%, ${a})`
+    : `hsl(${h}, ${s}%, ${l}%)`;
+}
+
+// ==========================================
+// DRAW HELPERS (operate in virtual coords via canvas transform)
+// ==========================================
+function dLine(x1, y1, x2, y2, c, w, a) {
+  if (a < 0.005) return;
+  X.globalAlpha = a;
+  X.strokeStyle = c;
+  X.lineWidth = w;
+  X.lineCap = 'round';
+  X.beginPath();
+  X.moveTo(x1, y1);
+  X.lineTo(x2, y2);
+  X.stroke();
+}
+
+function dCirc(cx, cy, r, c, w, a) {
+  if (a < 0.005 || r < 0.1) return;
+  X.globalAlpha = a;
+  X.strokeStyle = c;
+  X.lineWidth = w;
+  X.beginPath();
+  X.arc(cx, cy, r, 0, Math.PI * 2);
+  X.stroke();
+}
+
+function dDot(cx, cy, r, c, a) {
+  if (a < 0.005) return;
+  X.globalAlpha = a;
+  X.fillStyle = c;
+  X.beginPath();
+  X.arc(cx, cy, r, 0, Math.PI * 2);
+  X.fill();
+}
+
+function dPath(pts, c, w, a, fill, fa) {
+  if (a < 0.005 && (!fill || fa < 0.005)) return;
+  X.beginPath();
+  X.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]);
+  X.closePath();
+  if (fill && fa > 0.005) { X.globalAlpha = fa; X.fillStyle = c; X.fill(); }
+  if (a > 0.005) { X.globalAlpha = a; X.strokeStyle = c; X.lineWidth = w; X.lineCap = 'round'; X.lineJoin = 'round'; X.stroke(); }
+}
+
+function dRect(x, y, w, h, c, lw, a, fa) {
+  if (fa > 0.005) { X.globalAlpha = fa; X.fillStyle = c; X.fillRect(x, y, w, h); }
+  if (a > 0.005) { X.globalAlpha = a; X.strokeStyle = c; X.lineWidth = lw; X.strokeRect(x, y, w, h); }
+}
+
+// ==========================================
+// OPERATOR RENDERERS
+// ==========================================
+const sw = () => SW + S.swOff;
+
+function drawNUL(raw, now, c) {
+  const b = 1 + Math.sin(now / 1200) * 0.012;
+  // Always fade in — faster on repeats so it's not sluggish
+  const fadeIn = S.cycle > 0 ? ease(cl(raw / 0.15)) : ease(raw);
+  // In last 20%, start contracting toward center
+  const contractP = cl((raw - 0.8) / 0.2);
+  const contractE = ease(contractP);
+  const r = NUL_R * b * lerp(1, 0.85, contractE);
+  const l = r * 0.7;
+  dCirc(CX, CY, r, c, sw() * 1.3, fadeIn * 0.8);
+  dLine(CX - l, CY + l, CX + l, CY - l, c, sw() * 1.3, fadeIn * 0.8);
+}
+
+function drawSIG(raw, now, c) {
+  // Phase 1 (0-0.25): ∅ contracts to a point at center
+  const shr = cl(raw / 0.25);
+  const shrE = ease(shr);
+  const r = lerp(NUL_R * 0.85, 0, shrE);
+  const ll = r * 0.7;
+
+  // Phase 2 (0.25-0.75): dot drifts along future line path, pulsing
+  // Phase 3 (0.75-1.0): dot settles to LEFT edge — handoff to INS
+  const driftPhase = cl((raw - 0.28) / 0.47);  // 0-1 over drift period
+  const settlePhase = cl((raw - 0.75) / 0.25); // 0-1 over settle period
+  const fullPhase = cl((raw - 0.28) / 0.72);   // overall dot visibility
+
+  // Heartbeat pulse — 1.8s cycle, double-tap + rest
+  const beepCycle = (now / 1800) % 1;
+  const beat1 = beepCycle < 0.08 ? ease(beepCycle / 0.08) :
+                beepCycle < 0.16 ? ease(1 - (beepCycle - 0.08) / 0.08) : 0;
+  const beat2 = beepCycle > 0.2 && beepCycle < 0.28 ? ease((beepCycle - 0.2) / 0.08) :
+                beepCycle > 0.28 && beepCycle < 0.36 ? ease(1 - (beepCycle - 0.28) / 0.08) : 0;
+  const beat = Math.max(beat1, beat2 * 0.6);
+
+  // Fading ∅ symbol
+  if (r > 1) {
+    const fa = lerp(0.6, 0, shrE);
+    dCirc(CX, CY, r, c, sw() * (r > 10 ? 1.2 : 0.6), fa);
+    dLine(CX - ll, CY + ll, CX + ll, CY - ll, c, sw() * (r > 10 ? 1.2 : 0.6), fa);
+  }
+
+  if (fullPhase > 0) {
+    // Drift: sinusoidal wandering
+    const drift = Math.sin(driftPhase * Math.PI * 2.5) * HALF * 0.6;
+    const driftX = CX + drift * Math.min(driftPhase, 1);
+
+    // Settle: lerp from wherever drift is toward left edge
+    const settleE = ease(settlePhase);
+    const dotX = lerp(driftX, CX - HALF, settleE);
+    const dotY = CY;
+
+    // Pulse dampens as dot settles (it's committing to a position)
+    const beatDamped = beat * (1 - settleE * 0.7);
+    const dotR = 4 + beatDamped * 2.5;
+    const dotOp = lerp(0.55, 0.95, beatDamped) * fullPhase;
+
+    dDot(dotX, dotY, dotR, c, dotOp);
+
+    // Pulse rings — fade during settle
+    if (beatDamped > 0.2) {
+      dCirc(dotX, dotY, dotR + beatDamped * 12, c, sw() * 0.6, fullPhase * beatDamped * 0.35);
+    }
+
+    // Ghost trail — only during drift, not during settle
+    if (settlePhase < 0.3) {
+      const ghostOp = beat * 0.06 * driftPhase;
+      if (ghostOp > 0.005) {
+        dLine(CX, CY, dotX, dotY, c, sw() * 0.3, ghostOp);
+      }
+    }
+  }
+}
+
+function drawINS(raw, now, c) {
+  // The SIG dot wandered without committing. Now it sweeps once, decisively.
+  // Starts at left edge, sweeps right. The trail is permanent — this is the mint.
+  const sweepP = cl(raw / 0.6);
+  const sweepE = ease(sweepP);
+
+  // Dot position — left to right, one clean sweep
+  const dotX = lerp(CX - HALF, CX + HALF, sweepE);
+
+  // The permanent line — burns behind the dot
+  dLine(CX - HALF, CY, dotX, CY, c, sw() * 1.1, 0.9);
+
+  // The dot — same filled dot from SIG, but brighter now (committed)
+  const dotR = sweepP < 0.95 ? 4 : lerp(4, 2, ease(cl((sweepP - 0.95) / 0.05)));
+  const dotOp = sweepP < 0.95 ? 0.85 : lerp(0.85, 0, ease(cl((sweepP - 0.95) / 0.05)));
+  if (dotOp > 0.01) dDot(dotX, CY, dotR, c, dotOp);
+
+  // Faint glow at leading edge while sweeping
+  if (sweepP > 0.02 && sweepP < 0.9) {
+    dCirc(dotX, CY, 7 + Math.sin(now / 200) * 1.5, c, sw() * 0.3, 0.12);
+  }
+}
+
+function drawSEG(raw, now, c) {
+  const bladeP = cl(raw / 0.25);
+  const cutDone = raw > 0.25;
+  const fallP = cl((raw - 0.25) / 0.75);
+  const blY = lerp(CY - 28, CY, ease(bladeP));
+  const fY = fallP * fallP * FALL_Y;
+
+  if (!cutDone) {
+    dLine(CX, blY - 8, CX, blY + 3, c, sw() * 0.8, 0.7);
+    dLine(CX - HALF, CY, CX + HALF, CY, c, sw() * 1.1, 0.9);
+  } else {
+    dLine(CX + 2, CY, CX + HALF, CY, c, sw() * 1.1, 0.85);
+    dLine(CX - HALF, CY + fY, CX - 2, CY + fY, c, sw(), 0.7);
+  }
+}
+
+function drawCON(raw, now, c) {
+  const lP = cl(raw / 0.7);
+  const sP = cl((raw - 0.72) / 0.28);
+  const eL = ease(lP);
+
+  const prx = lerp(CX - 2, Rx, eL);
+  const pry = lerp(CY + FALL_Y, Ry, eL);
+  const ang = Math.min(Math.PI / 2, lerp(0, Math.PI / 2, eL));
+  const plx = prx - HALF * Math.cos(ang);
+  const ply = pry + HALF * Math.sin(ang);
+
+  dLine(Rx, Ry, Hx, Hy, c, sw() * 1.1, 0.85);
+  dLine(prx, pry, plx, ply, c, sw() * 1.1, 0.85);
+
+  if (sP > 0) {
+    const sa = ease(sP);
+    // Right angle marker
+    X.globalAlpha = sa * 0.6;
+    X.strokeStyle = c;
+    X.lineWidth = sw() * 0.6;
+    X.beginPath();
+    X.moveTo(Rx, Ry + 6);
+    X.lineTo(Rx + 6, Ry + 6);
+    X.lineTo(Rx + 6, Ry);
+    X.stroke();
+
+    dDot(Rx, Ry, 2.5, c, sa * 0.6);
+    dDot(Vx, Vy, 2, c, sa * 0.5);
+    dDot(Hx, Hy, 2, c, sa * 0.5);
+  }
+}
+
+function drawSYN(raw, now, c) {
+  const hypP = cl(raw / 0.35);
+  const sq1P = cl((raw - 0.4) / 0.2);
+  const sq2P = cl((raw - 0.5) / 0.2);
+  const sq3P = cl((raw - 0.6) / 0.25);
+  const eH = ease(hypP);
+
+  const hx = lerp(Vx, Hx, eH), hy = lerp(Vy, Hy, eH);
+  const a = Hx - Rx, b = Vy - Ry;
+
+  // Legs
+  dLine(Rx, Ry, Vx, Vy, c, sw() * 1.1, 0.7);
+  dLine(Rx, Ry, Hx, Hy, c, sw() * 1.1, 0.7);
+
+  // Right-angle marker
+  X.globalAlpha = 0.45;
+  X.strokeStyle = c;
+  X.lineWidth = sw() * 0.45;
+  X.beginPath();
+  X.moveTo(Rx, Ry + 6); X.lineTo(Rx + 6, Ry + 6); X.lineTo(Rx + 6, Ry);
+  X.stroke();
+
+  // Hypotenuse drawing
+  dLine(Vx, Vy, hx, hy, c, sw() * 1.1, 0.9);
+  if (hypP < 0.95) dDot(hx, hy, 3, c, 0.5);
+
+  // Fill once closed
+  if (hypP > 0.9) {
+    dPath([[Rx, Ry], [Vx, Vy], [Hx, Hy]], c, 0, 0, true, ease(cl((hypP - 0.9) / 0.1)) * 0.06);
+  }
+
+  // Square on a (horizontal leg) — grows downward
+  if (sq1P > 0) {
+    const e1 = ease(sq1P);
+    dRect(Rx, Ry, a, a * e1, c, sw() * 0.5, e1 * 0.5, 0.06 * e1);
+  }
+
+  // Square on b (vertical leg) — grows leftward
+  if (sq2P > 0) {
+    const e2 = ease(sq2P);
+    dRect(Rx - b * e2, Ry, b * e2, b, c, sw() * 0.5, e2 * 0.5, 0.06 * e2);
+  }
+
+  // Square on c (hypotenuse) — tilted, grows outward
+  if (sq3P > 0) {
+    const e3 = ease(sq3P);
+    const d = DSlen * e3;
+    dPath([[Vx, Vy], [Hx, Hy], [Hx + Nx * d, Hy + Ny * d], [Vx + Nx * d, Vy + Ny * d]],
+      c, sw() * 0.5, e3 * 0.5, true, 0.06 * e3);
+  }
+
+  // Vertices
+  dDot(Rx, Ry, 2.5, c, 0.5);
+  dDot(Vx, Vy, 2.5, c, 0.5);
+  dDot(Hx, Hy, 2.5, c, 0.5);
+}
+
+function drawDEF(raw, now, c) {
+  const altDropP = cl((raw - 0.1) / 0.35);
+  const splitP = cl((raw - 0.5) / 0.25);
+  const triFadeP = cl((raw - 0.75) / 0.25);
+
+  // Squares stay visible — dim slightly as altitude becomes the focus
+  const sqOp = lerp(0.45, 0.2, ease(cl(raw / 0.5)));
+
+  const altEx = lerp(Rx, Fx, ease(altDropP));
+  const altEy = lerp(Ry, Fy, ease(altDropP));
+  const splitE = ease(splitP);
+  const a = Hx - Rx, b2 = Vy - Ry;
+
+  // Pythagorean squares — persistent
+  dRect(Rx, Ry, a, a, c, sw() * 0.4, sqOp, 0.03 * sqOp);
+  dRect(Rx - b2, Ry, b2, b2, c, sw() * 0.4, sqOp, 0.03 * sqOp);
+  dPath([[Vx, Vy], [Hx, Hy], [Hx + Nx * DSlen, Hy + Ny * DSlen], [Vx + Nx * DSlen, Vy + Ny * DSlen]],
+    c, sw() * 0.4, sqOp, true, 0.03 * sqOp);
+
+  // Triangle
+  const triA = Math.max(0.3, 0.8 - triFadeP * 0.5);
+  dPath([[Rx, Ry], [Vx, Vy], [Hx, Hy]], c, sw() * 1, triA, false, 0);
+
+  // Right-angle marker
+  X.globalAlpha = Math.max(0.2, 0.5 - triFadeP * 0.3);
+  X.strokeStyle = c; X.lineWidth = sw() * 0.5;
+  X.beginPath(); X.moveTo(Rx, Ry + 6); X.lineTo(Rx + 6, Ry + 6); X.lineTo(Rx + 6, Ry); X.stroke();
+
+  // Altitude
+  if (altDropP > 0) dLine(Rx, Ry, altEx, altEy, c, sw() * 1.1, 0.9);
+  if (altDropP > 0.8) dDot(Fx, Fy, 3, c, ease(cl((altDropP - 0.8) / 0.2)) * 0.8);
+
+  // Two daughter triangles fill
+  if (splitP > 0) {
+    dPath([[Rx, Ry], [Vx, Vy], [Fx, Fy]], c, 0, 0, true, splitE * 0.1);
+    dPath([[Rx, Ry], [Fx, Fy], [Hx, Hy]], c, 0, 0, true, splitE * 0.1);
+  }
+
+  dDot(Rx, Ry, 3, c, 0.7);
+  dDot(Vx, Vy, 2.5, c, 0.55);
+  dDot(Hx, Hy, 2.5, c, 0.55);
+}
+
+function drawEVA(raw, now, c) {
+  const buildP = cl(raw / 0.9);
+  const waveReveal = buildP * (MAX_DIST + 2.5);
+
+  const preCurveP = cl((raw - 0.7) / 0.2);
+  const preCurveE = ease(preCurveP) * 0.25;
+  const maxFlatR = 120;
+
+  // Detail fadeout at end — growth lines and tip dots recede,
+  // leaving just triangle outlines + altitudes (what REC picks up)
+  const detailFade = 1 - ease(cl((raw - 0.8) / 0.15));
+
+  const warp = (x, y) => {
+    if (preCurveE < 0.005) return [x, y];
+    const dx = x - CX, dy = y - CY;
+    const r = Math.sqrt(dx * dx + dy * dy);
+    const a = Math.atan2(dy, dx);
+    const n = cl(r / maxFlatR);
+    const cr = Math.sin(n * Math.PI / 2) * 70;
+    const fr = lerp(r, cr, preCurveE);
+    return [CX + fr * Math.cos(a), CY + fr * Math.sin(a)];
+  };
+
+  // Seed triangle + altitude
+  const [wRx, wRy] = warp(Rx, Ry);
+  const [wVx, wVy] = warp(Vx, Vy);
+  const [wHx, wHy] = warp(Hx, Hy);
+  const [wFx, wFy] = warp(Fx, Fy);
+
+  // Faint Pythagorean squares — fade as tiling grows
+  const sqFade = Math.max(0, 0.12 - buildP * 0.1);
+  if (sqFade > 0.01) {
+    const a = Hx - Rx, b2 = Vy - Ry;
+    // Warp square corners
+    const [wSq1a, wSq1b] = warp(Rx, Ry + a);
+    const [wSq1c, wSq1d] = warp(Rx + a, Ry + a);
+    const [wSq1e, wSq1f] = warp(Rx + a, Ry);
+    dPath([[wRx, wRy], [wSq1a, wSq1b], [wSq1c, wSq1d], [wSq1e, wSq1f]], c, sw() * 0.2, sqFade, false, 0);
+
+    const [wSq2a, wSq2b] = warp(Rx - b2, Ry);
+    const [wSq2c, wSq2d] = warp(Rx - b2, Ry + b2);
+    const [wSq2e, wSq2f] = warp(Rx, Ry + b2);
+    dPath([[wRx, wRy], [wSq2a, wSq2b], [wSq2c, wSq2d], [wSq2e, wSq2f]], c, sw() * 0.2, sqFade, false, 0);
+
+    const [wSq3a, wSq3b] = warp(Hx + Nx * DSlen, Hy + Ny * DSlen);
+    const [wSq3c, wSq3d] = warp(Vx + Nx * DSlen, Vy + Ny * DSlen);
+    dPath([[wVx, wVy], [wHx, wHy], [wSq3a, wSq3b], [wSq3c, wSq3d]], c, sw() * 0.2, sqFade, false, 0);
+  }
+
+  dPath([[wRx, wRy], [wVx, wVy], [wHx, wHy]], c, sw() * 0.8, 0.6, true, 0.03);
+  dLine(wRx, wRy, wFx, wFy, c, sw() * 0.8, 0.75);
+  dDot(wFx, wFy, 2.5, c, 0.6);
+
+  // Tiling
+  for (let ti = 1; ti < TILES.length; ti++) {
+    const tri = TILES[ti];
+    const revP = cl((waveReveal - tri.dist) / 2.2);
+    if (revP < 0.01) continue;
+
+    const distFade = lerp(0.75, 0.2, tri.dist / Math.max(1, MAX_DIST));
+    const hyphaP = cl(revP / 0.35);
+    const crystP = cl((revP - 0.25) / 0.3);
+    const altP = cl((revP - 0.5) / 0.5);
+    const hyphaE = ease(hyphaP), crystE = ease(crystP), altE = ease(altP);
+
+    // Growth line — fades at end of EVA
+    const gfx = tri.growFrom[0], gfy = tri.growFrom[1];
+    const gtx = tri.growTo[0], gty = tri.growTo[1];
+    const tipX = lerp(gfx, gtx, hyphaE), tipY = lerp(gfy, gty, hyphaE);
+    const [wgf0, wgf1] = warp(gfx, gfy);
+    const [wt0, wt1] = warp(tipX, tipY);
+
+    const growOp = distFade * Math.max(0.3, 1 - crystE * 0.6) * detailFade;
+    dLine(wgf0, wgf1, wt0, wt1, c, sw() * 0.55, growOp);
+    if (hyphaP > 0.05 && hyphaP < 0.95 && detailFade > 0.3) dDot(wt0, wt1, 1.8, c, distFade * 0.6 * detailFade);
+
+    // Crystallize edges — these persist (REC picks them up)
+    if (crystP > 0.01) {
+      const v = tri.verts;
+      const [ws0, ws1] = warp(v[0][0], v[0][1]);
+      const [ws2, ws3] = warp(v[1][0], v[1][1]);
+      const [wn0, wn1] = warp(v[2][0], v[2][1]);
+      const ca = distFade * crystE;
+      dLine(ws0, ws1, lerp(ws0, wn0, crystE), lerp(ws1, wn1, crystE), c, sw() * 0.5, ca);
+      dLine(ws2, ws3, lerp(ws2, wn0, crystE), lerp(ws3, wn1, crystE), c, sw() * 0.5, ca);
+
+      if (crystE > 0.8) {
+        dPath([[ws0, ws1], [ws2, ws3], [wn0, wn1]], c, 0, 0, true, 0.015 * crystE);
+      }
+      if (hyphaE > 0.9 && detailFade > 0.3) dDot(wn0, wn1, 1.2, c, distFade * 0.5 * detailFade);
+    }
+
+    // Altitude — persists
+    if (altP > 0.01 && crystE > 0.6) {
+      const [wra0, wra1] = warp(tri.ra[0], tri.ra[1]);
+      const [wf0, wf1] = warp(tri.foot[0], tri.foot[1]);
+      dLine(wra0, wra1, lerp(wra0, wf0, altE), lerp(wra1, wf1, altE), c, sw() * 0.4, distFade * altE * 0.8);
+      if (altE > 0.85) dDot(wf0, wf1, 1, c, distFade * 0.5);
+    }
+  }
+
+  // Seed vertices
+  const [wrx2, wry2] = warp(Rx, Ry);
+  const [wvx2, wvy2] = warp(Vx, Vy);
+  const [whx2, why2] = warp(Hx, Hy);
+  dDot(wrx2, wry2, 2.5, c, 0.45);
+  dDot(wvx2, wvy2, 2, c, 0.3);
+  dDot(whx2, why2, 2, c, 0.3);
+}
+
+function drawREC(raw, now, c) {
+  // Phase timing — slower ramp so the sphere develops gradually
+  const curveP = cl(raw / 0.45);            // warp: 0→45%
+  const shrinkP = cl((raw - 0.3) / 0.2);    // shrink: starts at 30%, delayed
+  const fadeP = cl((raw - 0.4) / 0.15);     // triangles fade: starts at 40%
+  const circleP = cl((raw - 0.5) / 0.1);    // circle appears: 50%
+  const lineP = cl((raw - 0.55) / 0.12);    // diagonal: 55%
+  const landP = cl((raw - 0.65) / 0.35);    // settled: 65%
+
+  // Exit fade: last 8% dims everything for clean NUL handoff
+  const exitFade = 1 - ease(cl((raw - 0.92) / 0.08));
+
+  // Warp starts at 0.25 (where EVA's pre-curve left off) and ramps to 1.0
+  const curveE = lerp(0.25, 1, ease(curveP));
+  const shrinkE = ease(shrinkP);
+
+  // Triangle opacity: starts matching EVA's ending, fades to 0
+  // Early phase uses higher base since EVA tiles were bright
+  const earlyBlend = 1 - ease(cl(raw / 0.15)); // 1→0 over first 15%
+  const baseTriOp = lerp(0.7, 0.75, earlyBlend); // slightly brighter at start
+  const triOp = Math.max(0, baseTriOp - ease(fadeP) * baseTriOp) * exitFade;
+
+  const maxFR = 120;
+  const sphR = lerp(70, NUL_R, shrinkE);
+
+  const warp = (x, y) => {
+    const dx = x - CX, dy = y - CY;
+    const r = Math.sqrt(dx * dx + dy * dy);
+    const a = Math.atan2(dy, dx);
+    const n = cl(r / maxFR);
+    const cr = Math.sin(n * Math.PI / 2) * sphR;
+    const fr = lerp(r, cr, curveE);
+    return [CX + fr * Math.cos(a), CY + fr * Math.sin(a)];
+  };
+
+  const landed = landP > 0;
+  const breath = landed ? 1 + Math.sin(now / 900) * 0.01 : 1;
+  const fR = NUL_R * breath;
+  const nulOp = lerp(0, 0.85, ease(circleP)) * exitFade;
+  const nulSW = sw() * lerp(0.5, 1.4, ease(circleP));
+
+  // Warping triangles — distance-weighted opacity early (matching EVA),
+  // transitioning to uniform opacity as the warp takes over
+  if (triOp > 0.01) {
+    for (let ti = 0; ti < TILES.length; ti++) {
+      const tri = TILES[ti];
+      const v = tri.verts;
+      const [w0x, w0y] = warp(v[0][0], v[0][1]);
+      const [w1x, w1y] = warp(v[1][0], v[1][1]);
+      const [w2x, w2y] = warp(v[2][0], v[2][1]);
+
+      // Early: distance-weighted (like EVA). Late: uniform.
+      const distWeight = lerp(0.75, 0.2, tri.dist / Math.max(1, MAX_DIST));
+      const uniformWeight = lerp(0.6, 0.25, ti / TILES.length);
+      const tileWeight = lerp(distWeight, uniformWeight, ease(cl(raw / 0.2)));
+      const tOp = triOp * tileWeight;
+
+      dPath([[w0x, w0y], [w1x, w1y], [w2x, w2y]], c, sw() * 0.5, tOp, false, 0);
+
+      const [wra0, wra1] = warp(tri.ra[0], tri.ra[1]);
+      const [wf0, wf1] = warp(tri.foot[0], tri.foot[1]);
+      dLine(wra0, wra1, wf0, wf1, c, sw() * 0.3, tOp * 0.75);
+    }
+  }
+
+  // Circle
+  if (nulOp > 0.01) dCirc(CX, CY, fR, c, nulSW, nulOp);
+
+  // Recognition glow
+  const glowP = cl((raw - 0.52) / 0.12);
+  if (glowP > 0.01 && glowP < 1) {
+    const glowE = Math.sin(ease(glowP) * Math.PI) * exitFade;
+    dCirc(CX, CY, fR + 8, c, sw() * 0.7, glowE * 0.3);
+    dCirc(CX, CY, fR + 18, c, sw() * 0.35, glowE * 0.12);
+  }
+
+  // Diagonal: altitude → ∅ line → CLOCK → back to ∅
+  const diagE = ease(lineP);
+  const [wR0, wR1] = warp(Rx, Ry);
+  const [wF0, wF1] = warp(Fx, Fy);
+  const nulDiagAngle = -Math.PI / 4;
+
+  let lineAngle = nulDiagAngle;
+  if (landed) {
+    const sweepToP = cl((landP - 0.4) / 0.2);
+    const holdP = cl((landP - 0.6) / 0.12);
+    const sweepBackP = cl((landP - 0.72) / 0.16);
+    if (sweepBackP > 0) {
+      lineAngle = lerp(-Math.PI / 2, nulDiagAngle, ease(sweepBackP));
+    } else if (holdP > 0) {
+      lineAngle = -Math.PI / 2;
+    } else if (sweepToP > 0) {
+      lineAngle = lerp(nulDiagAngle, -Math.PI / 2, ease(sweepToP));
+    }
+  }
+
+  const lineLen = fR * 0.7;
+  let lx1, ly1, lx2, ly2;
+  if (!landed) {
+    lx1 = lerp(wR0, CX + lineLen * Math.cos(nulDiagAngle + Math.PI), diagE);
+    ly1 = lerp(wR1, CY + lineLen * Math.sin(nulDiagAngle + Math.PI), diagE);
+    lx2 = lerp(wF0, CX + lineLen * Math.cos(nulDiagAngle), diagE);
+    ly2 = lerp(wF1, CY + lineLen * Math.sin(nulDiagAngle), diagE);
+  } else {
+    lx1 = CX + lineLen * Math.cos(lineAngle + Math.PI);
+    ly1 = CY + lineLen * Math.sin(lineAngle + Math.PI);
+    lx2 = CX + lineLen * Math.cos(lineAngle);
+    ly2 = CY + lineLen * Math.sin(lineAngle);
+  }
+
+  const dOp = landed ? nulOp : lerp(0.4 * exitFade, nulOp, diagE);
+  dLine(lx1, ly1, lx2, ly2, c, landed ? nulSW : sw() * 0.7, dOp);
+
+  // Clock tick marks
+  if (landed) {
+    const clockFlash = cl((landP - 0.55) / 0.1) * (1 - cl((landP - 0.72) / 0.08)) * exitFade;
+    if (clockFlash > 0.01) {
+      const tickLen = fR * 0.12;
+      const tickR = fR * 0.85;
+      for (let h = 0; h < 4; h++) {
+        const ta = -Math.PI / 2 + h * Math.PI / 2;
+        dLine(
+          CX + tickR * Math.cos(ta), CY + tickR * Math.sin(ta),
+          CX + (tickR + tickLen) * Math.cos(ta), CY + (tickR + tickLen) * Math.sin(ta),
+          c, sw() * 0.4, clockFlash * 0.3
+        );
+      }
+      dDot(CX, CY, 1.5, c, clockFlash * 0.4);
+    }
+  }
+
+  // Landing pulse
+  if (landP > 0.2 && landP < 0.5) {
+    dCirc(CX, CY, fR + 5, c, sw() * 0.5, Math.sin(ease(cl((landP - 0.2) / 0.3)) * Math.PI) * 0.25 * exitFade);
+  }
+}
+
+const DRAWS = [drawNUL, drawSIG, drawINS, drawSEG, drawCON, drawSYN, drawDEF, drawEVA, drawREC];
+
+// ==========================================
+// FRAME LOOP
+// ==========================================
+let prevT = 0;
+let started = false;
+
+function frame(now) {
+  if (!started) { prevT = now; started = true; S.stepT = now; S.step = 0; }
+  const dt = Math.min((now - prevT) / 1000, 0.05);
+  prevT = now;
+
+  // Auto-advance
+  const step = S.step;
+  const elapsed = now - S.stepT;
+  const dur = DURS[step] || 3000;
+  const hold = HOLDS[step] || 600;
+  if (elapsed > dur + hold) advance(now);
+
+  const raw = cl(elapsed / dur);
+
+  // Smooth camera
+  if (step >= 0 && step < 9) {
+    const cam = CAMS[step];
+    let targetZ = cam[2];
+
+    // REC: dynamically zoom in as sphere forms
+    if (step === 8) {
+      const recElapsed = now - S.stepT;
+      const recRaw = cl(recElapsed / (DURS[8] || 6500));
+      // Stay at 0.65 during warp, ramp to 1.0 once circle appears (~50%)
+      const zoomP = cl((recRaw - 0.45) / 0.25);
+      targetZ = lerp(0.65, 1.0, ease(zoomP));
+    }
+
+    S.camX = damp(S.camX, cam[0], 5, dt);
+    S.camY = damp(S.camY, cam[1], 5, dt);
+    S.camZ = damp(S.camZ, targetZ, 4, dt);
+  }
+
+  // Entropy decay
+  S.entropy = damp(S.entropy, 0, 1.5, dt);
+
+  // ---- PAINT ----
+  X.clearRect(0, 0, W, H);
+
+  // Background
+  X.fillStyle = '#080808';
+  X.fillRect(0, 0, W, H);
+
+  // Compute scale
+  const baseScale = Math.min(W, H) / 420;
+
+  // Camera transform
+  X.save();
+  X.translate(W / 2, H / 2);
+  X.scale(S.camZ * baseScale, S.camZ * baseScale);
+  X.translate(-S.camX, -S.camY);
+
+  // Entropy wobble
+  if (S.entropy > 0.01) {
+    X.translate(
+      S.entropy * Math.sin(now * 0.004) * 2,
+      S.entropy * Math.cos(now * 0.003) * 1.5
+    );
+  }
+
+  // Draw current operator
+  if (step >= 0 && step < 9) {
+    const c = col(OPS[step].triad);
+    DRAWS[step](raw, now, c);
+  }
+
+  X.restore();
+
+  // ---- CHROME ----
+  X.globalAlpha = 1;
+
+  // Progress bar — top
+  const barY = 20;
+  const barW = Math.min(W * 0.7, 420);
+  const barX0 = (W - barW) / 2;
+  const segW = barW / 9;
+
+  for (let i = 0; i < 9; i++) {
+    const op = OPS[i];
+    const active = i === step;
+    const past = i < step;
+    const h = TRIAD_HUE[op.triad] + S.hueOff[op.triad];
+    const s = TRIAD_SAT[op.triad];
+    const l = TRIAD_LIT[op.triad];
+
+    X.fillStyle = active
+      ? `hsl(${h}, ${s}%, ${l}%)`
+      : past
+        ? `hsla(${h}, ${s}%, ${l}%, 0.25)`
+        : 'rgba(255,255,255,0.03)';
+    X.fillRect(barX0 + i * segW + 1, barY, segW - 2, 2.5);
+
+    // Label
+    X.font = `${active ? 500 : 300} 9px 'DM Sans', sans-serif`;
+    X.fillStyle = active
+      ? `hsl(${h}, ${s}%, ${l}%)`
+      : past
+        ? 'rgba(255,255,255,0.28)'
+        : 'rgba(255,255,255,0.08)';
+    X.textAlign = 'center';
+    X.textBaseline = 'top';
+    X.fillText(op.key, barX0 + i * segW + segW / 2, barY + 8);
+  }
+
+  // Operator info — bottom center
+  if (step >= 0 && step < 9) {
+    const op = OPS[step];
+    const h = TRIAD_HUE[op.triad] + S.hueOff[op.triad];
+    const s = TRIAD_SAT[op.triad];
+    const l = TRIAD_LIT[op.triad];
+
+    const infoY = H - 70;
+
+    // Glyph
+    X.font = `400 22px 'DM Sans', sans-serif`;
+    X.fillStyle = `hsla(${h}, ${s}%, ${l}%, 0.85)`;
+    X.textAlign = 'center';
+    X.textBaseline = 'alphabetic';
+    X.fillText(op.glyph, W / 2 - 55, infoY);
+
+    // Key
+    X.font = `500 12px 'DM Sans', sans-serif`;
+    X.fillStyle = `hsla(${h}, ${s}%, ${l}%, 0.9)`;
+    X.fillText(op.key, W / 2 - 22, infoY);
+
+    // Name
+    X.font = `300 11px 'DM Sans', sans-serif`;
+    X.fillStyle = 'rgba(255,255,255,0.35)';
+    X.textAlign = 'left';
+    X.fillText(op.name, W / 2 - 5, infoY);
+
+    // Description
+    X.font = `italic 300 15px 'Crimson Pro', Georgia, serif`;
+    X.fillStyle = 'rgba(255,255,255,0.45)';
+    X.textAlign = 'center';
+    X.fillText(op.desc, W / 2, infoY + 24);
+  }
+
+  // Info line
+  X.font = `italic 400 10px 'DM Sans', sans-serif`;
+  X.fillStyle = '#555';
+  X.textAlign = 'center';
+  X.textBaseline = 'bottom';
+  const nSlash = Math.max(1, step + 1);
+  X.fillText(
+    `cycle ${S.cycle}  \u00B7  ${step >= 0 ? OPS[step].glyph : '\u2205'}  \u00B7  ${Math.round(TRIAD_HUE[OPS[Math.max(0, step)].triad] + S.hueOff[OPS[Math.max(0, step)].triad])}\u00B0`,
+    W / 2, H - 14
+  );
+
+  // ---- RIPPLES ----
+  for (let i = S.ripples.length - 1; i >= 0; i--) {
+    const r = S.ripples[i];
+    r.t += dt * 0.7;
+    if (r.t > 1) { S.ripples.splice(i, 1); continue; }
+    const p = ease(r.t);
+    const fade = 1 - r.t;
+
+    X.beginPath();
+    X.arc(r.x, r.y, p * 140, 0, Math.PI * 2);
+    X.strokeStyle = `hsla(${r.hue}, 50%, 55%, ${fade * 0.12})`;
+    X.lineWidth = 1.2;
+    X.globalAlpha = 1;
+    X.stroke();
+
+    X.beginPath();
+    X.arc(r.x, r.y, p * 60, 0, Math.PI * 2);
+    X.strokeStyle = `hsla(${r.hue + 20}, 60%, 60%, ${fade * 0.07})`;
+    X.lineWidth = 0.8;
+    X.stroke();
+  }
+
+  requestAnimationFrame(frame);
+}
+
+// ==========================================
+// CLICK
+// ==========================================
+CV.addEventListener('click', e => {
+  S.entropy += 1.5;
+  advance(performance.now());
+
+  const triad = OPS[S.step].triad;
+  S.ripples.push({
+    x: e.clientX,
+    y: e.clientY,
+    t: 0,
+    hue: TRIAD_HUE[triad] + S.hueOff[triad] + (Math.random() - 0.5) * 30,
+  });
+});
+
+// ==========================================
+// START
+// ==========================================
+document.fonts.ready.then(() => requestAnimationFrame(frame));
+</script>
+</body>
+</html>
