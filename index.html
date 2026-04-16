@@ -1453,6 +1453,7 @@ function iconFor(type) {
     : type === "link"  ? "EXT"
     : type === "embed" ? "APP"
     : type === "file"  ? "TXT"
+    : type === "post"  ? "POST"
     :                    "";
   const cls = type === "dir" ? "type-badge dir" : "type-badge";
   return `<span class="${cls}">${label}</span>`;
