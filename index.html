@@ -985,6 +985,62 @@ tr.w-count td {
   font-size: 12.5px;
 }
 
+/* ── EO promo ─────────────────────────────────────────────────────────────
+   Compact teaser between the About dropdown and the directory listing.
+   Links to the local Operator Helix animation and the off-site EO wiki. */
+#eo-promo {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-bottom: 1.5rem;
+  padding: 0.85rem 0;
+  border-top: 0.5px solid var(--fg-ink-2);
+  border-bottom: 0.5px solid var(--fg-ink-2);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+}
+#eo-promo .eo-tag {
+  color: var(--accent-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border: 0.5px solid var(--badge-border);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+#eo-promo .eo-title {
+  color: var(--fg-strong);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(122,182,160,0.35);
+}
+#eo-promo .eo-title:hover {
+  color: var(--accent-hover);
+  text-decoration-color: var(--accent-hover);
+}
+#eo-promo .eo-desc { color: var(--fg-desc); }
+#eo-promo .eo-wiki {
+  margin-left: auto;
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(122,182,160,0.35);
+}
+#eo-promo .eo-wiki:hover {
+  color: var(--accent-hover);
+  text-decoration-color: var(--accent-hover);
+}
+@media (max-width: 639px) {
+  #eo-promo .eo-wiki { margin-left: 0; }
+}
+
 /* ── Inline expansion rows ────────────────────────────────────────────────
    When a root-level entry is clicked we reveal its underlying content in
    place instead of navigating. The expansion row spans all three columns,
@@ -1105,6 +1161,12 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
     </button>
     <div id="readme-body" hidden></div>
   </div>
+  <aside id="eo-promo" aria-label="Experiential Ontology">
+    <span class="eo-tag">EO</span>
+    <a class="eo-title" href="eo-animation.html">The Operator Helix</a>
+    <span class="eo-desc">— an animation of EO's nine operators.</span>
+    <a class="eo-wiki" href="https://experientialontology.org/" target="_blank" rel="noopener">EO wiki ↗</a>
+  </aside>
   <h1 id="dir-title">Index of /</h1>
   <hr>
   <table id="dir-table">
