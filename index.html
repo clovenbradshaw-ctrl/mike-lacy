@@ -986,13 +986,10 @@ tr.w-count td {
 }
 
 /* ── EO promo ─────────────────────────────────────────────────────────────
-   Compact teaser between the About dropdown and the directory listing.
-   Links to the local Operator Helix animation and the off-site EO wiki. */
+   Pinned between the About dropdown and the directory listing. Shows the
+   Operator Helix animation inline by default; the header row collapses the
+   frame without navigating away. */
 #eo-promo {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px 12px;
   margin-bottom: 1.5rem;
   padding: 0.85rem 0;
   border-top: 0.5px solid var(--fg-ink-2);
@@ -1001,6 +998,34 @@ tr.w-count td {
   font-size: 14px;
   line-height: 1.5;
 }
+#eo-promo .eo-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+#eo-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#eo-toggle:hover { color: var(--accent); }
+#eo-toggle .eo-caret {
+  display: inline-flex;
+  transition: transform 0.15s ease;
+}
+#eo-promo.is-expanded #eo-toggle .eo-caret { transform: rotate(90deg); }
 #eo-promo .eo-tag {
   color: var(--accent-muted);
   font-size: 11px;
@@ -1039,6 +1064,23 @@ tr.w-count td {
 }
 @media (max-width: 639px) {
   #eo-promo .eo-wiki { margin-left: 0; }
+}
+#eo-frame-wrap {
+  margin-top: 0.85rem;
+  border: 0.5px solid var(--fg-ink-2);
+  border-radius: 2px;
+  overflow: hidden;
+  background: #080808;
+}
+#eo-frame-wrap[hidden] { display: none; }
+#eo-frame-wrap iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+}
+@media (max-width: 639px) {
+  #eo-frame-wrap iframe { height: 420px; }
 }
 
 /* ── Inline expansion rows ────────────────────────────────────────────────
@@ -1161,11 +1203,21 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
     </button>
     <div id="readme-body" hidden></div>
   </div>
-  <aside id="eo-promo" aria-label="Experiential Ontology">
-    <span class="eo-tag">EO</span>
-    <a class="eo-title" href="eo-animation.html">The Operator Helix</a>
-    <span class="eo-desc">— an animation of EO's nine operators.</span>
-    <a class="eo-wiki" href="https://experientialontology.org/" target="_blank" rel="noopener">EO wiki ↗</a>
+  <aside id="eo-promo" class="is-expanded" aria-label="Experiential Ontology">
+    <div class="eo-header">
+      <button type="button" id="eo-toggle" aria-expanded="true" aria-controls="eo-frame-wrap" title="Collapse / expand">
+        <span class="eo-caret" aria-hidden="true">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5L3.5 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <span class="eo-tag">EO</span>
+      <a class="eo-title" href="eo-animation.html">The Operator Helix</a>
+      <span class="eo-desc">— an animation of EO's nine operators.</span>
+      <a class="eo-wiki" href="https://experientialontology.org/" target="_blank" rel="noopener">EO wiki ↗</a>
+    </div>
+    <div id="eo-frame-wrap">
+      <iframe src="eo-animation.html" title="The Operator Helix" loading="eager"></iframe>
+    </div>
   </aside>
   <h1 id="dir-title">Index of /</h1>
   <hr>
@@ -1740,6 +1792,22 @@ function hideReadmePreface() {
   const host = document.getElementById("readme-preface");
   if (host) host.classList.remove("show");
 }
+
+// Wire the Operator Helix collapse toggle. Starts expanded so visitors see
+// the animation immediately; clicking the caret collapses the iframe in place
+// without tearing it down, so it resumes at the same cycle when re-opened.
+(function initEoToggle() {
+  const host = document.getElementById("eo-promo");
+  const btn = document.getElementById("eo-toggle");
+  const frame = document.getElementById("eo-frame-wrap");
+  if (!host || !btn || !frame) return;
+  btn.addEventListener("click", () => {
+    const expanded = host.classList.toggle("is-expanded");
+    btn.setAttribute("aria-expanded", String(expanded));
+    if (expanded) frame.removeAttribute("hidden");
+    else frame.setAttribute("hidden", "");
+  });
+})();
 
 // ── inline-expansion state ──────────────────────────────────────────────────
 // Tracks which root-level entries are currently expanded so re-renders (e.g.
