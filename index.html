@@ -801,6 +801,48 @@ tr.w-count td {
 #lightbox .lb-close:hover { opacity: 1; }
 @keyframes lb-fade { from { opacity: 0 } to { opacity: 1 } }
 
+/* ── Fullframe modal ──────────────────────────────────────────────────────
+   Full-viewport overlay that hosts an arbitrary iframe (EO animation, the
+   Naibor app, etc.) when launched from the EO promo's expand button. The
+   inner iframe gets swapped by JS; close drops it back to about:blank so
+   the remote app stops running when dismissed. */
+#fullframe-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 10000;
+  padding: 24px;
+  animation: lb-fade 140ms ease-out;
+}
+#fullframe-modal.open { display: block; }
+#fullframe-modal iframe {
+  width: 100%;
+  height: 100%;
+  border: 0.5px solid var(--fg-ink-2);
+  border-radius: 2px;
+  background: var(--bg);
+  display: block;
+}
+#fullframe-close {
+  position: absolute;
+  top: 14px;
+  right: 22px;
+  z-index: 10001;
+  background: rgba(0,0,0,0.55);
+  border: 0.5px solid var(--fg-ink-2);
+  color: var(--fg-strong);
+  font: 600 22px/1 ui-sans-serif, system-ui, sans-serif;
+  padding: 4px 12px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+#fullframe-close:hover { color: var(--accent); border-color: var(--accent); }
+@media (max-width: 639px) {
+  #fullframe-modal { padding: 14px; }
+  #fullframe-close { top: 6px; right: 10px; }
+}
+
 /* ── Rich Text (Substack) right-side widget ────────────────────────────────
    A small floating feed card pinned to the upper-right. Only shows on
    viewports with headroom (the main column is capped at 960px centered;
@@ -913,6 +955,15 @@ tr.w-count td {
   margin-bottom: 2.25rem;
   padding-bottom: 2.25rem;
 }
+#readme-preview {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--fg-desc);
+}
+#readme-preview em { font-style: italic; color: var(--fg); }
+#readme-preface.is-expanded #readme-preview { display: none; }
 #readme-toggle {
   display: flex;
   align-items: center;
@@ -1071,6 +1122,66 @@ tr.w-count td {
 @media (max-width: 639px) {
   #eo-promo .eo-wiki { margin-left: 0; }
 }
+#eo-promo .eo-sub {
+  margin-top: 0.55rem;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--fg-desc);
+}
+#eo-promo .eo-sub[hidden] { display: none; }
+
+/* Switcher that cycles the EO promo between the Operator Helix and other
+   embedded previews (currently: Naibor). Sits between the collapse caret
+   and the mode tag so it reads as "pagination for this slot." */
+#eo-promo .eo-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+#eo-promo .eo-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 4px;
+  background: none;
+  border: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+}
+#eo-promo .eo-nav:hover { color: var(--accent); }
+#eo-promo .eo-dots {
+  display: inline-flex;
+  gap: 5px;
+  padding: 0 2px;
+}
+#eo-promo .eo-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--fg-ink-2);
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+#eo-promo .eo-dot[aria-current="true"] { background: var(--accent); }
+#eo-promo .eo-dot:hover { transform: scale(1.4); }
+
+/* Expand-to-modal affordance. Kept compact next to the title so it reads as
+   "open this preview full-screen" rather than a separate action. */
+#eo-promo .eo-expand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 5px;
+  background: none;
+  border: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+}
+#eo-promo .eo-expand:hover { color: var(--accent); }
+#eo-promo .eo-title { cursor: pointer; }
 #eo-frame-wrap {
   margin-top: 0.85rem;
   border: 0.5px solid var(--fg-ink-2);
@@ -1215,22 +1326,36 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
       </span>
       <span>About</span>
     </button>
+    <div id="readme-preview">Independent investigative journalist, civic technologist, and systems theorist in Nashville. Publishes <em>{Rich Text}</em> — 4,000+ subscribers, 186,000+ words in 2025, and Nashville Scene's "Best Metro Watchdog." Founded Ground Truth Nashville and builds open-source civic tools including the Nashville Eviction Tracker.</div>
     <div id="readme-body" hidden></div>
   </div>
-  <aside id="eo-promo" class="is-expanded" aria-label="Experiential Ontology">
+  <aside id="eo-promo" class="is-expanded" data-mode="eo" aria-label="Featured preview">
     <div class="eo-header">
       <button type="button" id="eo-toggle" aria-expanded="true" aria-controls="eo-frame-wrap" title="Collapse / expand">
         <span class="eo-caret" aria-hidden="true">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5L3.5 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
       </button>
-      <span class="eo-tag">EO</span>
-      <a class="eo-title" href="eo-animation.html">The Operator Helix</a>
-      <span class="eo-desc">— an animation of EO's nine operators.</span>
-      <a class="eo-wiki" href="https://experientialontology.org/" target="_blank" rel="noopener">EO wiki ↗</a>
+      <div class="eo-switch" role="tablist" aria-label="Switch preview">
+        <button type="button" class="eo-nav" id="eo-prev" aria-label="Previous preview" title="Previous">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6.5 2L3.5 5L6.5 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="eo-dots" id="eo-dots"></span>
+        <button type="button" class="eo-nav" id="eo-next" aria-label="Next preview" title="Next">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L6.5 5L3.5 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <span class="eo-tag" id="eo-tag">EO</span>
+      <a class="eo-title" id="eo-title" href="eo-animation.html" role="button">The Operator Helix</a>
+      <span class="eo-desc" id="eo-desc">— an animation of EO's nine operators.</span>
+      <button type="button" class="eo-expand" id="eo-expand" aria-label="Open full screen" title="Open full screen">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 4V1H4M7 1H10V4M10 7V10H7M4 10H1V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <a class="eo-wiki" id="eo-wiki" href="https://experientialontology.org/" target="_blank" rel="noopener">EO wiki ↗</a>
     </div>
+    <p class="eo-sub" id="eo-sub">The fundamental transformations underlying all change — useful for auditing how a decision was made, tracing the provenance of a record, and keeping systems from hiding what they've done.</p>
     <div id="eo-frame-wrap">
-      <iframe src="eo-animation.html" title="The Operator Helix" loading="eager" scrolling="no"></iframe>
+      <iframe id="eo-iframe" src="eo-animation.html" title="The Operator Helix" loading="eager" scrolling="no"></iframe>
     </div>
   </aside>
   <h1 id="dir-title">Index of /</h1>
@@ -1310,6 +1435,11 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
 <div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
   <button type="button" class="lb-close" aria-label="Close image">×</button>
   <img alt="">
+</div>
+
+<div id="fullframe-modal" role="dialog" aria-modal="true" aria-label="Full-screen preview">
+  <button type="button" id="fullframe-close" aria-label="Close preview">×</button>
+  <iframe id="fullframe-iframe" src="about:blank" title="" referrerpolicy="no-referrer"></iframe>
 </div>
 
 <script>
@@ -1820,6 +1950,137 @@ function hideReadmePreface() {
     btn.setAttribute("aria-expanded", String(expanded));
     if (expanded) frame.removeAttribute("hidden");
     else frame.setAttribute("hidden", "");
+  });
+})();
+
+// ── Featured-preview switcher ─────────────────────────────────────────────
+// The EO promo slot cycles between the Operator Helix animation and other
+// embedded previews. Adding a mode here is: append an entry to EO_MODES.
+const EO_MODES = [
+  {
+    id: "eo",
+    tag: "EO",
+    title: "The Operator Helix",
+    desc: "— an animation of EO's nine operators.",
+    src: "eo-animation.html",
+    wikiHref: "https://experientialontology.org/",
+    wikiText: "EO wiki ↗",
+    sub: "The fundamental transformations underlying all change — useful for auditing how a decision was made, tracing the provenance of a record, and keeping systems from hiding what they've done.",
+  },
+  {
+    id: "naibor",
+    tag: "Naibor",
+    title: "NaiBOR",
+    desc: "— the surveillance tool pointed back at Metro officials.",
+    src: "https://clovenbradshaw-ctrl.github.io/naibor/",
+    wikiHref: "https://clovenbradshaw-ctrl.github.io/naibor/",
+    wikiText: "Open Naibor ↗",
+    sub: "An open-source civic app that turns Metro's own surveillance methods back on its officials — their meetings, votes, and time allocations. Be a neighbor, not a naibor.",
+  },
+];
+
+(function initEoSwitcher() {
+  const host    = document.getElementById("eo-promo");
+  const iframe  = document.getElementById("eo-iframe");
+  const tagEl   = document.getElementById("eo-tag");
+  const titleEl = document.getElementById("eo-title");
+  const descEl  = document.getElementById("eo-desc");
+  const subEl   = document.getElementById("eo-sub");
+  const wikiEl  = document.getElementById("eo-wiki");
+  const prevBtn = document.getElementById("eo-prev");
+  const nextBtn = document.getElementById("eo-next");
+  const dotsEl  = document.getElementById("eo-dots");
+  const expand  = document.getElementById("eo-expand");
+  if (!host || !iframe) return;
+
+  // Seed dataset.src from the markup so the first setMode() call doesn't
+  // re-assign iframe.src and retrigger the initial load.
+  iframe.dataset.src = iframe.getAttribute("src") || "";
+
+  // Build dots from the modes list so it scales if more previews are added.
+  dotsEl.innerHTML = "";
+  EO_MODES.forEach((m, i) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "eo-dot";
+    dot.dataset.idx = String(i);
+    dot.setAttribute("aria-label", m.tag);
+    dot.addEventListener("click", () => setMode(i));
+    dotsEl.appendChild(dot);
+  });
+
+  let idx = 0;
+  function setMode(i) {
+    idx = (i + EO_MODES.length) % EO_MODES.length;
+    const m = EO_MODES[idx];
+    host.dataset.mode = m.id;
+    if (iframe.dataset.src !== m.src) {
+      iframe.src = m.src;
+      iframe.dataset.src = m.src;
+    }
+    iframe.title = m.title;
+    tagEl.textContent = m.tag;
+    titleEl.textContent = m.title;
+    titleEl.setAttribute("href", m.src);
+    descEl.textContent = m.desc;
+    subEl.textContent = m.sub;
+    wikiEl.textContent = m.wikiText;
+    wikiEl.href = m.wikiHref;
+    dotsEl.querySelectorAll(".eo-dot").forEach((d, di) => {
+      if (di === idx) d.setAttribute("aria-current", "true");
+      else d.removeAttribute("aria-current");
+    });
+  }
+
+  prevBtn && prevBtn.addEventListener("click", () => setMode(idx - 1));
+  nextBtn && nextBtn.addEventListener("click", () => setMode(idx + 1));
+
+  // Clicking the title or the expand glyph opens the current preview in a
+  // full-viewport modal so it can be interacted with at full size without
+  // leaving the page.
+  function openFull() {
+    const m = EO_MODES[idx];
+    openFullframe(m.src, m.title);
+  }
+  titleEl.addEventListener("click", (e) => { e.preventDefault(); openFull(); });
+  expand && expand.addEventListener("click", openFull);
+
+  setMode(0);
+})();
+
+// ── Fullframe modal ───────────────────────────────────────────────────────
+// Generic full-viewport iframe overlay used by the EO/Naibor previews. The
+// iframe is reset to about:blank on close so remote apps stop running and
+// don't hold audio/network when dismissed.
+function openFullframe(src, title) {
+  const modal = document.getElementById("fullframe-modal");
+  const frame = document.getElementById("fullframe-iframe");
+  if (!modal || !frame) return;
+  frame.src = src;
+  frame.title = title || "";
+  modal.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeFullframe() {
+  const modal = document.getElementById("fullframe-modal");
+  const frame = document.getElementById("fullframe-iframe");
+  if (!modal || !modal.classList.contains("open")) return false;
+  modal.classList.remove("open");
+  if (frame) frame.src = "about:blank";
+  document.body.style.overflow = "";
+  return true;
+}
+(function initFullframe() {
+  const modal = document.getElementById("fullframe-modal");
+  const close = document.getElementById("fullframe-close");
+  if (!modal || !close) return;
+  close.addEventListener("click", closeFullframe);
+  // Click on the dim backdrop (outside the iframe) dismisses the modal.
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeFullframe();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("open")) closeFullframe();
   });
 })();
 
