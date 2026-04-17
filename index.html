@@ -913,6 +913,15 @@ tr.w-count td {
   margin-bottom: 2.25rem;
   padding-bottom: 2.25rem;
 }
+#readme-preview {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--fg-desc);
+}
+#readme-preview em { font-style: italic; color: var(--fg); }
+#readme-preface.is-expanded #readme-preview { display: none; }
 #readme-toggle {
   display: flex;
   align-items: center;
@@ -1071,6 +1080,13 @@ tr.w-count td {
 @media (max-width: 639px) {
   #eo-promo .eo-wiki { margin-left: 0; }
 }
+#eo-promo .eo-sub {
+  margin-top: 0.55rem;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--fg-desc);
+}
+#eo-promo .eo-sub[hidden] { display: none; }
 #eo-frame-wrap {
   margin-top: 0.85rem;
   border: 0.5px solid var(--fg-ink-2);
@@ -1215,6 +1231,7 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
       </span>
       <span>About</span>
     </button>
+    <div id="readme-preview">Independent investigative journalist, civic technologist, and systems theorist in Nashville. Publishes <em>{Rich Text}</em> — 4,000+ subscribers, 186,000+ words in 2025, and Nashville Scene's "Best Metro Watchdog." Founded Ground Truth Nashville and builds open-source civic tools including the Nashville Eviction Tracker.</div>
     <div id="readme-body" hidden></div>
   </div>
   <aside id="eo-promo" class="is-expanded" aria-label="Experiential Ontology">
@@ -1229,6 +1246,7 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
       <span class="eo-desc">— an animation of EO's nine operators.</span>
       <a class="eo-wiki" href="https://experientialontology.org/" target="_blank" rel="noopener">EO wiki ↗</a>
     </div>
+    <p class="eo-sub">The fundamental transformations underlying all change — useful for auditing how a decision was made, tracing the provenance of a record, and keeping systems from hiding what they've done.</p>
     <div id="eo-frame-wrap">
       <iframe src="eo-animation.html" title="The Operator Helix" loading="eager" scrolling="no"></iframe>
     </div>
