@@ -1042,6 +1042,78 @@ tr.w-count td {
   font-size: 12.5px;
 }
 
+/* ── Truthout external-publication promo ──────────────────────────────────
+   Sits between the About dropdown and the EO preview. Surfaces Mike's
+   byline on Truthout.org at a glance — no iframe (truthout.org blocks
+   embedding), so the card renders the title, pull-quote, and CTA inline. */
+#truthout-promo {
+  margin-bottom: 1.5rem;
+  padding: 0.85rem 0;
+  border-top: 0.5px solid var(--fg-ink-2);
+  border-bottom: 0.5px solid var(--fg-ink-2);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+}
+#truthout-promo .to-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+#truthout-promo .to-tag {
+  color: var(--accent-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border: 0.5px solid var(--badge-border);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+#truthout-promo .to-byline {
+  color: var(--fg-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+#truthout-promo .to-title {
+  color: var(--fg-strong);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(122,182,160,0.35);
+}
+#truthout-promo .to-title:hover {
+  color: var(--accent-hover);
+  text-decoration-color: var(--accent-hover);
+}
+#truthout-promo .to-cta {
+  margin-left: auto;
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(122,182,160,0.35);
+}
+#truthout-promo .to-cta:hover {
+  color: var(--accent-hover);
+  text-decoration-color: var(--accent-hover);
+}
+@media (max-width: 639px) {
+  #truthout-promo .to-cta { margin-left: 0; }
+}
+#truthout-promo .to-sub {
+  margin: 0.55rem 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--fg-desc);
+}
+
 /* ── EO promo ─────────────────────────────────────────────────────────────
    Pinned between the About dropdown and the directory listing. Shows the
    Operator Helix animation inline by default; the header row collapses the
@@ -1346,6 +1418,15 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
     <div id="readme-preview">Independent investigative journalist, civic technologist, and systems theorist in Nashville. Publishes <em>{Rich Text}</em> — 4,000+ subscribers, 186,000+ words in 2025, and Nashville Scene's "Best Metro Watchdog." Founded Ground Truth Nashville and builds open-source civic tools including the Nashville Eviction Tracker.</div>
     <div id="readme-body" hidden></div>
   </div>
+  <aside id="truthout-promo" aria-label="Mike's byline on Truthout.org">
+    <div class="to-header">
+      <span class="to-tag">Truthout</span>
+      <span class="to-byline">By Mike Lacy</span>
+      <a class="to-title" href="https://truthout.org/articles/a-nashville-proposal-could-outsource-surveillance-and-policing-to-a-nonprofit/" target="_blank" rel="noopener">A Nashville Proposal Could Outsource Surveillance and Policing to a Nonprofit</a>
+      <a class="to-cta" href="https://truthout.org/articles/a-nashville-proposal-could-outsource-surveillance-and-policing-to-a-nonprofit/" target="_blank" rel="noopener">Read on Truthout ↗</a>
+    </div>
+    <p class="to-sub">Nashville's plan to hand public safety to a private nonprofit — with former Fusus executives selling the surveillance stack back to the city, and Oracle's cloud poised to host it. Mike's on-the-record reporting, published on Truthout.org.</p>
+  </aside>
   <aside id="eo-promo" class="is-expanded" data-mode="eo" aria-label="Featured preview">
     <div class="eo-header">
       <button type="button" id="eo-toggle" aria-expanded="true" aria-controls="eo-frame-wrap" title="Collapse / expand">
