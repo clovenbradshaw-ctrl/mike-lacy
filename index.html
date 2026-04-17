@@ -1183,6 +1183,7 @@ tr.w-count td {
 #eo-promo .eo-expand:hover { color: var(--accent); }
 #eo-promo .eo-title { cursor: pointer; }
 #eo-frame-wrap {
+  position: relative;
   margin-top: 0.85rem;
   border: 0.5px solid var(--fg-ink-2);
   border-radius: 2px;
@@ -1195,6 +1196,22 @@ tr.w-count td {
   width: 100%;
   height: 520px;
   border: 0;
+}
+/* Transparent overlay so clicking anywhere on the inline preview launches it
+   fullscreen — the iframe captures pointer events otherwise. */
+#eo-frame-click {
+  position: absolute;
+  inset: 0;
+  cursor: zoom-in;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  z-index: 1;
+}
+#eo-frame-click:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 @media (max-width: 639px) {
   #eo-frame-wrap iframe { height: 360px; }
@@ -1356,6 +1373,7 @@ tr.w-row.is-expanded td.w-main a { color: var(--accent); }
     <p class="eo-sub" id="eo-sub">The fundamental transformations underlying all change — useful for auditing how a decision was made, tracing the provenance of a record, and keeping systems from hiding what they've done.</p>
     <div id="eo-frame-wrap">
       <iframe id="eo-iframe" src="eo-animation.html" title="The Operator Helix" loading="eager" scrolling="no"></iframe>
+      <button type="button" id="eo-frame-click" aria-label="Open full screen"></button>
     </div>
   </aside>
   <h1 id="dir-title">Index of /</h1>
@@ -2044,6 +2062,8 @@ const EO_MODES = [
   }
   titleEl.addEventListener("click", (e) => { e.preventDefault(); openFull(); });
   expand && expand.addEventListener("click", openFull);
+  const frameClick = document.getElementById("eo-frame-click");
+  frameClick && frameClick.addEventListener("click", openFull);
 
   setMode(0);
 })();
