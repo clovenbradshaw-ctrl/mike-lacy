@@ -1627,7 +1627,7 @@ const files = {
 
 substack:  <a href="https://readrichtext.substack.com" target="_blank">readrichtext.substack.com</a>
 email:     <a href="mailto:scores.patch.points@proton.me">scores.patch.points@proton.me</a>
-signal:    <a href="https://signal.me/#eu/0sH-qog826fh91_3ZkY3XycscZO93L8T2Bbf2kZ" target="_blank">signal.me → tap to open</a>
+signal:    <a href="https://signal.me/#u/scores.patch.points.1926" target="_blank">scores.patch.points.1926</a>
 
 If you have a tip, a records request to share,
 or information about Nashville city government
@@ -1739,12 +1739,17 @@ full materials
 // Hash-encode the state into the URL so reload + direct linking work.
 function hashOf(s) {
   if (!s) return '';
-  if (s.view === 'dir')   return '#' + (s.path || '/');
-  if (s.view === 'post')  return '#' + (s.fromP || '/writing/') + s.file;
-  if (s.view === 'text')  return '#' + (s.fromP || '/') + s.name;
-  if (s.view === 'embed') return '#' + (s.fromP || '/projects/') + s.name;
+  if (s.view === 'dir')      return '#' + (s.path || '/');
+  if (s.view === 'post')     return '#' + (s.fromP || '/writing/') + s.file;
+  if (s.view === 'text')     return '#' + (s.fromP || '/') + s.name;
+  if (s.view === 'embed')    return '#' + (s.fromP || '/projects/') + s.name;
+  if (s.view === 'richtext') return '#/richtext/' + s.slug;
   return '';
 }
+// Set by restoreFromState when a #/richtext/<slug> deep-link arrives before
+// the Substack RSS fetch has resolved. The widget's load() drains this after
+// items are parsed so the modal opens as soon as data is ready.
+let pendingRichTextSlug = null;
 let suppressHashChange = false;
 function pushNav(state, replace) {
   const h = hashOf(state);
@@ -1778,6 +1783,10 @@ function stateFromHash(h) {
   if (fromP === '/writing/' && POST_BY_FILE[leaf]) {
     return { view:'post', file:leaf, fromP };
   }
+  // Substack (Rich Text) article — leaf is the Substack slug.
+  if (fromP === '/richtext/' && leaf) {
+    return { view:'richtext', slug:leaf };
+  }
   // Entry under any known dir — could be post, embed, or directory.
   const entries = dirs[fromP] || [];
   const entry = entries.find(e => e.name === leaf || (e.file && e.file === leaf));
@@ -1800,7 +1809,7 @@ function restoreFromState(s) {
   // avoid an unnecessary re-render (which would lose inline expansions).
   const viewer = document.getElementById('viewer');
   const modalOpen = viewer && viewer.classList.contains('modal-mode');
-  if (modalOpen && (!s || s.view !== 'post')) {
+  if (modalOpen && (!s || (s.view !== 'post' && s.view !== 'richtext'))) {
     closeArticleModal();
     return;
   }
@@ -1814,6 +1823,13 @@ function restoreFromState(s) {
   if (s.view === 'text')  { openText(s.name, s.fromP || '/', true); return; }
   if (s.view === 'embed') {
     openEmbed({ name:s.name, src:s.src, date:s.date, desc:s.desc }, s.fromP || '/', true);
+    return;
+  }
+  if (s.view === 'richtext') {
+    // If the RT widget has finished fetching the feed, open directly.
+    // Otherwise stash the slug — the widget's load() drains it on success.
+    if (window.__openRichTextBySlug) window.__openRichTextBySlug(s.slug);
+    else pendingRichTextSlug = s.slug;
     return;
   }
   render('/', true);
@@ -2854,6 +2870,14 @@ async function openPost(meta, fromP) {
   const PROXY = 'https://n8n.intelechia.com/webhook/b5e89bf9-a8bb-43ef-b1de-ceac4b0d6f59';
   const PER = 5;
   let items = [], page = 0;
+  let itemBySlug = {};
+
+  // Substack permalinks look like https://readrichtext.substack.com/p/<slug>
+  // — that slug is our stable shareable ID since the RSS feed offers no other.
+  const slugFromLink = (link) => {
+    const m = String(link || '').match(/\/p\/([^/?#]+)/);
+    return m ? m[1] : null;
+  };
 
   const rtBody = () => document.getElementById('rt-body');
   const esc = s => String(s).replace(/[&<>"']/g, c => (
@@ -2884,7 +2908,15 @@ async function openPost(meta, fromP) {
          `</div>`;
     rtBody().innerHTML = h;
     document.querySelectorAll('#rt-widget .rtw-pi').forEach(el => {
-      el.addEventListener('click', () => openItemModal(items[+el.dataset.i]));
+      el.addEventListener('click', () => {
+        const it = items[+el.dataset.i];
+        if (!it) return;
+        // Push a hash entry so the URL reflects the open article and the
+        // modal becomes shareable. Items without a slug (non-Substack links)
+        // fall back to in-place open without touching history.
+        if (it.slug) pushNav({ view:'richtext', slug: it.slug });
+        openItemModal(it);
+      });
     });
     document.getElementById('rtw-prev')?.addEventListener('click', () => { page--; renderList(); });
     document.getElementById('rtw-next')?.addEventListener('click', () => { page++; renderList(); });
@@ -2901,22 +2933,40 @@ async function openPost(meta, fromP) {
       const parseErr = xml.querySelector('parsererror');
       if (parseErr) throw new Error('XML parse error');
       const ns = 'http://purl.org/rss/1.0/modules/content/';
-      items = Array.from(xml.querySelectorAll('item')).map(el => ({
-        title:   el.querySelector('title')?.textContent?.trim() || '',
-        link:    el.querySelector('link')?.textContent?.trim() || el.querySelector('guid')?.textContent?.trim() || '',
-        date:    el.querySelector('pubDate')?.textContent || '',
-        content: el.getElementsByTagNameNS(ns, 'encoded')[0]?.textContent
-               || el.querySelector('description')?.textContent || ''
-      }));
+      items = Array.from(xml.querySelectorAll('item')).map(el => {
+        const link = el.querySelector('link')?.textContent?.trim() || el.querySelector('guid')?.textContent?.trim() || '';
+        return {
+          title:   el.querySelector('title')?.textContent?.trim() || '',
+          link,
+          slug:    slugFromLink(link),
+          date:    el.querySelector('pubDate')?.textContent || '',
+          content: el.getElementsByTagNameNS(ns, 'encoded')[0]?.textContent
+                 || el.querySelector('description')?.textContent || ''
+        };
+      });
       if (!items.length) throw new Error('no items parsed');
+      itemBySlug = Object.fromEntries(items.filter(x => x.slug).map(x => [x.slug, x]));
       const latestEl = document.getElementById('rtw-latest');
       if (latestEl && items[0]) latestEl.textContent = items[0].title;
       renderList();
+      // If someone deep-linked to #/richtext/<slug> before the feed arrived,
+      // the router stashed the slug — open it now that we have the content.
+      if (pendingRichTextSlug && itemBySlug[pendingRichTextSlug]) {
+        openItemModal(itemBySlug[pendingRichTextSlug]);
+        pendingRichTextSlug = null;
+      }
     } catch (e) {
       rtBody().innerHTML = `<div class="rtw-load">Error: ${esc(e.message)}</div>`;
       console.error('[rt-widget]', e);
     }
   }
+
+  // Router bridge: the hash handler lives outside this IIFE and needs a way
+  // to reach into the widget's closure when a #/richtext/<slug> URL resolves.
+  window.__openRichTextBySlug = (slug) => {
+    const it = itemBySlug[slug];
+    if (it) openItemModal(it);
+  };
 
   // Rich Text items are rendered through the shared article modal so they
   //    inherit the same narrow-column typography as /writing/ posts. The only
@@ -2946,7 +2996,8 @@ async function openPost(meta, fromP) {
   // If the modal came from the RT widget (no history push) we just tear it
   // down in place.
   const closeModal = () => {
-    if (history.state && history.state.view === 'post') history.back();
+    const v = history.state && history.state.view;
+    if (v === 'post' || v === 'richtext') history.back();
     else closeArticleModal();
   };
 
