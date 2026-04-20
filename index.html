@@ -1826,8 +1826,9 @@ function restoreFromState(s) {
     return;
   }
   if (s.view === 'richtext') {
-    // If the RT widget has finished fetching the feed, open directly.
-    // Otherwise stash the slug — the widget's load() drains it on success.
+    // The widget's bridge both tries the open and stashes the slug if the
+    // RSS feed hasn't resolved yet — so we hand off regardless and let it
+    // decide. Falls back to a local stash if the IIFE hasn't registered.
     if (window.__openRichTextBySlug) window.__openRichTextBySlug(s.slug);
     else pendingRichTextSlug = s.slug;
     return;
@@ -2963,9 +2964,14 @@ async function openPost(meta, fromP) {
 
   // Router bridge: the hash handler lives outside this IIFE and needs a way
   // to reach into the widget's closure when a #/richtext/<slug> URL resolves.
+  // The cold-load race looks like this: the IIFE is defined synchronously so
+  // this function exists before init() runs, but the RSS fetch is still in
+  // flight — so a hit here would silently miss. Stash the slug when items
+  // aren't populated yet, and let load() drain it on success.
   window.__openRichTextBySlug = (slug) => {
     const it = itemBySlug[slug];
     if (it) openItemModal(it);
+    else pendingRichTextSlug = slug;
   };
 
   // Rich Text items are rendered through the shared article modal so they
