@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Integral Model — Homelessness Framework</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +49,20 @@
   }
   @media (max-width: 1300px){
     .app{grid-template-columns: 320px minmax(0,1fr) 340px}
+  }
+  @media (max-width: 900px){
+    .app{
+      grid-template-columns: minmax(0,1fr);
+      grid-template-rows: auto auto auto auto;
+      height:auto;min-height:100vh;
+      grid-template-areas:
+        "topbar"
+        "center"
+        "log"
+        "right";
+    }
+    .topbar{flex-wrap:wrap;padding:8px 12px;gap:8px;height:auto;min-height:56px}
+    .topbar .grow{display:none}
   }
 
   /* ---------- Top bar ---------- */
@@ -481,6 +496,25 @@
     grid-template-areas:
       "topbar topbar"
       "crmnav crmmain";
+  }
+  @media (max-width: 720px){
+    body.mode-crm .app{
+      grid-template-columns: minmax(0,1fr);
+      grid-template-rows: auto auto 1fr;
+      grid-template-areas:
+        "topbar"
+        "crmnav"
+        "crmmain";
+    }
+    body.mode-crm .crm-nav{
+      flex-direction:row;flex-wrap:wrap;padding:10px;gap:4px;
+      border-right:none;border-bottom:1px solid var(--line);
+    }
+    body.mode-crm .crm-nav .nav-title,
+    body.mode-crm .crm-nav .divider{display:none}
+    body.mode-crm .crm-nav .nav-item{padding:6px 10px;font-size:12.5px}
+    body.mode-crm .crm-main{padding:14px 14px 60px}
+    body.mode-crm .crm-detail{width:100vw;max-width:100vw}
   }
   body.mode-crm .log-rail, body.mode-crm .right{display:none}
   body.mode-crm .center{grid-area:crmmain;padding:0;background:var(--bg)}
