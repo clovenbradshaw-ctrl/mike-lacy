@@ -1,0 +1,2468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Integral Model — Homelessness Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f6f5f1;
+    --panel: #ffffff;
+    --ink: #141414;
+    --ink-2: #3a3a38;
+    --muted: #76736c;
+    --line: #e6e3dc;
+    --line-2: #eeece5;
+    --hover: #f0ede4;
+    --accent: #2a5caa;         /* cool blue — facts */
+    --accent-soft: #e5edf9;
+    --actual: #2d7a4f;         /* green — committed */
+    --actual-soft: #e2f0e7;
+    --whatif: #b2581a;         /* amber — sandbox */
+    --whatif-soft: #fbeadd;
+    --danger: #c03a2b;
+    --danger-soft: #fbe4e1;
+    --sugg: #7b5cc0;           /* violet — REC */
+    --sugg-soft: #ece5fa;
+    --warn: #a37a00;
+    --warn-soft: #fbf0cc;
+    --radius: 10px;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit}
+  code,.mono{font-family:var(--mono);font-size:0.92em}
+
+  /* ---------- App shell ---------- */
+  .app{
+    display:grid;
+    grid-template-columns: 360px minmax(0,1fr) 380px;
+    grid-template-rows: 56px 1fr;
+    height:100vh;
+    grid-template-areas:
+      "topbar topbar topbar"
+      "log    center  right";
+  }
+  @media (max-width: 1300px){
+    .app{grid-template-columns: 320px minmax(0,1fr) 340px}
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    grid-area:topbar;
+    background:var(--panel);
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:14px;padding:0 18px;
+    position:relative;z-index:5;min-width:0;overflow:hidden;
+  }
+  .brand{display:flex;align-items:baseline;gap:10px;min-width:0;max-width:280px;flex-shrink:1}
+  .brand .mark{
+    width:22px;height:22px;border-radius:6px;
+    background:
+      conic-gradient(from 210deg,#2a5caa,#7b5cc0,#2d7a4f,#b2581a,#2a5caa);
+    align-self:center;
+    box-shadow: inset 0 0 0 2px var(--panel), inset 0 0 0 3px rgba(0,0,0,.08);
+  }
+  .brand h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-0.01em;white-space:nowrap}
+  .brand .sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  @media (max-width: 1200px){ .brand .sub{display:none} }
+  .topbar .grow{flex:1}
+
+  .scenario-switch{
+    display:inline-flex;background:var(--hover);border-radius:8px;padding:3px;gap:2px;
+    border:1px solid var(--line);
+  }
+  .scenario-switch button{
+    border:none;background:transparent;padding:5px 12px;border-radius:6px;cursor:pointer;
+    font-size:12.5px;font-weight:500;color:var(--ink-2);display:inline-flex;gap:6px;align-items:center;
+  }
+  .scenario-switch button .dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+  .scenario-switch button[data-on="true"]{background:var(--panel);box-shadow:0 1px 2px rgba(0,0,0,.06);color:var(--ink)}
+  .scenario-switch button[data-scn="actual"][data-on="true"] .dot{background:var(--actual)}
+  .scenario-switch button[data-scn="what-if"][data-on="true"] .dot{background:var(--whatif)}
+
+  .tb-btn{
+    background:var(--panel);border:1px solid var(--line);
+    padding:5px 11px;border-radius:7px;font-size:12.5px;cursor:pointer;color:var(--ink-2);
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .tb-btn:hover{background:var(--hover)}
+  .tb-btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tb-btn.primary:hover{background:#000}
+  .tb-btn .kbd{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-left:2px}
+  .tb-btn.danger{color:var(--danger)}
+  .tb-btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+  .tb-btn.ghost:hover{color:var(--ink);background:var(--hover)}
+
+  .topbar .iconbtn{
+    width:30px;height:30px;border-radius:7px;border:1px solid var(--line);background:var(--panel);
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);
+  }
+  .topbar .iconbtn:hover{background:var(--hover)}
+
+  /* ---------- Left: Log rail ---------- */
+  .log-rail{
+    grid-area:log;
+    background:var(--panel);
+    border-right:1px solid var(--line);
+    display:flex;flex-direction:column;min-height:0;
+  }
+  .rail-head{
+    padding:14px 16px 10px;border-bottom:1px solid var(--line-2);
+    display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  }
+  .rail-head h2{margin:0;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink)}
+  .rail-head .count{font-size:11px;color:var(--muted);font-family:var(--mono)}
+  .rail-sub{padding:0 16px 12px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line-2)}
+  .rail-sub em{color:var(--ink-2);font-style:normal;font-weight:500}
+
+  .timeline{
+    padding:10px 16px;border-bottom:1px solid var(--line-2);
+  }
+  .timeline .row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .timeline .row small{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+  .timeline .pips{
+    position:relative;height:18px;background:var(--line-2);border-radius:4px;overflow:hidden;cursor:pointer;
+  }
+  .timeline .pips .cursor{
+    position:absolute;top:0;bottom:0;width:2px;background:var(--ink);pointer-events:none;
+  }
+  .timeline .pips .pip{
+    position:absolute;top:4px;bottom:4px;width:2px;border-radius:1px;opacity:.55;
+  }
+  .timeline .pips .pip.DEF{background:var(--accent)}
+  .timeline .pips .pip.INS{background:var(--actual)}
+  .timeline .pips .pip.SEG{background:var(--danger)}
+  .timeline .pips .pip.EVA{background:var(--danger)}
+  .timeline .pips .pip.REC{background:var(--sugg)}
+  .timeline .pips .live-fill{position:absolute;top:0;bottom:0;left:0;background:rgba(42,92,170,0.08)}
+
+  .log-filters{
+    display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;border-bottom:1px solid var(--line-2);background:var(--bg);
+  }
+  .log-filters .chip{
+    font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel);
+    cursor:pointer;display:inline-flex;gap:6px;align-items:center;color:var(--ink-2);
+  }
+  .log-filters .chip[data-on="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .log-filters .chip .dot{width:6px;height:6px;border-radius:50%}
+  .log-filters .chip[data-k="DEF"] .dot{background:var(--accent)}
+  .log-filters .chip[data-k="INS"] .dot{background:var(--actual)}
+  .log-filters .chip[data-k="SEG"] .dot{background:var(--danger)}
+  .log-filters .chip[data-k="EVA"] .dot{background:var(--danger)}
+  .log-filters .chip[data-k="REC"] .dot{background:var(--sugg)}
+
+  #log-entries{
+    list-style:none;margin:0;padding:4px 0 80px 0;overflow:auto;flex:1;min-height:0;
+    font-size:12.5px;
+  }
+  .log-entry{
+    padding:8px 16px 8px 16px;border-left:2px solid transparent;position:relative;
+    border-bottom:1px solid var(--line-2);
+  }
+  .log-entry.DEF{border-left-color:var(--accent)}
+  .log-entry.INS{border-left-color:var(--actual)}
+  .log-entry.SEG{border-left-color:var(--danger)}
+  .log-entry.EVA{border-left-color:var(--danger);background:var(--danger-soft)}
+  .log-entry.REC{border-left-color:var(--sugg);background:var(--sugg-soft)}
+  .log-entry.scn-whatif{background:var(--whatif-soft)}
+  .log-entry.reversed{opacity:.45}
+  .log-entry.reversed .body{text-decoration:line-through}
+  .log-entry.future{opacity:.32;filter:grayscale(.4)}
+  .log-entry.reversal{background:var(--sugg-soft);border-left-color:var(--sugg)}
+  .log-entry:hover{background:var(--hover)}
+  .log-entry.EVA:hover{background:#f6d7d2}
+  .log-entry .meta{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted);margin-bottom:3px;font-family:var(--mono)}
+  .log-entry .body{color:var(--ink);word-break:break-word;line-height:1.45;font-family:var(--mono);font-size:11.5px}
+  .log-entry .body code{background:rgba(0,0,0,0.04);padding:0 3px;border-radius:3px}
+  .log-entry .body .val{color:var(--accent);font-weight:500}
+  .log-entry.EVA .body .val{color:var(--danger)}
+  .log-entry .op{
+    display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.06em;
+    padding:1px 5px;border-radius:3px;color:#fff;margin-right:6px;font-family:"Inter",sans-serif;vertical-align:middle;
+  }
+  .log-entry .op.DEF{background:var(--accent)}
+  .log-entry .op.INS{background:var(--actual)}
+  .log-entry .op.SEG{background:var(--danger)}
+  .log-entry .op.EVA{background:var(--danger)}
+  .log-entry .op.REC{background:var(--sugg)}
+  .log-entry .scn-tag{font-size:9.5px;padding:1px 5px;border-radius:3px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+  .log-entry .scn-tag.actual{background:var(--actual-soft);color:var(--actual)}
+  .log-entry .scn-tag.whatif{background:var(--whatif-soft);color:var(--whatif)}
+  .log-entry .ref{color:var(--sugg);font-weight:500;font-family:var(--mono)}
+
+  /* ---------- Center ---------- */
+  .center{
+    grid-area:center;
+    overflow:auto;min-height:0;padding:22px 26px 80px;
+  }
+  .banner{
+    border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;
+    display:flex;align-items:center;gap:10px;font-size:12.5px;
+    border:1px solid transparent;
+  }
+  .banner.past{background:#eaf0f9;border-color:#c6d6ee;color:#1f3b6b}
+  .banner.whatif{background:var(--whatif-soft);border-color:#e7c19b;color:#7a3b11}
+  .banner.hypo{background:var(--sugg-soft);border-color:#d3c3ee;color:#4a3580}
+  .banner button{margin-left:auto;background:var(--panel);border:1px solid currentColor;color:inherit;border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer}
+  .banner button:hover{opacity:.85}
+
+  /* Classification = hero */
+  .classify-hero{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:0;margin-bottom:22px;overflow:hidden;
+  }
+  .classify-hero .hh{
+    display:flex;align-items:center;gap:10px;padding:14px 18px 10px;
+  }
+  .classify-hero .hh h2{margin:0;font-size:16px;font-weight:600;letter-spacing:-0.005em}
+  .classify-hero .hh .tag{font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--sugg-soft);color:var(--sugg);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  .classify-hero .hh .hint{font-size:12px;color:var(--muted);margin-left:auto}
+  .classify-hero .formula{
+    padding:0 18px 12px;font-size:12px;color:var(--muted);font-family:var(--mono);
+  }
+  .classify-hero .formula code{color:var(--ink-2)}
+
+  .matrix{width:100%;border-collapse:collapse;font-size:13px}
+  .matrix th, .matrix td{padding:10px 12px;text-align:left;border-top:1px solid var(--line-2)}
+  .matrix thead th{
+    background:#fafaf6;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+    font-weight:600;color:var(--muted);vertical-align:bottom;white-space:nowrap;
+  }
+  .matrix thead th .agency-note{display:block;font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-top:2px;font-family:var(--mono);white-space:normal;max-width:160px}
+  .matrix tbody td.entity{font-family:var(--mono);font-size:12px;color:var(--ink-2);background:#fafaf6;white-space:nowrap;border-right:1px solid var(--line-2)}
+  .matrix tbody td.ccell{text-align:center;font-weight:600;cursor:default;position:relative;transition:background .18s}
+  .matrix tbody td.ccell.yes{background:var(--actual-soft);color:var(--actual)}
+  .matrix tbody td.ccell.no{background:#fbfaf5;color:#b4b0a6}
+  .matrix tbody td.ccell.indet{background:var(--warn-soft);color:var(--warn)}
+  .matrix tbody td.ccell.changed{box-shadow: inset 0 0 0 2px var(--whatif)}
+  .matrix tbody td.ccell.hypo{box-shadow: inset 0 0 0 2px var(--sugg)}
+  .matrix tbody td.ccell .glyph{font-size:16px;display:block}
+  .matrix tbody td.ccell .ctx{font-size:10px;color:var(--muted);font-weight:400;margin-top:1px;display:block;font-family:var(--mono)}
+  .matrix tr.summary td{background:#fafaf6;font-size:11.5px;color:var(--muted);border-top:2px solid var(--line)}
+  .matrix tr.summary td.entity{color:var(--ink-2);font-weight:600}
+
+  /* Two-column: People / Defs */
+  .sources-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+  @media (max-width: 1550px){.sources-grid{grid-template-columns:1fr}}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  }
+  .card > .ch{
+    display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-2);
+  }
+  .card > .ch h3{margin:0;font-size:13.5px;font-weight:600;letter-spacing:-0.005em}
+  .card > .ch .ns{font-size:10.5px;color:var(--muted);font-family:var(--mono);padding:2px 6px;background:var(--hover);border-radius:3px}
+  .card > .ch .ch-actions{margin-left:auto;display:flex;gap:6px}
+  .card > .ch .ch-actions button{
+    background:transparent;border:1px solid var(--line);padding:4px 9px;border-radius:6px;
+    font-size:12px;cursor:pointer;color:var(--ink-2);
+  }
+  .card > .ch .ch-actions button:hover{background:var(--hover)}
+  .tbl-wrap{overflow:auto}
+
+  table.data{width:100%;border-collapse:collapse;font-size:13px}
+  table.data th, table.data td{padding:8px 11px;text-align:left;border-top:1px solid var(--line-2);vertical-align:middle}
+  table.data thead th{
+    background:#fafaf6;font-size:10.5px;color:var(--muted);font-weight:600;
+    text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;position:sticky;top:0;z-index:1;
+  }
+  table.data thead th .fname{font-family:var(--mono);font-weight:500;text-transform:none;letter-spacing:0;color:var(--ink-2);font-size:12px}
+  table.data thead th .flags{display:inline-flex;gap:5px;margin-left:6px;vertical-align:middle}
+  table.data thead th .ft{font-size:9px;padding:1px 5px;border-radius:3px;letter-spacing:.04em;font-weight:600}
+  table.data thead th .ft.enum{background:var(--accent-soft);color:var(--accent)}
+  table.data thead th .ft.multi{background:var(--warn-soft);color:var(--warn)}
+  table.data thead th .ft.fail{background:var(--danger-soft);color:var(--danger)}
+  table.data thead th .ft.sugg{background:var(--sugg-soft);color:var(--sugg);animation:pulse 1s ease-in-out infinite}
+  table.data thead th .ft.rec-done{background:var(--sugg-soft);color:var(--sugg)}
+  @keyframes pulse{50%{opacity:.5}}
+  table.data thead th .col-ctl{
+    float:right;display:inline-flex;gap:2px;
+  }
+  table.data thead th .col-ctl button{
+    background:transparent;border:none;cursor:pointer;color:var(--muted);
+    font-size:12px;padding:1px 5px;border-radius:3px;
+  }
+  table.data thead th .col-ctl button:hover{background:var(--hover);color:var(--ink)}
+  table.data thead th .col-ctl button.drop:hover{color:var(--danger)}
+
+  table.data td.entity{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);background:#fafaf6;white-space:nowrap;border-right:1px solid var(--line-2);position:relative}
+  table.data td.entity .ent-row{display:flex;align-items:center;gap:6px}
+  table.data td.entity .drop-ent{opacity:0;color:var(--muted);cursor:pointer;font-size:13px;padding:0 3px;border-radius:3px;margin-left:auto}
+  table.data td.entity:hover .drop-ent{opacity:1}
+  table.data td.entity .drop-ent:hover{color:var(--danger);background:var(--danger-soft)}
+
+  table.data tbody td.cell{cursor:text;position:relative}
+  table.data tbody td.cell:hover{background:var(--hover)}
+  table.data tbody td.cell.empty{color:#cbc7bc;font-style:italic}
+  table.data tbody td.cell.failed{background:var(--danger-soft)}
+  table.data tbody td.cell.failed::before{
+    content:"⚠";position:absolute;left:3px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--danger);
+  }
+  table.data tbody td.cell.failed{padding-left:16px}
+  table.data tbody td.cell.hypo-override{background:var(--whatif-soft);box-shadow:inset 3px 0 0 var(--whatif)}
+  table.data tbody td.cell.hypo-override::after{content:"⚡";margin-left:6px;color:var(--whatif);font-size:11px}
+
+  .chip{display:inline-block;background:var(--accent-soft);color:var(--accent);font-size:11px;padding:1px 8px;border-radius:10px;margin-right:3px;font-family:"Inter",sans-serif;font-weight:500}
+  .chip.fail{background:var(--danger-soft);color:var(--danger)}
+  .multi-pill{
+    display:inline-block;background:var(--accent-soft);color:var(--accent);font-size:10px;padding:0 5px;border-radius:10px;margin-left:6px;font-weight:600;cursor:pointer;
+  }
+  .multi-pill:hover{background:#cddaf0}
+  .add-alt{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    background:var(--panel);border:1px solid var(--line);color:var(--muted);
+    font-size:10.5px;padding:1px 6px;border-radius:4px;cursor:pointer;opacity:0;
+  }
+  td.cell:hover .add-alt{opacity:1}
+  .add-alt:hover{background:var(--hover);color:var(--ink)}
+
+  td.cell input{
+    width:100%;border:1.5px solid var(--accent);padding:4px 6px;font-size:13px;outline:none;
+    font-family:inherit;border-radius:4px;background:var(--panel);
+  }
+
+  /* ---------- Right: Inspector ---------- */
+  .right{
+    grid-area:right;
+    background:var(--panel);border-left:1px solid var(--line);
+    display:flex;flex-direction:column;min-height:0;overflow:hidden;
+  }
+  .right-tabs{
+    display:flex;border-bottom:1px solid var(--line-2);padding:0 6px;
+  }
+  .right-tabs .tab{
+    padding:12px 12px 10px;border-bottom:2px solid transparent;cursor:pointer;
+    font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .right-tabs .tab[data-on="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+  .right-tabs .tab .badge{
+    font-size:10px;background:var(--sugg);color:#fff;padding:1px 6px;border-radius:8px;font-weight:700;letter-spacing:0;
+  }
+  .right-tabs .tab .badge.muted{background:var(--muted)}
+  .right-body{flex:1;min-height:0;overflow:auto;padding:16px 18px 40px}
+  .right-body .hint{font-size:12px;color:var(--muted);margin-bottom:12px}
+
+  /* Inspector content */
+  .ins-title{font-size:13px;font-weight:600;margin:0 0 2px}
+  .ins-sub{font-size:11.5px;color:var(--muted);font-family:var(--mono);margin-bottom:12px;word-break:break-all}
+  .ins-section{margin-bottom:14px}
+  .ins-section h4{margin:0 0 6px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+  .defs-stack{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .defs-stack li{padding:7px 10px;font-family:var(--mono);font-size:11.5px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:8px}
+  .defs-stack li:last-child{border-bottom:none}
+  .defs-stack li.winner{background:var(--accent-soft);color:var(--accent);font-weight:500}
+  .defs-stack li.winner::before{content:"●";color:var(--accent);margin-right:4px}
+  .defs-stack li .ts{margin-left:auto;color:var(--muted);font-size:10px;font-family:"Inter",sans-serif}
+  .defs-stack li.scn-whatif{background:var(--whatif-soft);color:var(--whatif)}
+
+  .field-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12.5px}
+  .field-row label{min-width:86px;color:var(--muted);font-size:11.5px}
+  .field-row select, .field-row input{
+    flex:1;padding:5px 7px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;background:var(--panel);font-family:inherit;
+  }
+  .field-row select:focus, .field-row input:focus{outline:none;border-color:var(--accent)}
+
+  .btn-row{display:flex;gap:8px;margin-top:10px}
+  .btn{background:var(--ink);color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:500}
+  .btn:hover{background:#000}
+  .btn.secondary{background:var(--hover);color:var(--ink);border:1px solid var(--line)}
+  .btn.secondary:hover{background:var(--line-2)}
+  .btn.danger{background:var(--danger)}
+  .btn.sugg{background:var(--sugg)}
+
+  /* REC cards */
+  .rec-card{
+    border:1px solid var(--line);border-radius:10px;margin-bottom:14px;overflow:hidden;background:var(--panel);
+  }
+  .rec-card .rh{
+    padding:10px 12px;background:var(--sugg-soft);color:var(--sugg);display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .rec-card .rh .lbl{font-size:10px;font-weight:700;padding:2px 7px;background:var(--sugg);color:#fff;border-radius:4px;letter-spacing:.06em}
+  .rec-card .rh .t{font-weight:600;font-size:12.5px}
+  .rec-card .rh .t code{font-family:var(--mono);font-weight:500;font-size:11.5px;background:rgba(255,255,255,.5);padding:1px 5px;border-radius:3px;color:var(--ink-2)}
+  .rec-card .body{padding:12px}
+  .rec-card .because{
+    font-size:12px;color:var(--ink-2);background:#fafaf6;border:1px solid var(--line-2);
+    border-radius:6px;padding:8px 10px;margin-bottom:10px;line-height:1.5;
+  }
+  .rec-card .because code{background:rgba(0,0,0,0.04);padding:0 3px;border-radius:3px;font-size:11px}
+  .rec-card .preview-table{
+    border:1px solid var(--line-2);border-radius:6px;overflow:hidden;margin-bottom:10px;
+  }
+  .rec-card .preview-table table{width:100%;border-collapse:collapse;font-size:12px}
+  .rec-card .preview-table th, .rec-card .preview-table td{padding:6px 9px;border-top:1px solid var(--line-2);text-align:left}
+  .rec-card .preview-table thead th{background:#fafaf6;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+  .rec-card .preview-table td.e{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .rec-card .preview-table td .chip.was-fail{background:var(--actual-soft);color:var(--actual)}
+  .rec-card .preview-table td .chip.was-fail::before{content:"✓ "}
+  .rec-card .rec-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* Popover for cell inspector opened from center */
+  .popover{
+    position:absolute;z-index:120;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 14px 40px rgba(0,0,0,.12);padding:12px;min-width:320px;max-width:380px;font-size:12.5px;
+  }
+  .popover h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .popover .close{position:absolute;top:6px;right:9px;cursor:pointer;color:var(--muted);font-size:16px;line-height:1}
+  .popover .close:hover{color:var(--ink)}
+  .backdrop{position:fixed;inset:0;z-index:100;background:transparent}
+
+  /* Legend */
+  .legend{
+    display:flex;gap:14px;padding:10px 16px;font-size:11px;color:var(--muted);
+    border-bottom:1px solid var(--line-2);align-items:center;flex-wrap:wrap;
+  }
+  .legend .dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
+  .legend .item{display:inline-flex;align-items:center}
+
+  /* Utility */
+  .kbd{font-family:var(--mono);font-size:10.5px;padding:1px 5px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--muted)}
+  .sr{position:absolute;left:-9999px}
+  .pulse-once{animation:flash .9s ease-out 1}
+  @keyframes flash{0%{background:var(--warn-soft)}100%{background:transparent}}
+
+  /* Scrollbars */
+  *::-webkit-scrollbar{width:10px;height:10px}
+  *::-webkit-scrollbar-thumb{background:#d9d5cc;border-radius:10px;border:2px solid var(--bg)}
+  *::-webkit-scrollbar-track{background:transparent}
+
+  /* Concept strip */
+  .concept{
+    background:linear-gradient(180deg,#fffefa,var(--panel));
+    border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;margin-bottom:22px;
+    display:grid;grid-template-columns:auto 1fr auto 1fr auto 1fr;align-items:center;gap:14px;
+  }
+  .concept .box{
+    padding:9px 12px;border-radius:8px;background:var(--panel);border:1px solid var(--line);font-size:12px;
+    font-weight:500;text-align:center;min-width:110px;
+  }
+  .concept .box .kind{font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:600;display:block;margin-bottom:2px}
+  .concept .arrow{color:var(--muted);font-size:18px;line-height:1}
+  .concept .box.log-box{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .concept .box.log-box .kind{color:#b8b5aa}
+  @media (max-width:1550px){.concept{grid-template-columns:1fr;grid-auto-flow:row}.concept .arrow{transform:rotate(90deg);justify-self:center}}
+
+  body.time-past .center .cell, body.time-past .center .add-alt, body.time-past .ch-actions button{pointer-events:none}
+  body.time-past .center td.cell{opacity:.9}
+
+  /* ---------- Mode switch in topbar ---------- */
+  .mode-switch{
+    display:inline-flex;background:var(--hover);border-radius:8px;padding:3px;gap:2px;
+    border:1px solid var(--line);
+  }
+  .mode-switch button{
+    border:none;background:transparent;padding:5px 11px;border-radius:6px;cursor:pointer;
+    font-size:12.5px;font-weight:500;color:var(--ink-2);display:inline-flex;gap:6px;align-items:center;
+  }
+  .mode-switch button .mi{font-size:13px;line-height:1;color:var(--muted)}
+  .mode-switch button[data-on="true"]{background:var(--panel);box-shadow:0 1px 2px rgba(0,0,0,.06);color:var(--ink)}
+  .mode-switch button[data-on="true"] .mi{color:var(--accent)}
+
+  /* ---------- CRM MODE ---------- */
+  body.mode-crm{
+    --bg:#f4f6fa;
+    --panel:#ffffff;
+    --ink:#0f172a;
+    --ink-2:#334155;
+    --muted:#64748b;
+    --line:#e2e8f0;
+    --line-2:#eef2f7;
+    --hover:#f1f5f9;
+    --accent:#2563eb;
+    --accent-soft:#dbeafe;
+  }
+  body.mode-crm .app{
+    grid-template-columns: 220px minmax(0,1fr);
+    grid-template-areas:
+      "topbar topbar"
+      "crmnav crmmain";
+  }
+  body.mode-crm .log-rail, body.mode-crm .right{display:none}
+  body.mode-crm .center{grid-area:crmmain;padding:0;background:var(--bg)}
+  body.mode-crm .concept{display:none}
+  body.mode-crm .classify-hero{display:none}
+  body.mode-crm .sources-grid{display:none}
+  body.mode-crm #view-banner:empty{display:none}
+  body.mode-crm .banner{margin:16px 28px 0}
+
+  /* Hide what-if/scenario stuff in CRM */
+  body.mode-crm .scenario-switch{display:none}
+  body.mode-crm .brand .sub{display:none}
+  body.mode-crm .topbar{padding:0 18px}
+
+  /* Cell dropdown menu (enum picker) */
+  .cell-menu{
+    position:absolute;left:0;top:0;min-width:100%;background:var(--panel);
+    border:1px solid var(--line);border-radius:8px;
+    box-shadow:0 8px 28px rgba(15,23,42,.14);
+    padding:4px;z-index:50;max-height:240px;overflow:auto;
+  }
+  td.cell{position:relative}
+  .menu-opt{
+    padding:6px 10px;border-radius:5px;cursor:pointer;font-size:12.5px;
+    color:var(--ink-2);white-space:nowrap;
+  }
+  .menu-opt:hover{background:var(--hover);color:var(--ink)}
+  .menu-opt.cur{background:var(--accent-soft);color:var(--accent);font-weight:500}
+  .menu-opt.other{color:var(--warn);font-style:italic}
+  .menu-sep{height:1px;background:var(--line-2);margin:4px 2px}
+
+  /* CRM DOM is hidden in integral mode, shown in crm mode */
+  body:not(.mode-crm) .crm-nav,
+  body:not(.mode-crm) .crm-main,
+  body:not(.mode-crm) .crm-backdrop,
+  body:not(.mode-crm) .crm-detail{display:none !important}
+
+  .crm-nav{
+    grid-area:crmnav;background:var(--panel);border-right:1px solid var(--line);
+    padding:18px 10px;display:flex;flex-direction:column;gap:2px;
+    font-size:13.5px;
+  }
+  .crm-nav .nav-title{
+    font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);
+    padding:8px 10px 6px;text-transform:uppercase;
+  }
+  .crm-nav .nav-item{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;
+    color:var(--ink-2);cursor:pointer;
+  }
+  .crm-nav .nav-item:hover{background:var(--hover)}
+  .crm-nav .nav-item[data-on="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .crm-nav .nav-item .ico{width:18px;text-align:center;opacity:.8;font-size:14px}
+  .crm-nav .nav-item .cnt{margin-left:auto;font-size:11px;color:var(--muted);background:var(--hover);padding:1px 7px;border-radius:10px}
+  .crm-nav .nav-item[data-on="true"] .cnt{background:var(--panel);color:var(--accent)}
+  .crm-nav .divider{height:1px;background:var(--line-2);margin:10px 4px}
+
+  .crm-main{padding:22px 28px 80px;grid-area:crmmain;min-width:0;overflow-x:auto}
+
+  /* CRM timeline scrubber */
+  .crm-timeline{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;margin-bottom:18px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .crm-timeline .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;flex-shrink:0}
+  .crm-timeline .stamp{font-size:12px;color:var(--ink-2);font-family:var(--mono);min-width:90px}
+  .crm-timeline .stamp .now{color:var(--ink);font-weight:600}
+  .crm-timeline .pips{
+    flex:1;height:30px;position:relative;cursor:pointer;background:#f8fafc;
+    border-radius:6px;border:1px solid var(--line-2);overflow:hidden;
+  }
+  .crm-timeline .pips .fill{position:absolute;inset:0 auto 0 0;background:var(--accent-soft);transition:width .12s}
+  .crm-timeline .pips .pip{position:absolute;top:8px;width:2px;height:14px;background:var(--muted);opacity:.5}
+  .crm-timeline .pips .pip.INS{background:var(--actual)}
+  .crm-timeline .pips .pip.DEF{background:var(--accent)}
+  .crm-timeline .pips .pip.EVA{background:var(--danger);height:18px;top:6px}
+  .crm-timeline .pips .pip.REC{background:var(--sugg);height:18px;top:6px}
+  .crm-timeline .pips .cursor{position:absolute;top:2px;bottom:2px;width:3px;background:var(--ink);border-radius:2px;box-shadow:0 0 0 2px rgba(255,255,255,.8)}
+  .crm-timeline .ctrl{display:inline-flex;gap:4px}
+  .crm-timeline .ctrl button{
+    background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 9px;
+    font-size:12px;cursor:pointer;color:var(--ink-2);
+  }
+  .crm-timeline .ctrl button:hover{background:var(--hover)}
+  .crm-timeline .ctrl button.live{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .crm-timeline .hint{font-size:11.5px;color:var(--muted);max-width:200px;line-height:1.4}
+  body.time-past .crm-list tbody tr{opacity:.94}
+  body.time-past .crm-timeline{background:#fffbeb;border-color:#fde68a}
+  .crm-head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  .crm-head h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-0.01em}
+  .crm-head .count{font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:3px 9px;border-radius:20px}
+  .crm-head .grow{flex:1}
+  .crm-head .search{
+    display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;padding:6px 10px;min-width:260px;
+  }
+  .crm-head .search input{border:none;outline:none;background:transparent;font:inherit;font-size:13px;width:100%;color:var(--ink)}
+  .crm-head .search .i{color:var(--muted);font-size:13px}
+  .crm-head .btn-primary{
+    background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;
+    font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .crm-head .btn-primary:hover{background:#1d4ed8}
+
+  /* Stat row */
+  .crm-stats{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px;
+  }
+  .crm-stat{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+  }
+  .crm-stat .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .crm-stat .val{font-size:22px;font-weight:600;color:var(--ink);margin-top:4px;letter-spacing:-0.01em}
+  .crm-stat .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .crm-stat .val .unit{font-size:13px;color:var(--muted);font-weight:500;margin-left:4px}
+
+  /* Filter bar */
+  .crm-filters{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px 10px 0 0;
+    padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:none;
+  }
+  .crm-filters .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-right:4px}
+  .crm-filters .fchip{
+    font-size:12.5px;padding:4px 11px;border-radius:16px;border:1px solid var(--line);
+    background:var(--panel);cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);
+  }
+  .crm-filters .fchip:hover{background:var(--hover)}
+  .crm-filters .fchip[data-on="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .crm-filters .fchip .n{font-size:11px;background:rgba(255,255,255,.25);padding:0 6px;border-radius:8px}
+  .crm-filters .fchip[data-on="false"] .n{background:var(--hover);color:var(--muted)}
+  .crm-filters .grow{flex:1}
+
+  /* List */
+  .crm-list{
+    background:var(--panel);border:1px solid var(--line);border-radius:0 0 10px 10px;overflow:hidden;
+  }
+  .crm-list table{width:100%;border-collapse:collapse}
+  .crm-list thead th{
+    background:#f8fafc;text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  .crm-list tbody td{padding:12px 14px;border-bottom:1px solid var(--line-2);font-size:13px;vertical-align:middle}
+  .crm-list tbody tr:last-child td{border-bottom:none}
+  .crm-list tbody tr{cursor:pointer;transition:background .1s}
+  .crm-list tbody tr:hover{background:var(--hover)}
+  .crm-list .avatar{
+    width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+    font-weight:600;color:#fff;font-size:12px;flex-shrink:0;
+  }
+  .crm-list .contact{display:flex;align-items:center;gap:10px}
+  .crm-list .name{font-weight:600;color:var(--ink);font-size:13.5px}
+  .crm-list .meta{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+  .crm-list .status{
+    display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;
+    font-size:11.5px;font-weight:500;
+  }
+  .crm-list .status .sdot{width:6px;height:6px;border-radius:50%}
+  .status.eligible{background:#dcfce7;color:#15803d}
+  .status.eligible .sdot{background:#16a34a}
+  .status.partial{background:#fef3c7;color:#92400e}
+  .status.partial .sdot{background:#d97706}
+  .status.ineligible{background:#f1f5f9;color:#64748b}
+  .status.ineligible .sdot{background:#94a3b8}
+  .status.review{background:#fee2e2;color:#991b1b}
+  .status.review .sdot{background:#dc2626;animation:pulse 1.1s ease-in-out infinite}
+  .crm-list .pillrow{display:flex;gap:4px;flex-wrap:wrap}
+  .crm-list .agpill{
+    font-size:10.5px;padding:2px 7px;border-radius:4px;background:var(--hover);color:var(--ink-2);font-weight:500;
+    border:1px solid var(--line);
+  }
+  .crm-list .agpill.yes{background:#dcfce7;color:#15803d;border-color:#bbf7d0}
+  .crm-list .agpill.no{background:var(--hover);color:#94a3b8;border-color:var(--line)}
+  .crm-list .agpill.indet{background:#fef3c7;color:#92400e;border-color:#fde68a}
+  .crm-list td.num{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+  .crm-list td.date{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+  .crm-list .rowwarn{background:#fef2f2}
+  .crm-list .rowwarn:hover{background:#fee2e2}
+  .crm-list tr.selected{background:var(--accent-soft)!important}
+
+  /* CRM detail drawer */
+  .crm-detail{
+    position:fixed;top:0;right:0;bottom:0;width:440px;background:var(--panel);
+    border-left:1px solid var(--line);box-shadow:-12px 0 40px rgba(15,23,42,.08);
+    z-index:200;display:flex;flex-direction:column;
+    transform:translateX(100%);transition:transform .22s ease;
+  }
+  .crm-detail.open{transform:translateX(0)}
+  .crm-detail .dh{padding:16px 20px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:12px}
+  .crm-detail .dh .dclose{margin-left:auto;background:transparent;border:none;cursor:pointer;color:var(--muted);font-size:22px;line-height:1}
+  .crm-detail .dh .dclose:hover{color:var(--ink)}
+  .crm-detail .dbody{flex:1;overflow:auto;padding:18px 20px}
+  .crm-detail .dsection{margin-bottom:20px}
+  .crm-detail .dsection h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+  .crm-detail .kv{display:grid;grid-template-columns:130px 1fr;gap:6px 10px;font-size:13px}
+  .crm-detail .kv .k{color:var(--muted)}
+  .crm-detail .kv .v{color:var(--ink);font-weight:500}
+  .crm-detail .agency-row{
+    display:flex;align-items:center;justify-content:space-between;padding:10px 12px;
+    border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:13px;
+  }
+  .crm-detail .agency-row .an{font-weight:500;color:var(--ink)}
+  .crm-detail .agency-row .ac{font-size:11px;color:var(--muted);font-family:var(--mono)}
+  .crm-detail .warn-note{
+    background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px 12px;border-radius:8px;
+    font-size:12.5px;line-height:1.5;
+  }
+  .crm-detail .warn-note strong{font-weight:600}
+  .crm-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.18);z-index:199;opacity:0;pointer-events:none;transition:opacity .22s}
+  .crm-backdrop.open{opacity:1;pointer-events:auto}
+
+  /* CRM attention banner for EVA failures */
+  .crm-alert{
+    background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;
+    display:flex;align-items:center;gap:12px;margin-bottom:18px;color:#991b1b;font-size:13px;
+  }
+  .crm-alert .ai{font-size:18px}
+  .crm-alert button{
+    margin-left:auto;background:#dc2626;color:#fff;border:none;border-radius:7px;
+    padding:6px 12px;font-size:12.5px;cursor:pointer;font-weight:500;
+  }
+  .crm-alert button:hover{background:#b91c1c}
+  .crm-alert button.secondary{background:#fff;color:#991b1b;border:1px solid #fecaca;margin-left:8px}
+
+  /* Policy page (shows defs list in CRM mode) */
+  .policy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .policy-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .policy-card h3{margin:0 0 4px;font-size:14px;font-weight:600}
+  .policy-card .agency-sub{font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:10px}
+  .policy-card .criteria{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+  .policy-card .crit{font-size:11.5px;padding:3px 9px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-weight:500}
+  .policy-card .metric{font-size:12.5px;color:var(--ink-2);padding-top:10px;border-top:1px solid var(--line-2)}
+  .policy-card .metric strong{color:var(--ink);font-size:15px;font-weight:600}
+
+  /* Audit log "activity" styling in CRM */
+  .crm-activity{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .crm-activity .arow{padding:11px 16px;border-bottom:1px solid var(--line-2);font-size:13px;display:flex;gap:10px;align-items:flex-start}
+  .crm-activity .arow:last-child{border-bottom:none}
+  .crm-activity .atime{font-size:11.5px;color:var(--muted);font-family:var(--mono);min-width:60px}
+  .crm-activity .aicon{
+    width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+    font-size:12px;color:#fff;flex-shrink:0;
+  }
+  .crm-activity .aicon.INS{background:#10b981}
+  .crm-activity .aicon.DEF{background:#2563eb}
+  .crm-activity .aicon.SEG{background:#64748b}
+  .crm-activity .aicon.EVA{background:#dc2626}
+  .crm-activity .aicon.REC{background:#7c3aed}
+  .crm-activity .atext{flex:1;color:var(--ink-2);line-height:1.45}
+  .crm-activity .atext strong{color:var(--ink);font-weight:600}
+  .crm-activity .atext code{font-family:var(--mono);font-size:11.5px;background:var(--hover);padding:1px 5px;border-radius:3px;color:var(--ink-2)}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark"></div>
+      <div style="min-width:0">
+        <h1>Integral Model</h1>
+        <div class="sub">Observations × Definitions → Classifications · a single given-log</div>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+
+    <div class="mode-switch" role="tablist" aria-label="Mode">
+      <button data-mode="integral" data-on="false" onclick="switchMode('integral')" title="The integral model — log, projections, the whole machinery"><span class="mi">◈</span>Integral</button>
+      <button data-mode="crm" data-on="true" onclick="switchMode('crm')" title="Same data, reskinned as a familiar CRM list"><span class="mi">☷</span>CRM view</button>
+    </div>
+
+    <div class="scenario-switch" role="tablist" aria-label="Scenario">
+      <button data-scn="actual" data-on="true" onclick="switchScenario('actual')"><span class="dot"></span>Actual</button>
+      <button data-scn="what-if" data-on="false" onclick="switchScenario('what-if')"><span class="dot"></span>What-if</button>
+    </div>
+
+    <button class="tb-btn" onclick="undoLast()" title="Undo last event">↶ Undo</button>
+    <button class="tb-btn ghost" onclick="resetAll()" title="Reset to seeded state">Reset</button>
+
+    <button class="iconbtn" onclick="toggleHelp()" title="About the model" aria-label="Help">?</button>
+  </header>
+
+  <!-- ============ LEFT: LOG RAIL ============ -->
+  <aside class="log-rail">
+    <div class="rail-head">
+      <h2>Given-Log</h2>
+      <span class="count" id="log-count">0 events</span>
+    </div>
+    <div class="rail-sub">
+      The <em>only authoritative store</em>. Every table on the right is a live projection of these events.
+    </div>
+
+    <div class="timeline">
+      <div class="row">
+        <small>TIME</small>
+        <small style="margin-left:auto">event <strong id="cursor-display" style="color:var(--ink)">—</strong> / <strong id="live-display" style="color:var(--ink)">—</strong></small>
+      </div>
+      <div class="pips" id="timeline-pips" title="Click to scrub time"></div>
+      <div class="row" style="margin-top:6px">
+        <button class="tb-btn" style="padding:3px 9px;font-size:11.5px" onclick="stepTime(-1)" title="Step back">◀</button>
+        <button class="tb-btn" style="padding:3px 9px;font-size:11.5px" onclick="stepTime(1)" title="Step forward">▶</button>
+        <div style="flex:1"></div>
+        <button class="tb-btn" style="padding:3px 9px;font-size:11.5px" onclick="jumpToLive()" title="Jump to live">Live ▶▶</button>
+      </div>
+    </div>
+
+    <div class="log-filters" id="log-filters">
+      <span class="chip" data-k="INS" data-on="true" onclick="toggleFilter('INS')"><span class="dot"></span>INS</span>
+      <span class="chip" data-k="DEF" data-on="true" onclick="toggleFilter('DEF')"><span class="dot"></span>DEF</span>
+      <span class="chip" data-k="SEG" data-on="true" onclick="toggleFilter('SEG')"><span class="dot"></span>SEG</span>
+      <span class="chip" data-k="EVA" data-on="true" onclick="toggleFilter('EVA')"><span class="dot"></span>EVA</span>
+      <span class="chip" data-k="REC" data-on="true" onclick="toggleFilter('REC')"><span class="dot"></span>REC</span>
+    </div>
+
+    <ol id="log-entries"></ol>
+  </aside>
+
+  <!-- ============ CENTER ============ -->
+  <main class="center">
+    <div id="view-banner"></div>
+
+    <!-- Classification matrix — hero -->
+    <section class="classify-hero" id="classify-panel">
+      <div class="hh">
+        <h2>Is each person "homeless" under each agency's definition?</h2>
+        <span class="tag">derived</span>
+        <span class="hint">Nothing in this table is written. It is re-computed from the log.</span>
+      </div>
+      <div class="formula"><code>person.current_situation  ∈  def.counts_as_homeless</code> — same observation, different rule, different outcome.</div>
+      <div id="classify-body"></div>
+    </section>
+
+    <!-- Sources -->
+    <div class="sources-grid">
+      <section class="card" id="card-person">
+        <div class="ch">
+          <h3>People</h3>
+          <span class="ns">person:*</span>
+          <div class="ch-actions">
+            <button onclick="addColumn('person')">＋ Field</button>
+            <button onclick="addRow('person')">＋ Person</button>
+          </div>
+        </div>
+        <div class="tbl-wrap" id="table-person"></div>
+      </section>
+
+      <section class="card" id="card-def">
+        <div class="ch">
+          <h3>Agency Definitions</h3>
+          <span class="ns">def:*</span>
+          <div class="ch-actions">
+            <button onclick="addColumn('def')">＋ Field</button>
+            <button onclick="addRow('def')">＋ Agency</button>
+          </div>
+        </div>
+        <div class="tbl-wrap" id="table-def"></div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- ============ CRM MODE: NAV + MAIN (only visible when body.mode-crm) ============ -->
+  <aside class="crm-nav" id="crm-nav">
+    <div class="nav-title">Caseload</div>
+    <div class="nav-item" data-page="people" data-on="true" onclick="switchCrmPage('people')"><span class="ico">◉</span>People<span class="cnt" id="crm-cnt-people">—</span></div>
+    <div class="nav-item" data-page="review" data-on="false" onclick="switchCrmPage('review')"><span class="ico">⚠</span>Needs review<span class="cnt" id="crm-cnt-review">0</span></div>
+    <div class="divider"></div>
+    <div class="nav-title">Policy</div>
+    <div class="nav-item" data-page="policies" data-on="false" onclick="switchCrmPage('policies')"><span class="ico">§</span>Agency rules<span class="cnt" id="crm-cnt-policies">—</span></div>
+    <div class="divider"></div>
+    <div class="nav-title">Audit</div>
+    <div class="nav-item" data-page="activity" data-on="false" onclick="switchCrmPage('activity')"><span class="ico">⏱</span>Activity<span class="cnt" id="crm-cnt-activity">0</span></div>
+  </aside>
+
+  <section class="crm-main" id="crm-main"></section>
+
+  <!-- CRM detail drawer -->
+  <div class="crm-backdrop" id="crm-backdrop" onclick="closeCrmDetail()"></div>
+  <aside class="crm-detail" id="crm-detail"></aside>
+
+  <!-- ============ RIGHT: INSPECTOR ============ -->
+  <aside class="right">
+    <div class="right-tabs">
+      <div class="tab" data-tab="inspector" data-on="true" onclick="switchTab('inspector')">Inspector</div>
+      <div class="tab" data-tab="suggestions" data-on="false" onclick="switchTab('suggestions')">
+        Suggestions <span class="badge muted" id="rec-badge">0</span>
+      </div>
+      <div class="tab" data-tab="about" data-on="false" onclick="switchTab('about')">About</div>
+    </div>
+    <div class="right-body" id="right-body"></div>
+  </aside>
+
+</div>
+
+<script>
+/* =====================================================================
+   CORE MODEL — unchanged semantics from the source, restyled UX
+   ===================================================================== */
+const NAMESPACES = {
+  person:{entityPrefix:'person:',schemaPrefix:'schema:person.',schemaRoot:'schema:person',label:'People',activeSet:'active_people'},
+  def:   {entityPrefix:'def:',   schemaPrefix:'schema:def.',   schemaRoot:'schema:def',   label:'Agency Definitions',activeSet:'active_defs'}
+};
+
+const FIELD_LABELS = {
+  last_housed: "last housed",
+  current_situation: "current situation",
+  nights_unstable_30d: "nights unstable (30d)",
+  agency: "agency",
+  counts_as_homeless: "counts as homeless"
+};
+
+let state = {
+  log:[], transient:[], nextId:1,
+  scenario:"actual", logHypotheticals:true, autoRec:true,
+  lastAction:null,
+  personCounter:0, defCounter:0, fieldCounter:0,
+  timeCursor:null,
+  hypotheticalRecIds:new Set(),
+  filters:{INS:true,DEF:true,SEG:true,EVA:true,REC:true},
+  activeTab:"inspector",
+  inspectContext:null,   // { kind:'cell'|'column', ... }
+  helpOpen:false,
+  mode:"crm",            // "integral" | "crm"  — CRM is the landing view
+  crmPage:"people",      // "people" | "review" | "policies" | "activity"
+  crmSelected:null       // person id when drawer is open
+};
+
+const REC_DELAY_MS = 1200;
+let recTimer = null;
+
+function nowStamp(){const d=new Date();return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function emit(event, forceScenario){
+  event.id = state.nextId++;
+  event.timestamp = nowStamp();
+  event.scenario = forceScenario || event.scenario || state.scenario;
+  const isHypo = event.scenario !== "actual";
+  const shouldLog = !isHypo || state.logHypotheticals;
+  if (shouldLog){ state.log.push(event); state.lastAction = {target:'log',id:event.id}; }
+  else{ event.transient=true; state.transient.push(event); state.lastAction = {target:'transient',id:event.id}; }
+  render();
+  return event;
+}
+
+function resetAll(){
+  if (recTimer){clearTimeout(recTimer);recTimer=null;}
+  state.log=[]; state.transient=[]; state.nextId=1; state.lastAction=null;
+  state.scenario="actual"; state.logHypotheticals=true; state.autoRec=true;
+  state.personCounter=0; state.defCounter=0; state.fieldCounter=0;
+  state.timeCursor=null; state.hypotheticalRecIds=new Set();
+  state.inspectContext=null;
+  document.body.classList.remove('time-past');
+  setScenarioUI('actual');
+  closeAllPopovers();
+  seed();
+  state.lastAction=null;
+  render();
+}
+
+function seed(){
+  emit({op:"INS",target:"schema:person"},"actual");
+  emit({op:"INS",target:"schema:person.last_housed"},"actual");
+  emit({op:"INS",target:"schema:person.current_situation"},"actual");
+  emit({op:"DEF",target:"schema:person.current_situation.type",operand:"enum"},"actual");
+  emit({op:"DEF",target:"schema:person.current_situation.allowed",operand:["sheltered","unsheltered","doubled_up","transitional","motel"]},"actual");
+  emit({op:"DEF",target:"schema:person.current_situation.resolution",operand:"latest"},"actual");
+  emit({op:"INS",target:"schema:person.nights_unstable_30d"},"actual");
+
+  emit({op:"INS",target:"schema:def"},"actual");
+  emit({op:"INS",target:"schema:def.agency"},"actual");
+  emit({op:"INS",target:"schema:def.counts_as_homeless"},"actual");
+  emit({op:"DEF",target:"schema:def.counts_as_homeless.resolution",operand:"all"},"actual");
+
+  emit({op:"INS",target:"person:sarah_m"},"actual");
+  emit({op:"DEF",target:"person:sarah_m.last_housed",operand:"2024-03"},"actual");
+  emit({op:"DEF",target:"person:sarah_m.current_situation",operand:"doubled_up"},"actual");
+  emit({op:"DEF",target:"person:sarah_m.nights_unstable_30d",operand:"28"},"actual");
+
+  emit({op:"INS",target:"person:james_t"},"actual");
+  emit({op:"DEF",target:"person:james_t.last_housed",operand:"2022-07"},"actual");
+  emit({op:"DEF",target:"person:james_t.current_situation",operand:"unsheltered"},"actual");
+  emit({op:"DEF",target:"person:james_t.nights_unstable_30d",operand:"30"},"actual");
+
+  emit({op:"INS",target:"person:maria_r"},"actual");
+  emit({op:"DEF",target:"person:maria_r.last_housed",operand:"2024-11"},"actual");
+  emit({op:"DEF",target:"person:maria_r.current_situation",operand:"motel"},"actual");
+  emit({op:"DEF",target:"person:maria_r.nights_unstable_30d",operand:"15"},"actual");
+
+  emit({op:"INS",target:"person:robert_l"},"actual");
+  emit({op:"DEF",target:"person:robert_l.last_housed",operand:"2023-09"},"actual");
+  emit({op:"DEF",target:"person:robert_l.current_situation",operand:"living_in_car"},"actual");
+  emit({op:"DEF",target:"person:robert_l.nights_unstable_30d",operand:"30"},"actual");
+  evalNewDef("person:robert_l.current_situation","living_in_car");
+
+  emit({op:"INS",target:"def:hud_2024"},"actual");
+  emit({op:"DEF",target:"def:hud_2024.agency",operand:"HUD (CoC, 2024 rule)"},"actual");
+  emit({op:"DEF",target:"def:hud_2024.counts_as_homeless",operand:"unsheltered"},"actual");
+  emit({op:"DEF",target:"def:hud_2024.counts_as_homeless",operand:"sheltered"},"actual");
+
+  emit({op:"INS",target:"def:mckinney_vento"},"actual");
+  emit({op:"DEF",target:"def:mckinney_vento.agency",operand:"DOE / McKinney-Vento"},"actual");
+  for (const s of ["unsheltered","sheltered","doubled_up","transitional","motel"]){
+    emit({op:"DEF",target:"def:mckinney_vento.counts_as_homeless",operand:s},"actual");
+  }
+
+  emit({op:"INS",target:"def:local_coc"},"actual");
+  emit({op:"DEF",target:"def:local_coc.agency",operand:"Local Continuum of Care"},"actual");
+  for (const s of ["unsheltered","sheltered","doubled_up"]){
+    emit({op:"DEF",target:"def:local_coc.counts_as_homeless",operand:s},"actual");
+  }
+
+  state.personCounter=4; state.defCounter=3;
+}
+
+/* ----------------- PROJECTION ----------------- */
+function project(namespace, frameOverrides){
+  const ns = NAMESPACES[namespace];
+  frameOverrides = frameOverrides ? Object.assign({},frameOverrides) : {};
+
+  if (state.scenario === 'what-if'){
+    for (const recId of state.hypotheticalRecIds){
+      const rec = state.log.find(e=>e.id===recId);
+      if (!rec || !rec.operand) continue;
+      if (rec.operand.namespace !== namespace) continue;
+      const fname = rec.target.substring(ns.schemaPrefix.length).split(".")[0];
+      if (!frameOverrides[fname]){
+        frameOverrides[fname] = { type: rec.operand.proposed_type, allowed: rec.operand.proposed_allowed };
+      }
+    }
+  }
+
+  const fieldInsertedOrder=[], activeFieldSet=new Set();
+  const activeEntities=new Set(), entityOrder=[];
+  const allDefs={}, schemaPropDefs={}, fieldRecs={}, allRecs=[];
+  const adoptedRecIds=new Set(), dismissedRecIds=new Set();
+
+  let allEvents = state.log.concat(state.scenario!=="actual" ? state.transient.filter(e=>e.scenario===state.scenario) : []);
+  if (state.timeCursor !== null) allEvents = allEvents.filter(e=>e.id <= state.timeCursor);
+
+  for (const evt of allEvents){
+    if (evt.op==="INS"){
+      if (evt.target.startsWith(ns.schemaPrefix) && evt.target.split(".").length===2){
+        const fname = evt.target.split(".")[1];
+        if (!fieldInsertedOrder.includes(fname)) fieldInsertedOrder.push(fname);
+        activeFieldSet.add(fname);
+      } else if (evt.target.startsWith(ns.entityPrefix)){
+        if (!entityOrder.includes(evt.target)) entityOrder.push(evt.target);
+        activeEntities.add(evt.target);
+      }
+    } else if (evt.op==="SEG" && evt.operand){
+      if (evt.target === ns.activeSet){
+        if (evt.operand.exclude_entity) activeEntities.delete(evt.operand.exclude_entity);
+        if (evt.operand.include_entity) activeEntities.add(evt.operand.include_entity);
+      }
+      if (evt.target === `${ns.schemaRoot}.active_fields`){
+        if (evt.operand.exclude_field) activeFieldSet.delete(evt.operand.exclude_field);
+        if (evt.operand.include_field) activeFieldSet.add(evt.operand.include_field);
+      }
+    } else if (evt.op==="DEF"){
+      const t=evt.target;
+      (allDefs[t]=allDefs[t]||[]).push(evt);
+      if (t.startsWith(ns.schemaPrefix) && t.split(".").length===3){
+        (schemaPropDefs[t]=schemaPropDefs[t]||[]).push(evt);
+      }
+      if (evt.adopts) adoptedRecIds.add(evt.adopts);
+      if (evt.dismisses) dismissedRecIds.add(evt.dismisses);
+    } else if (evt.op==="REC" && evt.operand){
+      allRecs.push(evt);
+      if (evt.target.startsWith(ns.schemaPrefix)){
+        const fname = evt.target.split(".")[1];
+        (fieldRecs[fname]=fieldRecs[fname]||[]).push(evt);
+      }
+    }
+  }
+  const activeFields = [];
+  for (const f of fieldInsertedOrder) if (activeFieldSet.has(f)) activeFields.push(f);
+
+  function schemaPropValue(fieldName, propName){
+    if (frameOverrides[fieldName] && frameOverrides[fieldName][propName] !== undefined) return frameOverrides[fieldName][propName];
+    const t = `${ns.schemaPrefix}${fieldName}.${propName}`;
+    const defs = schemaPropDefs[t] || [];
+    if (defs.length===0) return null;
+    return defs[defs.length-1].operand;
+  }
+
+  const liveProposals={};
+  for (const rec of allRecs){
+    if (!rec.operand.proposed_type) continue;
+    if (adoptedRecIds.has(rec.id) || dismissedRecIds.has(rec.id)) continue;
+    const fname = rec.target.split(".")[1];
+    if (fname) liveProposals[fname] = rec;
+  }
+
+  const values={}, failures={};
+  for (const e of entityOrder){
+    if (!activeEntities.has(e)) continue;
+    values[e]={};
+    for (const f of activeFields){
+      const target=`${e}.${f}`;
+      const defs=(allDefs[target]||[]);
+      let visible;
+      if (state.scenario==="what-if"){
+        const wi=defs.filter(d=>d.scenario==="what-if");
+        visible = wi.length>0 ? wi : defs.filter(d=>d.scenario==="actual");
+      } else visible = defs.filter(d=>d.scenario==="actual");
+      if (visible.length===0){ values[e][f]=null; continue; }
+
+      const type = schemaPropValue(f,"type");
+      const allowed = schemaPropValue(f,"allowed");
+      const rule = schemaPropValue(f,"resolution") || "latest";
+      const isMultiByRule = rule==="all";
+      const isMulti = type==="enum_multi" || isMultiByRule;
+
+      if (isMulti){
+        const items=[], seen=new Set();
+        for (const d of visible){
+          if (d.operand==="∅") continue;
+          if (seen.has(d.operand)) continue;
+          seen.add(d.operand); items.push(d.operand);
+        }
+        const failingItems = Array.isArray(allowed) ? items.filter(v=>!allowed.includes(v)) : [];
+        const isOverride = state.scenario==="what-if" && visible.some(d=>d.scenario==="what-if");
+        values[e][f] = { isMulti:true, items, failingItems, failed: failingItems.length>0, override:isOverride, cleared: items.length===0, multiCount:visible.length, allDefs:visible };
+        if (failingItems.length>0) failures[target]={fieldName:f,values:failingItems};
+      } else {
+        let chosen;
+        if (rule==="alphabetical") chosen = [...visible].sort((a,b)=>String(a.operand).localeCompare(String(b.operand)))[0];
+        else if (rule==="first") chosen = visible[0];
+        else chosen = visible[visible.length-1];
+        const isOverride = state.scenario==="what-if" && chosen.scenario==="what-if";
+        const winnerVal = chosen.operand;
+        let failed=false;
+        if (type==="enum" && Array.isArray(allowed) && winnerVal!=="∅" && !allowed.includes(winnerVal)) failed=true;
+        values[e][f] = { isMulti:false, value:winnerVal, override:isOverride, cleared:winnerVal==="∅", multiCount:visible.length, allDefs:visible, failed };
+        if (failed) failures[target]={fieldName:f,value:winnerVal};
+      }
+    }
+  }
+  const fieldFailures={};
+  for (const t in failures){
+    const f = failures[t].fieldName;
+    (fieldFailures[f]=fieldFailures[f]||[]);
+    const vals = failures[t].values || [failures[t].value];
+    for (const v of vals) fieldFailures[f].push(v);
+  }
+  return { namespace, fields:activeFields, entities:entityOrder.filter(e=>activeEntities.has(e)), values, fieldFailures, fieldRecs, liveProposals, schemaPropValue };
+}
+
+/* ----------------- ACTIONS ----------------- */
+function addRow(namespace){
+  if (namespace==='person'){
+    state.personCounter++; let id=`person:new_${state.personCounter}`;
+    while (state.log.some(e=>e.op==="INS"&&e.target===id)){state.personCounter++; id=`person:new_${state.personCounter}`}
+    emit({op:"INS",target:id});
+  } else {
+    state.defCounter++; let id=`def:new_${state.defCounter}`;
+    while (state.log.some(e=>e.op==="INS"&&e.target===id)){state.defCounter++; id=`def:new_${state.defCounter}`}
+    emit({op:"INS",target:id});
+  }
+}
+function addColumn(namespace){
+  const ns = NAMESPACES[namespace];
+  state.fieldCounter++; let name=`field_${state.fieldCounter}`;
+  while (state.log.some(e=>e.op==="INS"&&e.target===`${ns.schemaPrefix}${name}`)){state.fieldCounter++; name=`field_${state.fieldCounter}`}
+  emit({op:"INS",target:`${ns.schemaPrefix}${name}`});
+}
+function dropColumn(namespace,fieldName){
+  emit({op:"SEG",target:`${NAMESPACES[namespace].schemaRoot}.active_fields`,operand:{exclude_field:fieldName}});
+}
+function deleteRow(namespace,entityId){
+  emit({op:"SEG",target:NAMESPACES[namespace].activeSet,operand:{exclude_entity:entityId}});
+}
+function editCell(namespace,entityId,field,newValue){
+  emit({op:"DEF",target:`${entityId}.${field}`,operand:newValue});
+  evalNewDef(`${entityId}.${field}`,newValue);
+}
+function addAltCell(namespace,entityId,field,newValue){
+  emit({op:"DEF",target:`${entityId}.${field}`,operand:newValue});
+  evalNewDef(`${entityId}.${field}`,newValue);
+}
+function evalNewDef(target,value){
+  const [ent,field] = target.split(".");
+  let namespace=null;
+  for (const key in NAMESPACES) if (ent.startsWith(NAMESPACES[key].entityPrefix)) namespace=key;
+  if (!namespace||!field) return;
+  const p = project(namespace);
+  const type = p.schemaPropValue(field,"type");
+  const allowed = p.schemaPropValue(field,"allowed");
+  if ((type==="enum"||type==="enum_multi") && Array.isArray(allowed) && !allowed.includes(value)){
+    emit({op:"EVA",target,operand:{rule:`${NAMESPACES[namespace].schemaPrefix}${field}.allowed`,value,result:"failed"}});
+    scheduleAutoRec();
+  }
+}
+function setColumnType(namespace,fieldName,type,allowed){
+  const ns = NAMESPACES[namespace];
+  emit({op:"DEF",target:`${ns.schemaPrefix}${fieldName}.type`,operand:type});
+  if ((type==="enum"||type==="enum_multi") && allowed){
+    emit({op:"DEF",target:`${ns.schemaPrefix}${fieldName}.allowed`,operand:allowed});
+    const p = project(namespace);
+    for (const e of p.entities){
+      const v = p.values[e]&&p.values[e][fieldName];
+      if (!v||v.cleared) continue;
+      if (v.isMulti){
+        const bad = (v.items||[]).filter(x=>!allowed.includes(x));
+        for (const x of bad) emit({op:"EVA",target:`${e}.${fieldName}`,operand:{rule:`${ns.schemaPrefix}${fieldName}.allowed`,value:x,result:"failed"}});
+      } else if (!allowed.includes(v.value)){
+        emit({op:"EVA",target:`${e}.${fieldName}`,operand:{rule:`${ns.schemaPrefix}${fieldName}.allowed`,value:v.value,result:"failed"}});
+      }
+    }
+    scheduleAutoRec();
+  }
+}
+function setColumnResolution(namespace,fieldName,rule){
+  const ns=NAMESPACES[namespace];
+  emit({op:"DEF",target:`${ns.schemaPrefix}${fieldName}.resolution`,operand:rule});
+}
+
+function scheduleAutoRec(){
+  if (!state.autoRec) return;
+  if (recTimer) clearTimeout(recTimer);
+  recTimer = setTimeout(()=>{recTimer=null; runAutoRec();}, REC_DELAY_MS);
+  render();
+}
+function runAutoRec(){
+  let had=false;
+  for (const nsKey in NAMESPACES){
+    const p = project(nsKey);
+    for (const fieldName in p.fieldFailures){
+      if (p.liveProposals[fieldName]) continue;
+      const failing=[...new Set(p.fieldFailures[fieldName])];
+      had=true;
+      const currentAllowed = p.schemaPropValue(fieldName,"allowed") || [];
+      const proposedAllowed=[...currentAllowed];
+      for (const v of failing) if (!proposedAllowed.includes(v)) proposedAllowed.push(v);
+      emit({
+        op:"REC",
+        target:`${NAMESPACES[nsKey].schemaPrefix}${fieldName}`,
+        operand:{proposed_type:"enum_multi",proposed_allowed:proposedAllowed,triggering_failures:failing,namespace:nsKey,reason:`EVA failure(s): ${failing.join(", ")} cannot be held by single-pick enum`}
+      });
+    }
+  }
+  if (had) { state.activeTab="suggestions"; render(); }
+}
+
+function adoptProposal(recId){
+  const rec = state.log.find(e=>e.id===recId);
+  if (!rec||rec.op!=="REC"||!rec.operand) return;
+  const ns = NAMESPACES[rec.operand.namespace]; if (!ns) return;
+  const fieldName = rec.target.substring(ns.schemaPrefix.length).split(".")[0];
+  emit({op:"DEF",target:`${ns.schemaPrefix}${fieldName}.type`,operand:rec.operand.proposed_type,adopts:recId});
+  emit({op:"DEF",target:`${ns.schemaPrefix}${fieldName}.allowed`,operand:rec.operand.proposed_allowed,adopts:recId});
+  state.hypotheticalRecIds.delete(recId);
+}
+function dismissProposal(recId){ emit({op:"DEF",target:`rec:${recId}.status`,operand:"dismissed",dismisses:recId}); state.hypotheticalRecIds.delete(recId); }
+function viewHypothetically(recId){
+  state.hypotheticalRecIds.add(recId);
+  state.scenario="what-if"; setScenarioUI("what-if");
+  render();
+}
+function stopHypotheticalView(recId){ state.hypotheticalRecIds.delete(recId); render(); }
+
+function switchScenario(newScenario){
+  state.scenario = newScenario;
+  setScenarioUI(newScenario);
+  closeAllPopovers();
+  render();
+}
+function setScenarioUI(s){
+  document.querySelectorAll('.scenario-switch button').forEach(b=>{
+    b.dataset.on = String(b.dataset.scn === s);
+  });
+  document.body.classList.toggle('scenario-whatif', s!=='actual');
+}
+
+/* ----------------- MODE (integral vs CRM) ----------------- */
+function switchMode(m){
+  state.mode = m;
+  document.body.classList.toggle('mode-crm', m === 'crm');
+  document.querySelectorAll('.mode-switch button').forEach(b=>{
+    b.dataset.on = String(b.dataset.mode === m);
+  });
+  closeAllPopovers();
+  closeCrmDetail();
+  // Scenario toggle doesn't apply to CRM — force actual
+  if (m === 'crm' && state.scenario !== 'actual'){
+    state.scenario = 'actual'; setScenarioUI('actual');
+  }
+  render();
+}
+function switchCrmPage(p){
+  state.crmPage = p;
+  state.crmSelected = null;
+  document.querySelectorAll('.crm-nav .nav-item').forEach(n=>{
+    n.dataset.on = String(n.dataset.page === p);
+  });
+  renderCrm();
+  closeCrmDetail();
+}
+function openCrmDetail(personId){
+  state.crmSelected = personId;
+  const d = document.getElementById('crm-detail');
+  const bd = document.getElementById('crm-backdrop');
+  d.innerHTML = renderCrmDetail(personId);
+  d.classList.add('open'); bd.classList.add('open');
+}
+function closeCrmDetail(){
+  const d = document.getElementById('crm-detail');
+  const bd = document.getElementById('crm-backdrop');
+  if (d) d.classList.remove('open');
+  if (bd) bd.classList.remove('open');
+  state.crmSelected = null;
+}
+
+/* -- time -- */
+function stepTime(dir){
+  const liveId = state.nextId-1;
+  const cur = state.timeCursor===null ? liveId : state.timeCursor;
+  let next = cur+dir;
+  if (next<1) next=1;
+  if (next>=liveId){ state.timeCursor=null; render(); return; }
+  state.timeCursor=next; render();
+}
+function setTimeCursor(v){
+  const liveId = state.nextId-1;
+  v = parseInt(v,10);
+  if (!Number.isFinite(v)||v>=liveId) state.timeCursor=null;
+  else if (v<1) state.timeCursor=1;
+  else state.timeCursor=v;
+  render();
+}
+function jumpToLive(){ state.timeCursor=null; render(); }
+
+function updateLastActionFromBuffers(){
+  const lastLog=state.log.length?state.log[state.log.length-1]:null;
+  const lastTr=state.transient.length?state.transient[state.transient.length-1]:null;
+  if (!lastLog&&!lastTr){state.lastAction=null;return;}
+  if (!lastLog) state.lastAction={target:'transient',id:lastTr.id};
+  else if (!lastTr) state.lastAction={target:'log',id:lastLog.id};
+  else state.lastAction = lastLog.id>lastTr.id ? {target:'log',id:lastLog.id} : {target:'transient',id:lastTr.id};
+}
+function undoLast(){
+  const la=state.lastAction; if (!la) return;
+  if (la.target==='transient'){
+    const idx=state.transient.findIndex(e=>e.id===la.id);
+    if (idx>=0) state.transient.splice(idx,1);
+    updateLastActionFromBuffers(); render(); return;
+  }
+  const evt=state.log.find(e=>e.id===la.id); if (!evt) return;
+  if (evt.op==="EVA"||evt.op==="REC"){
+    const idx=state.log.indexOf(evt);
+    for (let i=idx-1;i>=0;i--){
+      if (state.log[i].op!=="EVA"&&state.log[i].op!=="REC"){
+        state.lastAction={target:'log',id:state.log[i].id}; undoLast(); return;
+      }
+    }
+    state.lastAction=null; render(); return;
+  }
+  let reversal=null;
+  if (evt.op==="DEF"){
+    const priorDef = [...state.log].slice(0,state.log.indexOf(evt)).reverse().find(e=>e.op==="DEF"&&e.target===evt.target&&e.scenario===evt.scenario);
+    reversal = {op:"DEF",target:evt.target,operand:priorDef?priorDef.operand:"∅",scenario:evt.scenario,reverses:evt.id};
+  } else if (evt.op==="INS"){
+    for (const nsKey in NAMESPACES){
+      const ns=NAMESPACES[nsKey];
+      if (evt.target.startsWith(ns.schemaPrefix) && evt.target.split(".").length===2){
+        const fname=evt.target.split(".")[1];
+        reversal={op:"SEG",target:`${ns.schemaRoot}.active_fields`,operand:{exclude_field:fname},reverses:evt.id}; break;
+      } else if (evt.target.startsWith(ns.entityPrefix)){
+        reversal={op:"SEG",target:ns.activeSet,operand:{exclude_entity:evt.target},reverses:evt.id}; break;
+      }
+    }
+  } else if (evt.op==="SEG"){
+    if (evt.operand.exclude_entity) reversal={op:"SEG",target:evt.target,operand:{include_entity:evt.operand.exclude_entity},reverses:evt.id};
+    else if (evt.operand.include_entity) reversal={op:"SEG",target:evt.target,operand:{exclude_entity:evt.operand.include_entity},reverses:evt.id};
+    else if (evt.operand.exclude_field) reversal={op:"SEG",target:evt.target,operand:{include_field:evt.operand.exclude_field},reverses:evt.id};
+    else if (evt.operand.include_field) reversal={op:"SEG",target:evt.target,operand:{exclude_field:evt.operand.include_field},reverses:evt.id};
+  }
+  if (reversal) emit(reversal, evt.scenario);
+}
+
+function closeAllPopovers(){ document.querySelectorAll('.popover,.backdrop').forEach(el=>el.remove()); }
+
+/* ----------------- FILTERS & TABS ----------------- */
+function toggleFilter(k){ state.filters[k] = !state.filters[k]; render(); }
+function switchTab(t){ state.activeTab=t; render(); }
+
+/* ----------------- RENDER ----------------- */
+function render(){
+  if (state.mode === 'crm'){
+    renderTimeline();   // keeps state refs consistent but not shown
+    renderBanner();
+    renderCrm();
+    return;
+  }
+  renderTimeline();
+  renderBanner();
+  renderTable('person','table-person');
+  renderTable('def','table-def');
+  renderClassifications();
+  renderLog();
+  renderRight();
+  updateFilterChips();
+}
+
+function updateFilterChips(){
+  document.querySelectorAll('#log-filters .chip').forEach(c=>{
+    c.dataset.on = String(!!state.filters[c.dataset.k]);
+  });
+}
+
+function renderTimeline(){
+  const liveId = Math.max(1, state.nextId-1);
+  const cursor = state.timeCursor===null ? liveId : state.timeCursor;
+  document.getElementById('cursor-display').textContent = cursor;
+  document.getElementById('live-display').textContent = liveId;
+  document.getElementById('log-count').textContent = `${state.log.length} event${state.log.length===1?'':'s'}`;
+  document.body.classList.toggle('time-past', state.timeCursor!==null);
+
+  const pips = document.getElementById('timeline-pips');
+  const width = pips.clientWidth || 300;
+  const evts = state.log;
+  pips.innerHTML = '';
+  const cursorFill = document.createElement('div');
+  cursorFill.className='live-fill';
+  cursorFill.style.width = `${(cursor/liveId)*100}%`;
+  pips.appendChild(cursorFill);
+  for (const e of evts){
+    const pip = document.createElement('div');
+    pip.className = `pip ${e.op}`;
+    const left = ((e.id-0.5)/liveId) * 100;
+    pip.style.left = `calc(${left}% - 1px)`;
+    pips.appendChild(pip);
+  }
+  const cur = document.createElement('div');
+  cur.className='cursor';
+  cur.style.left = `calc(${(cursor/liveId)*100}% - 1px)`;
+  pips.appendChild(cur);
+
+  pips.onclick = (ev)=>{
+    const rect = pips.getBoundingClientRect();
+    const ratio = (ev.clientX - rect.left)/rect.width;
+    const v = Math.max(1, Math.min(liveId, Math.round(ratio * liveId)));
+    setTimeCursor(v);
+  };
+}
+
+function renderBanner(){
+  const banner = document.getElementById('view-banner');
+  const isPast = state.timeCursor!==null;
+  const hypotheticals = state.scenario==='what-if' ? [...state.hypotheticalRecIds].filter(rid=>state.log.find(e=>e.id===rid)) : [];
+  if (isPast){
+    banner.className = 'banner past';
+    banner.innerHTML = `<span>🕘 Viewing past state at event <strong>#${state.timeCursor}</strong>. Later events exist in the log but aren't "present" in this view. Editing paused.</span>
+      <button onclick="jumpToLive()">Return to live</button>`;
+  } else if (hypotheticals.length){
+    const names = hypotheticals.map(rid=>`REC #${rid}`).join(', ');
+    banner.className='banner hypo';
+    banner.innerHTML = `<span>🔮 <strong>Hypothetical view</strong> · projecting under ${names}. The actual frame is untouched.</span>
+      <button onclick="switchScenario('actual')">Return to actual</button>`;
+  } else if (state.scenario==='what-if'){
+    banner.className='banner whatif';
+    banner.innerHTML = `<span>🧪 <strong>What-if sandbox.</strong> Edits here are isolated from "actual" — toggle back anytime.</span>
+      <button onclick="switchScenario('actual')">Return to actual</button>`;
+  } else {
+    banner.className=''; banner.innerHTML='';
+  }
+}
+
+function renderTable(namespace, wrapId){
+  const ns = NAMESPACES[namespace];
+  const p = project(namespace);
+  const wrap = document.getElementById(wrapId);
+  const recPending = recTimer !== null;
+
+  if (p.fields.length===0){
+    wrap.innerHTML = `<div style="padding:14px 16px;color:var(--muted);font-size:12px">No fields yet. Use <strong>＋ Field</strong>.</div>`;
+    return;
+  }
+
+  const headCells = p.fields.map(f=>{
+    const type = p.schemaPropValue(f,"type");
+    const rule = p.schemaPropValue(f,"resolution");
+    const ftags=[];
+    if (type==="enum") ftags.push(`<span class="ft enum">enum</span>`);
+    else if (type==="enum_multi") ftags.push(`<span class="ft multi">multi</span>`);
+    else if (rule==="all") ftags.push(`<span class="ft multi">multi</span>`);
+    const fails = (p.fieldFailures[f]||[]).length;
+    if (fails>0) ftags.push(`<span class="ft fail">${fails} fail</span>`);
+    if (fails>0 && recPending) ftags.push(`<span class="ft sugg">thinking…</span>`);
+    const recCount = (p.fieldRecs[f]||[]).length;
+    if (recCount>0 && !recPending && fails===0) ftags.push(`<span class="ft rec-done">rec'd</span>`);
+
+    const label = FIELD_LABELS[f] || f;
+    return `<th>
+      <span class="fname" title="${escapeHtml(f)}">${escapeHtml(label)}</span>
+      <span class="flags">${ftags.join('')}</span>
+      <span class="col-ctl">
+        <button title="Column settings" onclick="openColumnInspector('${namespace}','${escapeHtml(f)}')">⚙</button>
+        <button class="drop" title="Hide column" onclick="dropColumn('${namespace}','${escapeHtml(f)}')">✕</button>
+      </span>
+    </th>`;
+  }).join('');
+
+  const rows = p.entities.map(e=>{
+    const cells = p.fields.map(f=>{
+      const v = p.values[e] && p.values[e][f];
+      if (!v || v.cleared) return `<td class="cell empty" onclick="startEdit(this,'${namespace}','${e}','${f}')">—</td>`;
+      const cls=['cell'];
+      if (v.override) cls.push('hypo-override');
+      if (v.failed) cls.push('failed');
+      if (v.isMulti){
+        const chips = v.items.map(x=>{
+          const failing=(v.failingItems||[]).includes(x);
+          return `<span class="chip ${failing?'fail':''}">${escapeHtml(x)}</span>`;
+        }).join('');
+        const alt = `<span class="add-alt" onclick="event.stopPropagation(); startAlt(this.closest('td'),'${namespace}','${e}','${f}')">+ alt</span>`;
+        return `<td class="${cls.join(' ')}" onclick="openCellInspector('${namespace}','${e}','${f}')">${chips}${alt}</td>`;
+      }
+      const multiPill = v.multiCount>1 ? `<span class="multi-pill" onclick="event.stopPropagation(); openCellInspector('${namespace}','${e}','${f}')" title="${v.multiCount} DEFs — click to inspect">${v.multiCount}</span>` : '';
+      const alt = `<span class="add-alt" onclick="event.stopPropagation(); startAlt(this.closest('td'),'${namespace}','${e}','${f}')">+ alt</span>`;
+      return `<td class="${cls.join(' ')}" onclick="startEdit(this,'${namespace}','${e}','${f}')"><span class="cell-val">${escapeHtml(v.value)}</span>${multiPill}${alt}</td>`;
+    }).join('');
+    return `<tr>
+      <td class="entity"><div class="ent-row">${e}<span class="drop-ent" onclick="deleteRow('${namespace}','${e}')" title="Hide (SEG exclude)">×</span></div></td>
+      ${cells}
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `<table class="data"><thead><tr><th>entity</th>${headCells}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderClassifications(){
+  const pPerson = project('person');
+  const pDef = project('def');
+  const body = document.getElementById('classify-body');
+
+  if (pPerson.entities.length===0 || pDef.entities.length===0){
+    body.innerHTML = `<div style="padding:14px 18px;color:var(--muted);font-size:12px">Classifications need at least one person and one agency definition.</div>`;
+    return;
+  }
+
+  // Determine hypothetical framing markers
+  const hypoActive = state.hypotheticalRecIds.size>0 && state.scenario==='what-if';
+
+  const defSets={}, agencyLabels={};
+  for (const d of pDef.entities){
+    const v = pDef.values[d]&&pDef.values[d].counts_as_homeless;
+    defSets[d] = !v ? new Set() : (v.isMulti ? new Set(v.items) : new Set([v.value]));
+    const ag = pDef.values[d]&&pDef.values[d].agency;
+    agencyLabels[d] = ag && !ag.cleared ? ag.value : d;
+  }
+
+  const defHeader = pDef.entities.map(d=>{
+    return `<th title="${escapeHtml(d)}">${escapeHtml(agencyLabels[d])}<span class="agency-note">${escapeHtml(d)}</span></th>`;
+  }).join('');
+
+  const rows = pPerson.entities.map(person=>{
+    const sv = pPerson.values[person]&&pPerson.values[person].current_situation;
+    let currentSits = new Set(); let hasFailure=false;
+    if (sv && !sv.cleared){
+      if (sv.isMulti){for (const s of sv.items) currentSits.add(s); if (sv.failed) hasFailure=true;}
+      else{currentSits.add(sv.value); if (sv.failed) hasFailure=true;}
+    }
+    const classCells = pDef.entities.map(d=>{
+      const accepted = defSets[d];
+      if (hasFailure) return `<td class="ccell indet" title="current_situation fails the allowed enum — classification undefined until the frame resolves"><span class="glyph">?</span><span class="ctx">undefined</span></td>`;
+      if (currentSits.size===0) return `<td class="ccell no"><span class="glyph">—</span><span class="ctx">no data</span></td>`;
+      const hit = [...currentSits].some(s=>accepted.has(s));
+      const extra = hypoActive ? 'hypo' : (sv && sv.override ? 'changed' : '');
+      if (hit) return `<td class="ccell yes ${extra}" title="∈ ${escapeHtml(d)}.counts_as_homeless"><span class="glyph">✓</span><span class="ctx">homeless</span></td>`;
+      return `<td class="ccell no ${extra}" title="∉ ${escapeHtml(d)}.counts_as_homeless"><span class="glyph">✗</span><span class="ctx">not</span></td>`;
+    }).join('');
+    return `<tr><td class="entity">${person}</td>${classCells}</tr>`;
+  }).join('');
+
+  const summaryCells = pDef.entities.map(d=>{
+    const accepted = defSets[d];
+    let c=0;
+    for (const person of pPerson.entities){
+      const v = pPerson.values[person]&&pPerson.values[person].current_situation;
+      if (!v||v.cleared||v.failed) continue;
+      const sits = v.isMulti ? v.items : [v.value];
+      if (sits.some(s=>accepted.has(s))) c++;
+    }
+    return `<td class="ccell" style="background:#fafaf6;color:var(--ink-2)">${c} of ${pPerson.entities.length}</td>`;
+  }).join('');
+  const summaryRow = `<tr class="summary"><td class="entity">counted as homeless</td>${summaryCells}</tr>`;
+
+  body.innerHTML = `<table class="matrix"><thead><tr><th>person</th>${defHeader}</tr></thead><tbody>${rows}${summaryRow}</tbody></table>`;
+}
+
+/* ----------------- LOG ----------------- */
+function renderLog(){
+  const el = document.getElementById('log-entries');
+  const combined = state.log.map(e=>({...e,source:'log'}))
+    .concat(state.transient.map(e=>({...e,source:'transient'})))
+    .sort((a,b)=>a.id-b.id);
+  const reversedIds = new Set();
+  for (const e of combined) if (e.reverses) reversedIds.add(e.reverses);
+
+  const out = combined.filter(e=>state.filters[e.op] !== false).map(e=>{
+    const classes=['log-entry',e.op];
+    if (e.source==='transient') classes.push('transient');
+    if (e.reverses) classes.push('reversal');
+    if (reversedIds.has(e.id)) classes.push('reversed');
+    if (e.scenario==='what-if'&&e.source==='log') classes.push('scn-whatif');
+    if (state.timeCursor!==null && e.id > state.timeCursor) classes.push('future');
+
+    const scnTag = e.scenario==='what-if' ? `<span class="scn-tag whatif">what-if</span>` : `<span class="scn-tag actual">actual</span>`;
+    const refs = [
+      e.reverses ? `<span class="ref">⤺ #${e.reverses}</span>` : '',
+      e.adopts ? `<span class="ref">⊕ adopts #${e.adopts}</span>` : '',
+      e.dismisses ? `<span class="ref">⊘ dismisses #${e.dismisses}</span>` : ''
+    ].join(' ');
+
+    return `<li class="${classes.join(' ')}" onclick="focusLogEntry(${e.id})">
+      <div class="meta">#${e.id} · ${e.timestamp} ${scnTag} ${refs}</div>
+      <div class="body"><span class="op ${e.op}">${e.op}</span>${renderEventBody(e)}</div>
+    </li>`;
+  }).join('');
+  el.innerHTML = out;
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderEventBody(e){
+  let opd='';
+  if (e.op==='DEF'){
+    if (Array.isArray(e.operand)) opd = ` <span class="val">[${e.operand.map(x=>`"${escapeHtml(x)}"`).join(', ')}]</span>`;
+    else opd = ` <span class="val">"${escapeHtml(e.operand)}"</span>`;
+  } else if (e.op==='SEG' && e.operand){
+    for (const k of ['exclude_entity','include_entity','exclude_field','include_field']){
+      if (e.operand[k]) opd = ` ${k}: <code>${escapeHtml(e.operand[k])}</code>`;
+    }
+  } else if (e.op==='REC' && e.operand){
+    if (e.operand.proposed_type) opd = ` → <span class="val">${escapeHtml(e.operand.proposed_type)}</span>`;
+  } else if (e.op==='EVA' && e.operand){
+    opd = ` <span class="val">"${escapeHtml(e.operand.value)}"</span> · ${escapeHtml(e.operand.result)}`;
+  }
+  return `<code>${escapeHtml(e.target)}</code>${opd}`;
+}
+
+function focusLogEntry(id){
+  // Not used for interaction yet — log is informational
+}
+
+/* ----------------- RIGHT PANEL ----------------- */
+function renderRight(){
+  // Count suggestions
+  let recCount=0;
+  for (const ns in NAMESPACES){
+    const p = project(ns);
+    recCount += Object.keys(p.liveProposals).length;
+  }
+  const badge = document.getElementById('rec-badge');
+  badge.textContent = recCount;
+  badge.classList.toggle('muted', recCount===0);
+
+  document.querySelectorAll('.right-tabs .tab').forEach(t=>{
+    t.dataset.on = String(t.dataset.tab === state.activeTab);
+  });
+
+  // auto-flip to suggestions when a new REC arrives
+  if (recCount>0 && state.activeTab==='inspector' && !state.inspectContext){
+    state.activeTab = 'suggestions';
+    document.querySelectorAll('.right-tabs .tab').forEach(t=>{ t.dataset.on = String(t.dataset.tab === state.activeTab); });
+  }
+
+  const body = document.getElementById('right-body');
+  if (state.activeTab==='about'){ body.innerHTML = renderAbout(); return; }
+  if (state.activeTab==='suggestions'){ body.innerHTML = renderSuggestions(recCount); return; }
+  body.innerHTML = renderInspector();
+}
+
+function renderAbout(){
+  return `
+    <div class="ins-section">
+      <h4>The Integral Model</h4>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--ink-2);line-height:1.55">
+        Three tables, one log. <strong>People</strong> holds raw observations. <strong>Agency Definitions</strong> holds each agency's rule for what "homeless" means. <strong>Classifications</strong> is not stored — it's computed live from the other two.
+      </p>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--ink-2);line-height:1.55">
+        Every table cell is a projection over the log. Edit an observation, edit a definition, scrub time, try a what-if frame — the classification matrix updates immediately, and the log never loses what things used to be.
+      </p>
+    </div>
+    <div class="ins-section">
+      <h4>Operations</h4>
+      <ul style="padding-left:18px;margin:0;font-size:12.5px;line-height:1.8;color:var(--ink-2)">
+        <li><span class="chip" style="background:var(--actual-soft);color:var(--actual)">INS</span> introduce an entity or field</li>
+        <li><span class="chip" style="background:var(--accent-soft);color:var(--accent)">DEF</span> assign a value</li>
+        <li><span class="chip" style="background:var(--danger-soft);color:var(--danger)">SEG</span> include / exclude from active set</li>
+        <li><span class="chip" style="background:var(--danger-soft);color:var(--danger)">EVA</span> evaluate a value against a rule</li>
+        <li><span class="chip" style="background:var(--sugg-soft);color:var(--sugg)">REC</span> propose a structural change</li>
+      </ul>
+    </div>
+    <div class="ins-section">
+      <h4>Try this</h4>
+      <ol style="padding-left:18px;margin:0;font-size:12.5px;line-height:1.7;color:var(--ink-2)">
+        <li>Edit <code>def:hud_2024</code> to include <code>doubled_up</code>. Watch Sarah M flip to ✓ under HUD.</li>
+        <li>Notice <code>robert_l</code>'s cell flagged red — "living_in_car" isn't in the allowed set. A suggestion appears in the right panel.</li>
+        <li><strong>View hypothetically</strong> to see the proposed frame applied to what-if only, then <strong>Adopt</strong> to commit.</li>
+        <li>Scrub the timeline to any past event — the whole view rewinds, including Classifications.</li>
+      </ol>
+    </div>
+  `;
+}
+
+function renderSuggestions(count){
+  if (count===0){
+    return `
+      <div class="ins-section">
+        <h4>Suggestions</h4>
+        <p style="margin:0;font-size:12.5px;color:var(--muted)">The system proposes structural fixes (<span class="chip" style="background:var(--sugg-soft);color:var(--sugg)">REC</span>) when observations can't fit the current schema. None pending.</p>
+      </div>
+      <div class="ins-section">
+        <h4>Why suggestions?</h4>
+        <p style="margin:0;font-size:12.5px;color:var(--ink-2);line-height:1.55">
+          EVA failures don't force anything. They log a tension, and after a moment the system proposes a new frame that would absorb the mismatch. You decide whether to adopt, dismiss, or just look at it hypothetically.
+        </p>
+      </div>
+    `;
+  }
+  const cards = [];
+  for (const nsKey in NAMESPACES){
+    const p = project(nsKey);
+    for (const fieldName in p.liveProposals){
+      const rec = p.liveProposals[fieldName];
+      const ns = NAMESPACES[nsKey];
+      const proposedType = rec.operand.proposed_type;
+      const proposedAllowed = rec.operand.proposed_allowed || [];
+      const triggering = rec.operand.triggering_failures || [];
+
+      const overrides = {}; overrides[fieldName] = {type:proposedType, allowed:proposedAllowed};
+      const pPreview = project(nsKey, overrides);
+      const rows = pPreview.entities.map(e=>{
+        const v = pPreview.values[e]&&pPreview.values[e][fieldName];
+        let cell = '<td></td>';
+        if (v && !v.cleared){
+          if (v.isMulti){
+            const chips = v.items.map(x=>{
+              const wasFailing = triggering.includes(x);
+              return `<span class="chip ${wasFailing?'was-fail':''}">${escapeHtml(x)}</span>`;
+            }).join('');
+            cell = `<td>${chips}</td>`;
+          } else cell = `<td>${escapeHtml(v.value)}</td>`;
+        }
+        return `<tr><td class="e">${e}</td>${cell}</tr>`;
+      }).join('');
+
+      const isHypo = state.hypotheticalRecIds.has(rec.id);
+      const hypoBtn = isHypo
+        ? `<button class="btn secondary" onclick="stopHypotheticalView(${rec.id})">Stop hypothetical</button>`
+        : `<button class="btn secondary" onclick="viewHypothetically(${rec.id})">View hypothetically</button>`;
+
+      const label = FIELD_LABELS[fieldName] || fieldName;
+      cards.push(`
+        <div class="rec-card">
+          <div class="rh">
+            <span class="lbl">REC #${rec.id}</span>
+            <span class="t">Generalize <code>${label}</code> → <strong>${escapeHtml(proposedType)}</strong></span>
+          </div>
+          <div class="body">
+            <div class="because">
+              ${triggering.length
+                ? `Under the current single-pick enum, <code>${triggering.map(escapeHtml).join('</code>, <code>')}</code> can't be held. Proposed: <code>${escapeHtml(fieldName)}</code> becomes <code>enum_multi</code> with allowed <code>[${proposedAllowed.map(escapeHtml).join(', ')}]</code>. The failed value slots in as a multi-pick member. <strong>Classifications stay "?" until an agency's <code>counts_as_homeless</code> is extended — that's an editorial call, not automatic.</strong>`
+                : `Proposed structural change to <code>${escapeHtml(fieldName)}</code>.`}
+            </div>
+            <div class="preview-table">
+              <table>
+                <thead><tr><th>entity</th><th>${escapeHtml(label)} under proposed frame</th></tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+            <div class="rec-actions">
+              <button class="btn sugg" onclick="adoptProposal(${rec.id})">Adopt this frame</button>
+              ${hypoBtn}
+              <button class="btn secondary" onclick="dismissProposal(${rec.id})">Dismiss</button>
+            </div>
+          </div>
+        </div>`);
+    }
+  }
+  return cards.join('');
+}
+
+function renderInspector(){
+  const ctx = state.inspectContext;
+  if (!ctx){
+    return `
+      <div class="ins-section">
+        <h4>Inspector</h4>
+        <p style="margin:0;font-size:12.5px;color:var(--muted)">
+          Select a <strong>cell</strong> to see every DEF that shaped its current value, or click the <strong>⚙</strong> on a column header to reshape a field's type and rules.
+        </p>
+      </div>
+      <div class="ins-section">
+        <h4>Quick toggles</h4>
+        <div class="field-row">
+          <label>Auto-suggest</label>
+          <select onchange="state.autoRec=(this.value==='on'); if(!state.autoRec&&recTimer){clearTimeout(recTimer);recTimer=null;render();} else render();">
+            <option value="on" ${state.autoRec?'selected':''}>on — propose frames after failures</option>
+            <option value="off" ${!state.autoRec?'selected':''}>off — log failures only</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label>Log what-if</label>
+          <select onchange="state.logHypotheticals=(this.value==='on'); render();">
+            <option value="on" ${state.logHypotheticals?'selected':''}>on — persist in main log</option>
+            <option value="off" ${!state.logHypotheticals?'selected':''}>off — transient only</option>
+          </select>
+        </div>
+      </div>
+      <div class="ins-section">
+        <h4>Why this UX?</h4>
+        <p style="margin:0;font-size:12.5px;color:var(--ink-2);line-height:1.55">
+          Classification lives at the top because it's the <em>question</em>. The two sources feeding it are below. The log — the only real store — stays pinned on the left so you can always see exactly what's been said, and roll back or time-travel to any point.
+        </p>
+      </div>
+    `;
+  }
+  if (ctx.kind==='cell') return renderCellInspector(ctx);
+  if (ctx.kind==='column') return renderColumnInspector(ctx);
+  return '';
+}
+
+function renderCellInspector(ctx){
+  const {namespace, entityId, field} = ctx;
+  const p = project(namespace);
+  const v = p.values[entityId] && p.values[entityId][field];
+  if (!v){ state.inspectContext=null; return renderInspector(); }
+  const rule = p.schemaPropValue(field,"resolution") || "latest";
+  let winnerIdx;
+  if (rule==="alphabetical"){
+    const sorted = [...v.allDefs].sort((a,b)=>String(a.operand).localeCompare(String(b.operand)));
+    winnerIdx = v.allDefs.indexOf(sorted[0]);
+  } else if (rule==="first") winnerIdx=0;
+  else if (rule==="all") winnerIdx=-1;
+  else winnerIdx = v.allDefs.length-1;
+
+  const defsList = v.allDefs.map((d,i)=>{
+    const isWinner = rule==="all" ? true : i===winnerIdx;
+    const cls=[isWinner?'winner':'', d.scenario==='what-if'?'scn-whatif':''].filter(Boolean).join(' ');
+    return `<li class="${cls}">"${escapeHtml(d.operand)}"<span class="ts">#${d.id} · ${d.timestamp}</span></li>`;
+  }).join('');
+
+  const label = FIELD_LABELS[field] || field;
+  return `
+    <div class="ins-section">
+      <p class="ins-title">${escapeHtml(entityId)} · <strong>${escapeHtml(label)}</strong></p>
+      <p class="ins-sub"><code>${escapeHtml(entityId)}.${escapeHtml(field)}</code> · ${v.allDefs.length} DEF${v.allDefs.length===1?'':'s'} · resolution: <strong>${rule}</strong></p>
+    </div>
+    <div class="ins-section">
+      <h4>History of values</h4>
+      <ul class="defs-stack">${defsList}</ul>
+    </div>
+    <div class="ins-section">
+      <h4>Resolution rule</h4>
+      <div class="field-row">
+        <label>when many</label>
+        <select onchange="setColumnResolution('${namespace}','${field}',this.value); state.inspectContext=null;">
+          <option value="latest" ${rule==='latest'?'selected':''}>latest DEF wins</option>
+          <option value="first" ${rule==='first'?'selected':''}>first DEF wins</option>
+          <option value="alphabetical" ${rule==='alphabetical'?'selected':''}>alphabetical</option>
+          <option value="all" ${rule==='all'?'selected':''}>all — multi-pick</option>
+        </select>
+      </div>
+      <p style="margin:8px 0 0;font-size:11.5px;color:var(--muted)">Changing this rule is itself a DEF on the schema — retroactively swappable, never destructive.</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="state.inspectContext=null; render();">Close</button>
+    </div>
+  `;
+}
+
+function renderColumnInspector(ctx){
+  const {namespace, field} = ctx;
+  const p = project(namespace);
+  const type = p.schemaPropValue(field,"type") || "text";
+  const allowed = p.schemaPropValue(field,"allowed") || [];
+  const rule = p.schemaPropValue(field,"resolution") || "latest";
+  const label = FIELD_LABELS[field] || field;
+  return `
+    <div class="ins-section">
+      <p class="ins-title">Column · <strong>${escapeHtml(label)}</strong></p>
+      <p class="ins-sub"><code>${NAMESPACES[namespace].schemaPrefix}${escapeHtml(field)}</code></p>
+    </div>
+    <div class="ins-section">
+      <h4>Type</h4>
+      <div class="field-row">
+        <label>kind</label>
+        <select id="colset-type" onchange="document.getElementById('colset-allowed-row').style.display=(this.value==='enum'||this.value==='enum_multi')?'':'none'">
+          <option value="text" ${type==='text'?'selected':''}>text — no validation</option>
+          <option value="enum" ${type==='enum'?'selected':''}>enum — single-pick</option>
+          <option value="enum_multi" ${type==='enum_multi'?'selected':''}>enum_multi — multi-pick</option>
+        </select>
+      </div>
+      <div class="field-row" id="colset-allowed-row" style="${(type==='enum'||type==='enum_multi')?'':'display:none;'}">
+        <label>allowed</label>
+        <input type="text" id="colset-allowed" placeholder="value1, value2, ..." value="${escapeHtml(allowed.join(', '))}" />
+      </div>
+    </div>
+    <div class="ins-section">
+      <h4>Resolution</h4>
+      <div class="field-row">
+        <label>when many</label>
+        <select id="colset-resolution">
+          <option value="latest" ${rule==='latest'?'selected':''}>latest DEF wins</option>
+          <option value="first" ${rule==='first'?'selected':''}>first DEF wins</option>
+          <option value="alphabetical" ${rule==='alphabetical'?'selected':''}>alphabetical</option>
+          <option value="all" ${rule==='all'?'selected':''}>all — multi-pick</option>
+        </select>
+      </div>
+    </div>
+    <p style="margin:0 0 12px;font-size:11.5px;color:var(--muted)">Each setting lands as a DEF on the schema anchor. Retroactively swappable.</p>
+    <div class="btn-row">
+      <button class="btn" onclick="applyColumnSettings('${namespace}','${field}')">Apply</button>
+      <button class="btn secondary" onclick="state.inspectContext=null; render();">Cancel</button>
+    </div>
+  `;
+}
+
+function applyColumnSettings(namespace, fieldName){
+  const type = document.getElementById('colset-type').value;
+  const allowedInput = document.getElementById('colset-allowed');
+  const allowedStr = allowedInput ? allowedInput.value : '';
+  const rule = document.getElementById('colset-resolution').value;
+  const allowed = allowedStr.split(',').map(s=>s.trim()).filter(Boolean);
+  const p = project(namespace);
+  const curType = p.schemaPropValue(fieldName,"type") || "text";
+  const curAllowed = p.schemaPropValue(fieldName,"allowed") || [];
+  const curRule = p.schemaPropValue(fieldName,"resolution") || "latest";
+  if (type !== curType){
+    setColumnType(namespace, fieldName, type, (type==='enum'||type==='enum_multi')?allowed:null);
+  } else if ((type==='enum'||type==='enum_multi') && JSON.stringify(allowed) !== JSON.stringify(curAllowed)){
+    const ns = NAMESPACES[namespace];
+    emit({op:"DEF",target:`${ns.schemaPrefix}${fieldName}.allowed`,operand:allowed});
+    for (const e of p.entities){
+      const v = p.values[e]&&p.values[e][fieldName]; if (!v||v.cleared) continue;
+      if (v.isMulti){const bad=(v.items||[]).filter(x=>!allowed.includes(x)); for (const x of bad) emit({op:"EVA",target:`${e}.${fieldName}`,operand:{rule:`${ns.schemaPrefix}${fieldName}.allowed`,value:x,result:"failed"}}); }
+      else if (!allowed.includes(v.value)) emit({op:"EVA",target:`${e}.${fieldName}`,operand:{rule:`${ns.schemaPrefix}${fieldName}.allowed`,value:v.value,result:"failed"}});
+    }
+    scheduleAutoRec();
+  }
+  if (rule !== curRule) setColumnResolution(namespace, fieldName, rule);
+  state.inspectContext=null; render();
+}
+
+/* ----------------- Popover openers (now sidebar inspector) ----------------- */
+function openCellInspector(namespace, entityId, field){
+  state.inspectContext = {kind:'cell', namespace, entityId, field};
+  state.activeTab='inspector';
+  render();
+}
+function openColumnInspector(namespace, field){
+  state.inspectContext = {kind:'column', namespace, field};
+  state.activeTab='inspector';
+  render();
+}
+
+function startEdit(cell, namespace, entityId, field){
+  if (cell.querySelector('input,select')) return;
+  closeAllPopovers();
+  const valSpan = cell.querySelector('.cell-val');
+  const current = valSpan && !cell.classList.contains('empty') ? valSpan.textContent : '';
+  const p = project(namespace);
+  const type = p.schemaPropValue(field,"type");
+  const allowed = p.schemaPropValue(field,"allowed") || [];
+
+  // ENUM single-pick → show a menu with allowed options + "other…" escape hatch (with confirm)
+  if (type === 'enum' && allowed.length){
+    const list = allowed.map(v=>`<div class="menu-opt${v===current?' cur':''}" data-v="${escapeHtml(v)}">${escapeHtml(v)}</div>`).join('');
+    cell.innerHTML = `
+      <div class="cell-menu">
+        ${list}
+        <div class="menu-sep"></div>
+        <div class="menu-opt other" data-v="__other__">+ other value…</div>
+      </div>`;
+    cell.querySelectorAll('.menu-opt').forEach(opt=>{
+      opt.addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        const v = opt.dataset.v;
+        if (v === '__other__'){
+          // open free-text with confirm-on-commit
+          cell.innerHTML = `<input type="text" value="" placeholder="new value" />`;
+          const inp = cell.querySelector('input'); inp.focus();
+          const commitOther = ()=>{
+            const val = inp.value.trim();
+            if (!val){ render(); return; }
+            if (allowed.includes(val)){ editCell(namespace, entityId, field, val); return; }
+            const ok = confirm(`"${val}" is not in the allowed set for ${field}:\n  [${allowed.join(', ')}]\n\nCommit anyway? An EVA failure will be logged and the system may propose widening the schema.`);
+            if (ok) editCell(namespace, entityId, field, val);
+            else render();
+          };
+          inp.addEventListener('blur', commitOther);
+          inp.addEventListener('keydown', e=>{
+            if (e.key==='Enter'){e.preventDefault(); inp.blur();}
+            else if (e.key==='Escape') render();
+          });
+          return;
+        }
+        if (v !== current) editCell(namespace, entityId, field, v);
+        else render();
+      });
+    });
+    // click-away closes
+    setTimeout(()=>{
+      const off = (ev)=>{ if (!cell.contains(ev.target)){ document.removeEventListener('click', off); render(); } };
+      document.addEventListener('click', off);
+    }, 0);
+    return;
+  }
+
+  // Default text input
+  cell.innerHTML = `<input type="text" value="${escapeHtml(current)}" />`;
+  const input = cell.querySelector('input'); input.focus(); input.select();
+  const commit = ()=>{
+    const val = input.value.trim();
+    if (val !== current) editCell(namespace, entityId, field, val===''?'∅':val);
+    else render();
+  };
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e=>{
+    if (e.key==='Enter'){e.preventDefault(); input.blur();}
+    else if (e.key==='Escape') render();
+  });
+}
+
+function startAlt(cell, namespace, entityId, field){
+  closeAllPopovers();
+  cell.innerHTML = `<input type="text" placeholder="alternative value" />`;
+  const input = cell.querySelector('input'); input.focus();
+  const commit = ()=>{
+    const val = input.value.trim();
+    if (val) addAltCell(namespace, entityId, field, val); else render();
+  };
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e=>{
+    if (e.key==='Enter'){e.preventDefault(); input.blur();}
+    else if (e.key==='Escape') render();
+  });
+}
+
+/* ============================================================
+   CRM VIEW — same data, reskinned as a familiar caseload list.
+   The point: agencies often buy a CRM that looks like this and
+   HIDES the fact that "is homeless?" is actually a function of
+   two things. This view shows the cost of that reskin — and
+   surfaces the same EVA/REC as customer-service banners.
+   ============================================================ */
+function renderCrm(){
+  const main = document.getElementById('crm-main');
+  if (!main) return;
+  // keep counts fresh
+  const pPerson = project('person');
+  const pDef = project('def');
+  document.getElementById('crm-cnt-people').textContent = pPerson.entities.length;
+  document.getElementById('crm-cnt-policies').textContent = pDef.entities.length;
+  document.getElementById('crm-cnt-activity').textContent = state.log.length;
+  let recCount=0;
+  for (const ns in NAMESPACES){ recCount += Object.keys(project(ns).liveProposals).length; }
+  // "needs review" = classifications that are currently undefined (failing EVA) OR have open RECs
+  const reviewCount = pPerson.entities.filter(e=>{
+    const sv = pPerson.values[e]&&pPerson.values[e].current_situation;
+    return sv && !sv.cleared && sv.failed;
+  }).length + recCount;
+  document.getElementById('crm-cnt-review').textContent = reviewCount;
+
+  // highlight active nav
+  document.querySelectorAll('.crm-nav .nav-item').forEach(n=>{
+    n.dataset.on = String(n.dataset.page === state.crmPage);
+  });
+
+  const timeline = renderCrmTimeline();
+
+  if (state.crmPage === 'people')    main.innerHTML = timeline + renderCrmPeople(pPerson, pDef, false);
+  else if (state.crmPage === 'review')   main.innerHTML = timeline + renderCrmPeople(pPerson, pDef, true);
+  else if (state.crmPage === 'policies') main.innerHTML = timeline + renderCrmPolicies(pPerson, pDef);
+  else if (state.crmPage === 'activity') main.innerHTML = timeline + renderCrmActivity();
+
+  // wire up timeline interactivity after inject
+  wireCrmTimeline();
+}
+
+function renderCrmTimeline(){
+  const liveId = Math.max(1, state.nextId-1);
+  const cursor = state.timeCursor===null ? liveId : state.timeCursor;
+  const isPast = state.timeCursor!==null;
+  const stampText = isPast
+    ? `<span>event</span> <span class="now">#${cursor}</span> <span style="color:var(--muted)">/ ${liveId}</span>`
+    : `<span style="color:var(--muted)">live —</span> <span class="now">now</span>`;
+  return `
+    <div class="crm-timeline" id="crm-timeline">
+      <div class="label">Time</div>
+      <div class="stamp">${stampText}</div>
+      <div class="pips" id="crm-pips" title="Drag or click to scrub time"></div>
+      <div class="ctrl">
+        <button onclick="stepTime(-1)" title="Step back">◀</button>
+        <button onclick="stepTime(1)" title="Step forward">▶</button>
+        <button class="${isPast?'':'live'}" onclick="jumpToLive()" title="Jump to live">Live</button>
+      </div>
+    </div>`;
+}
+
+function wireCrmTimeline(){
+  const pips = document.getElementById('crm-pips');
+  if (!pips) return;
+  const liveId = Math.max(1, state.nextId-1);
+  const cursor = state.timeCursor===null ? liveId : state.timeCursor;
+  pips.innerHTML = '';
+  const fill = document.createElement('div'); fill.className='fill';
+  fill.style.width = `${(cursor/liveId)*100}%`;
+  pips.appendChild(fill);
+  for (const e of state.log){
+    const pip = document.createElement('div');
+    pip.className = `pip ${e.op}`;
+    pip.style.left = `calc(${((e.id-0.5)/liveId) * 100}% - 1px)`;
+    pips.appendChild(pip);
+  }
+  const cur = document.createElement('div');
+  cur.className='cursor';
+  cur.style.left = `calc(${(cursor/liveId)*100}% - 1px)`;
+  pips.appendChild(cur);
+
+  let dragging = false;
+  const scrub = (ev)=>{
+    const rect = pips.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (ev.clientX - rect.left)/rect.width));
+    const v = Math.max(1, Math.min(liveId, Math.round(ratio * liveId)));
+    setTimeCursor(v);
+  };
+  pips.onmousedown = (ev)=>{ dragging = true; scrub(ev); };
+  window.addEventListener('mousemove', (ev)=>{ if (dragging) scrub(ev); });
+  window.addEventListener('mouseup', ()=>{ dragging = false; }, {once:false});
+}
+
+function crmPersonDisplay(id){
+  // "person:sarah_m" -> "Sarah M."
+  const base = id.replace(/^person:/,'').replace(/_/g,' ');
+  return base.split(' ').map((w,i)=> i === base.split(' ').length-1 && w.length===1 ? w.toUpperCase()+'.' : w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+}
+function crmInitials(id){
+  const parts = id.replace(/^person:/,'').split('_');
+  return (parts[0][0] + (parts[1]?parts[1][0]:'')).toUpperCase();
+}
+function crmAvatarColor(id){
+  const palette = ['#2563eb','#7c3aed','#059669','#db2777','#ea580c','#0891b2','#9333ea'];
+  let h=0; for (let i=0;i<id.length;i++) h=(h*31 + id.charCodeAt(i))>>>0;
+  return palette[h % palette.length];
+}
+function crmSituationLabel(s){
+  if (!s) return '—';
+  return s.replace(/_/g,' ');
+}
+
+function crmClassifyPerson(person, pPerson, pDef){
+  const sv = pPerson.values[person]&&pPerson.values[person].current_situation;
+  const currentSits = new Set();
+  let failed = false, empty = true;
+  if (sv && !sv.cleared){
+    empty = false;
+    if (sv.isMulti) sv.items.forEach(x=>currentSits.add(x));
+    else currentSits.add(sv.value);
+    if (sv.failed) failed = true;
+  }
+  const results = {};
+  let yesCount=0, total=pDef.entities.length;
+  for (const d of pDef.entities){
+    const v = pDef.values[d]&&pDef.values[d].counts_as_homeless;
+    const set = !v || v.cleared ? new Set() : (v.isMulti ? new Set(v.items) : new Set([v.value]));
+    if (failed) results[d] = 'indet';
+    else if (empty) results[d] = 'no';
+    else {
+      const hit = [...currentSits].some(s=>set.has(s));
+      results[d] = hit ? 'yes' : 'no';
+      if (hit) yesCount++;
+    }
+  }
+  return {results, yesCount, total, failed, empty};
+}
+
+function renderCrmPeople(pPerson, pDef, onlyReview){
+  const pageTitle = onlyReview ? 'Needs review' : 'People';
+  let rows = pPerson.entities.map(e=>{
+    const cls = crmClassifyPerson(e, pPerson, pDef);
+    const sv = pPerson.values[e]&&pPerson.values[e].current_situation;
+    const lv = pPerson.values[e]&&pPerson.values[e].last_housed;
+    const nv = pPerson.values[e]&&pPerson.values[e].nights_unstable_30d;
+    const situation = sv && !sv.cleared ? (sv.isMulti ? sv.items.join(', ') : sv.value) : '—';
+    const lastHoused = lv && !lv.cleared ? lv.value : '—';
+    const nights = nv && !nv.cleared ? nv.value : '—';
+
+    let status, statusLabel;
+    if (cls.failed){ status = 'review'; statusLabel = 'Needs review'; }
+    else if (cls.empty){ status = 'ineligible'; statusLabel = 'Unknown'; }
+    else if (cls.yesCount === cls.total){ status = 'eligible'; statusLabel = 'Eligible (all)'; }
+    else if (cls.yesCount > 0){ status = 'partial'; statusLabel = `Eligible (${cls.yesCount}/${cls.total})`; }
+    else { status = 'ineligible'; statusLabel = 'Not eligible'; }
+
+    if (onlyReview && status !== 'review') return null;
+
+    const pills = pDef.entities.map(d=>{
+      const r = cls.results[d];
+      const agencyShort = (pDef.values[d]&&pDef.values[d].agency&&!pDef.values[d].agency.cleared)
+        ? pDef.values[d].agency.value.split('/')[0].split('(')[0].trim().split(' ').slice(0,1)[0]
+        : d.replace(/^def:/,'').split('_')[0];
+      return `<span class="agpill ${r}" title="${escapeHtml(d)}: ${r}">${escapeHtml(agencyShort.toUpperCase())}</span>`;
+    }).join('');
+
+    return {e, status, statusLabel, situation, lastHoused, nights, pills};
+  }).filter(Boolean);
+
+  const searchBar = `
+    <div class="crm-head">
+      <h2>${pageTitle}</h2>
+      <span class="count">${rows.length} ${rows.length===1?'person':'people'}</span>
+      <div class="grow"></div>
+      <div class="search"><span class="i">⌕</span><input id="crm-search" placeholder="Search name, situation, status…" oninput="crmFilter(this.value)"></div>
+      <button class="btn-primary" onclick="addRow('person')">＋ New person</button>
+    </div>`;
+
+  // stats (people page only)
+  let stats = '';
+  if (!onlyReview){
+    const eligible = rows.filter(r=>r.status==='eligible').length;
+    const partial = rows.filter(r=>r.status==='partial').length;
+    const review = rows.filter(r=>r.status==='review').length;
+    const none = rows.filter(r=>r.status==='ineligible').length;
+    stats = `
+      <div class="crm-stats">
+        <div class="crm-stat"><div class="lbl">Eligible (all agencies)</div><div class="val">${eligible}</div><div class="sub">Classified as homeless under every definition</div></div>
+        <div class="crm-stat"><div class="lbl">Partially eligible</div><div class="val">${partial}</div><div class="sub">Eligible under some agencies, not others</div></div>
+        <div class="crm-stat"><div class="lbl">Not eligible</div><div class="val">${none}</div><div class="sub">No agency definition matches</div></div>
+        <div class="crm-stat"><div class="lbl">Needs review</div><div class="val">${review}</div><div class="sub" style="color:${review>0?'#dc2626':'var(--muted)'}">Observation failed schema rule</div></div>
+      </div>`;
+  }
+
+  // attention banner: failures or RECs
+  let alert = '';
+  const reviewRows = rows.filter(r=>r.status==='review');
+  let recCount=0;
+  for (const ns in NAMESPACES){ recCount += Object.keys(project(ns).liveProposals).length; }
+  if (reviewRows.length > 0 || recCount > 0){
+    const names = reviewRows.map(r=>crmPersonDisplay(r.e)).slice(0,3).join(', ');
+    const more = reviewRows.length > 3 ? ` + ${reviewRows.length-3} more` : '';
+    const msg = reviewRows.length > 0
+      ? `<strong>${reviewRows.length} record${reviewRows.length===1?'':'s'} can't be classified</strong> — ${names}${more}. The observed value isn't in the allowed set for <code>current_situation</code>.`
+      : `<strong>${recCount} schema suggestion${recCount===1?'':'s'} pending.</strong> The data model needs to widen to fit recent observations.`;
+    alert = `
+      <div class="crm-alert">
+        <span class="ai">⚠</span>
+        <div>${msg}</div>
+        <button onclick="switchMode('integral'); state.activeTab='suggestions'; render();">Review in data model</button>
+        ${reviewRows.length>0 ? `<button class="secondary" onclick="switchCrmPage('review')">Show only these</button>` : ''}
+      </div>`;
+  }
+
+  // table
+  const tbody = rows.map(r=>`
+    <tr class="${r.status==='review'?'rowwarn':''}" onclick="openCrmDetail('${r.e}')">
+      <td>
+        <div class="contact">
+          <div class="avatar" style="background:${crmAvatarColor(r.e)}">${crmInitials(r.e)}</div>
+          <div>
+            <div class="name">${escapeHtml(crmPersonDisplay(r.e))}</div>
+            <div class="meta">${escapeHtml(r.e)}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="status ${r.status}"><span class="sdot"></span>${r.statusLabel}</span></td>
+      <td>${escapeHtml(crmSituationLabel(r.situation))}</td>
+      <td class="date">${escapeHtml(r.lastHoused)}</td>
+      <td class="num">${escapeHtml(String(r.nights))}</td>
+      <td><div class="pillrow">${r.pills}</div></td>
+    </tr>
+  `).join('');
+
+  const emptyState = rows.length===0 ? `<tr><td colspan="6" style="text-align:center;padding:40px 0;color:var(--muted)">${onlyReview?'No records need review. ✨':'No people yet.'}</td></tr>` : '';
+
+  return `
+    ${searchBar}
+    ${stats}
+    ${alert}
+    <div class="crm-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Current situation</th>
+            <th>Last housed</th>
+            <th>Nights unstable (30d)</th>
+            <th>By agency</th>
+          </tr>
+        </thead>
+        <tbody id="crm-tbody">${tbody}${emptyState}</tbody>
+      </table>
+    </div>`;
+}
+
+function crmFilter(q){
+  q = (q||'').toLowerCase().trim();
+  const tbody = document.getElementById('crm-tbody');
+  if (!tbody) return;
+  [...tbody.querySelectorAll('tr')].forEach(tr=>{
+    if (!q){ tr.style.display=''; return; }
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function renderCrmPolicies(pPerson, pDef){
+  const cards = pDef.entities.map(d=>{
+    const ag = pDef.values[d]&&pDef.values[d].agency&&!pDef.values[d].agency.cleared ? pDef.values[d].agency.value : d;
+    const cv = pDef.values[d]&&pDef.values[d].counts_as_homeless;
+    const crits = !cv || cv.cleared ? [] : (cv.isMulti ? cv.items : [cv.value]);
+    // count people eligible under this def
+    let count = 0;
+    for (const p of pPerson.entities){
+      const sv = pPerson.values[p]&&pPerson.values[p].current_situation;
+      if (!sv||sv.cleared||sv.failed) continue;
+      const sits = sv.isMulti ? sv.items : [sv.value];
+      if (sits.some(s=>crits.includes(s))) count++;
+    }
+    return `
+      <div class="policy-card">
+        <h3>${escapeHtml(ag)}</h3>
+        <div class="agency-sub">${escapeHtml(d)}</div>
+        <div class="criteria">
+          ${crits.length ? crits.map(c=>`<span class="crit">${escapeHtml(c.replace(/_/g,' '))}</span>`).join('') : '<span style="font-size:12px;color:var(--muted);font-style:italic">no criteria defined</span>'}
+        </div>
+        <div class="metric"><strong>${count}</strong> of ${pPerson.entities.length} current clients counted as homeless</div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="crm-head">
+      <h2>Agency rules</h2>
+      <span class="count">${pDef.entities.length} definitions</span>
+      <div class="grow"></div>
+      <button class="btn-primary" onclick="addRow('def')">＋ New policy</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:-6px 0 18px;max-width:720px;line-height:1.5">
+      Each agency has its own statutory definition of "homelessness." The same person can be counted by one and not another. This CRM view reveals what most dashboards hide: eligibility is a <em>function</em>, not a field.
+    </p>
+    <div class="policy-grid">${cards}</div>`;
+}
+
+function renderCrmActivity(){
+  const entries = state.log.slice().reverse().slice(0, 80);
+  const labelFor = (e)=>{
+    if (e.op==='INS'){
+      if (e.target.startsWith('person:')) return `New person <strong>${escapeHtml(crmPersonDisplay(e.target))}</strong> added to caseload`;
+      if (e.target.startsWith('def:')) return `New agency policy <strong>${escapeHtml(e.target)}</strong> created`;
+      if (e.target.startsWith('schema:')) return `Field <code>${escapeHtml(e.target)}</code> added to data model`;
+      return `Created <code>${escapeHtml(e.target)}</code>`;
+    }
+    if (e.op==='DEF'){
+      const v = Array.isArray(e.operand) ? `[${e.operand.join(', ')}]` : e.operand;
+      return `Updated <code>${escapeHtml(e.target)}</code> → <strong>${escapeHtml(String(v))}</strong>`;
+    }
+    if (e.op==='SEG'){
+      const o = e.operand||{};
+      if (o.exclude_entity) return `Excluded <code>${escapeHtml(o.exclude_entity)}</code> from active set`;
+      if (o.include_entity) return `Re-included <code>${escapeHtml(o.include_entity)}</code>`;
+      if (o.exclude_field) return `Hid field <code>${escapeHtml(o.exclude_field)}</code>`;
+      if (o.include_field) return `Re-shown field <code>${escapeHtml(o.include_field)}</code>`;
+      return `Segment change on <code>${escapeHtml(e.target)}</code>`;
+    }
+    if (e.op==='EVA'){
+      const o = e.operand||{};
+      return `<span style="color:#b91c1c">Validation failed</span> on <code>${escapeHtml(e.target)}</code> — <strong>"${escapeHtml(o.value||'')}"</strong> is not in the allowed set`;
+    }
+    if (e.op==='REC'){
+      return `<span style="color:#7c3aed">System suggestion:</span> widen <code>${escapeHtml(e.target)}</code> to <strong>${escapeHtml(e.operand && e.operand.proposed_type || '?')}</strong>`;
+    }
+    return `<code>${escapeHtml(e.target)}</code>`;
+  };
+  const rows = entries.map(e=>`
+    <div class="arow">
+      <span class="atime">${escapeHtml(e.timestamp||'')}</span>
+      <span class="aicon ${e.op}">${e.op[0]}</span>
+      <div class="atext">${labelFor(e)}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="crm-head">
+      <h2>Activity</h2>
+      <span class="count">${state.log.length} events</span>
+      <div class="grow"></div>
+      <button class="tb-btn" onclick="switchMode('integral')">Open full log</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:-6px 0 18px;max-width:720px;line-height:1.5">
+      Human-readable audit trail. Every row in this CRM is backed by an append-only event on the given-log — the same log powering the Integral view.
+    </p>
+    <div class="crm-activity">${rows || '<div class="arow"><span class="atext" style="color:var(--muted)">No activity yet.</span></div>'}</div>`;
+}
+
+function renderCrmDetail(personId){
+  const pPerson = project('person');
+  const pDef = project('def');
+  const v = pPerson.values[personId] || {};
+  const cls = crmClassifyPerson(personId, pPerson, pDef);
+  const field = (f)=>{
+    const cell = v[f];
+    if (!cell || cell.cleared) return '—';
+    if (cell.isMulti) return cell.items.join(', ');
+    return String(cell.value);
+  };
+  const failed = cls.failed;
+  const situation = v.current_situation;
+  const agencyRows = pDef.entities.map(d=>{
+    const r = cls.results[d];
+    const label = pDef.values[d]&&pDef.values[d].agency&&!pDef.values[d].agency.cleared ? pDef.values[d].agency.value : d;
+    const text = r==='yes' ? '<span class="status eligible"><span class="sdot"></span>Counts</span>'
+               : r==='no'  ? '<span class="status ineligible"><span class="sdot"></span>Does not count</span>'
+               : '<span class="status review"><span class="sdot"></span>Undefined</span>';
+    return `<div class="agency-row"><div><div class="an">${escapeHtml(label)}</div><div class="ac">${escapeHtml(d)}</div></div>${text}</div>`;
+  }).join('');
+
+  const warnBlock = failed ? `
+    <div class="dsection">
+      <div class="warn-note">
+        <strong>Can't be classified.</strong> The observed value for <code>current_situation</code> — "${escapeHtml(situation && situation.value || '?')}" — isn't in the allowed set.
+        <div style="margin-top:8px"><button class="tb-btn" onclick="switchMode('integral'); state.activeTab='suggestions'; render(); closeCrmDetail()">Review proposed fix →</button></div>
+      </div>
+    </div>` : '';
+
+  return `
+    <div class="dh">
+      <div class="avatar" style="width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:14px;background:${crmAvatarColor(personId)}">${crmInitials(personId)}</div>
+      <div>
+        <div style="font-size:15px;font-weight:600">${escapeHtml(crmPersonDisplay(personId))}</div>
+        <div style="font-size:12px;color:var(--muted);font-family:var(--mono)">${escapeHtml(personId)}</div>
+      </div>
+      <button class="dclose" onclick="closeCrmDetail()">×</button>
+    </div>
+    <div class="dbody">
+      ${warnBlock}
+      <div class="dsection">
+        <h4>Observations</h4>
+        <div class="kv">
+          <div class="k">Current situation</div><div class="v">${escapeHtml(crmSituationLabel(field('current_situation')))}</div>
+          <div class="k">Last housed</div><div class="v">${escapeHtml(field('last_housed'))}</div>
+          <div class="k">Nights unstable (30d)</div><div class="v">${escapeHtml(field('nights_unstable_30d'))}</div>
+        </div>
+      </div>
+      <div class="dsection">
+        <h4>Eligibility by agency</h4>
+        ${agencyRows}
+      </div>
+      <div class="dsection">
+        <h4>How this was computed</h4>
+        <p style="font-size:12.5px;color:var(--ink-2);line-height:1.55;margin:0">
+          Eligibility is not stored. For each agency, the system checks whether this person's <code>current_situation</code> is in that agency's <code>counts_as_homeless</code> set. Change either side and the answer changes retroactively — without losing history.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+function toggleHelp(){ state.activeTab = state.activeTab==='about' ? 'inspector' : 'about'; render(); }
+
+/* Keyboard shortcuts */
+window.addEventListener('keydown', (e)=>{
+  if (e.target.tagName==='INPUT' || e.target.tagName==='SELECT') return;
+  if ((e.key==='z'||e.key==='Z') && (e.metaKey||e.ctrlKey)){ e.preventDefault(); undoLast(); }
+  else if (e.key==='ArrowLeft' && (e.metaKey||e.ctrlKey||e.altKey)){ e.preventDefault(); stepTime(-1); }
+  else if (e.key==='ArrowRight' && (e.metaKey||e.ctrlKey||e.altKey)){ e.preventDefault(); stepTime(1); }
+});
+
+window.addEventListener('resize', ()=>renderTimeline());
+
+// Apply initial mode (CRM is the landing view)
+document.body.classList.toggle('mode-crm', state.mode === 'crm');
+document.querySelectorAll('.mode-switch button').forEach(b=>{
+  b.dataset.on = String(b.dataset.mode === state.mode);
+});
+
+resetAll();
+</script>
+</body>
+</html>
