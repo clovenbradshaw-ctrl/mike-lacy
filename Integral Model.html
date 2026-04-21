@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Integral Model — Homelessness Framework</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,29 +39,18 @@
   /* ---------- App shell ---------- */
   .app{
     display:grid;
-    grid-template-columns: 360px minmax(0,1fr) 380px;
+    grid-template-columns: 320px minmax(0,1fr) 360px;
     grid-template-rows: 56px 1fr;
     height:100vh;
     grid-template-areas:
       "topbar topbar topbar"
       "log    center  right";
   }
-  @media (max-width: 1300px){
-    .app{grid-template-columns: 320px minmax(0,1fr) 340px}
+  @media (max-width: 1200px){
+    .app{grid-template-columns: 280px minmax(0,1fr) 320px}
   }
-  @media (max-width: 900px){
-    .app{
-      grid-template-columns: minmax(0,1fr);
-      grid-template-rows: auto auto auto auto;
-      height:auto;min-height:100vh;
-      grid-template-areas:
-        "topbar"
-        "center"
-        "log"
-        "right";
-    }
-    .topbar{flex-wrap:wrap;padding:8px 12px;gap:8px;height:auto;min-height:56px}
-    .topbar .grow{display:none}
+  @media (max-width: 1000px){
+    .app{grid-template-columns: 240px minmax(0,1fr) 280px}
   }
 
   /* ---------- Top bar ---------- */
@@ -160,8 +148,13 @@
   }
   .log-filters .chip{
     font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel);
-    cursor:pointer;display:inline-flex;gap:6px;align-items:center;color:var(--ink-2);
+    cursor:pointer;display:inline-flex;gap:5px;align-items:center;color:var(--ink-2);
   }
+  .log-filters .chip .plain{
+    font-size:10px;color:var(--muted);font-family:var(--mono);font-weight:400;
+    padding-left:5px;border-left:1px solid var(--line);margin-left:1px;
+  }
+  .log-filters .chip[data-on="true"] .plain{color:rgba(255,255,255,0.65);border-left-color:rgba(255,255,255,0.2)}
   .log-filters .chip[data-on="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
   .log-filters .chip .dot{width:6px;height:6px;border-radius:50%}
   .log-filters .chip[data-k="DEF"] .dot{background:var(--accent)}
@@ -224,6 +217,100 @@
   .banner.hypo{background:var(--sugg-soft);border-color:#d3c3ee;color:#4a3580}
   .banner button{margin-left:auto;background:var(--panel);border:1px solid currentColor;color:inherit;border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer}
   .banner button:hover{opacity:.85}
+
+  /* Lesson (progressive-disclosure teaching mode) */
+  .lesson{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 22px 14px;margin-bottom:18px;position:relative;
+    box-shadow:0 2px 8px rgba(17,16,14,0.04);
+  }
+  /* Chapters 3+ float lesson card bottom-right so matrix is fully visible */
+  body.lesson-3 #lesson, body.lesson-4 #lesson, body.lesson-5 #lesson{
+    position:fixed;right:22px;bottom:22px;width:min(420px, calc(100vw - 44px));
+    margin:0;z-index:40;max-height:calc(100vh - 90px);overflow:auto;
+    box-shadow:0 12px 40px rgba(17,16,14,0.18), 0 2px 6px rgba(17,16,14,0.08);
+    border:1px solid var(--ink-2);
+  }
+  body.lesson-3 .lesson-h, body.lesson-4 .lesson-h, body.lesson-5 .lesson-h{font-size:17px;margin-bottom:6px}
+  body.lesson-3 .lesson-body, body.lesson-4 .lesson-body, body.lesson-5 .lesson-body{font-size:13px}
+  body.lesson-3 .lesson-body p, body.lesson-4 .lesson-body p, body.lesson-5 .lesson-body p{margin-bottom:8px}
+  body.explainer-dismissed .lesson, body.mode-crm .lesson{display:none}
+  .lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .chapter-pill{
+    font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
+    color:var(--ink);background:var(--bg);border:1px solid var(--line);
+    padding:5px 12px;border-radius:999px;font-family:var(--mono);
+  }
+  .chapter-pill #lesson-eyebrow{color:var(--muted);font-family:var(--sans);letter-spacing:0;text-transform:none;font-weight:500}
+  .lesson-skip{
+    margin-left:auto;background:transparent;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:5px 8px;border-radius:6px;
+  }
+  .lesson-skip:hover{background:var(--hover);color:var(--ink)}
+  .lesson-h{margin:0 0 10px;font-size:22px;font-weight:600;letter-spacing:-0.015em;line-height:1.25;max-width:720px}
+  .lesson-body{font-size:14px;line-height:1.55;color:var(--ink-2);max-width:720px}
+  .lesson-body p{margin:0 0 10px}
+  .lesson-body strong{color:var(--ink);font-weight:600}
+  .lesson-body em{font-style:normal;color:var(--accent);font-weight:500}
+  .lesson-body code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px solid var(--line-2);padding:1px 6px;border-radius:4px;color:var(--ink)}
+  .lesson-try{
+    margin-top:14px!important;padding:10px 12px;background:var(--bg);border:1px dashed var(--line);border-radius:8px;
+    font-size:13px;color:var(--ink-2);
+  }
+  .lesson-try strong{color:var(--ink)}
+  .lesson-foot{
+    display:flex;align-items:center;gap:12px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line-2);
+  }
+  .lesson-prev, .lesson-next{
+    padding:8px 16px;font-size:13px;font-weight:500;border-radius:7px;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  }
+  .lesson-prev:disabled{opacity:0.35;cursor:not-allowed}
+  .lesson-prev:not(:disabled):hover{background:var(--hover)}
+  .lesson-next{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .lesson-next:hover{background:#000}
+  .lesson-dots{display:flex;gap:6px;margin-left:auto;margin-right:auto}
+  .lesson-dots .dot{width:7px;height:7px;border-radius:50%;background:var(--line);transition:all .2s}
+  .lesson-dots .dot.active{background:var(--ink);width:22px;border-radius:4px}
+  .lesson-dots .dot.done{background:var(--ink-2)}
+
+  /* Progressive disclosure — hide pieces until their chapter unlocks. */
+  body.lesson-1 .classify-hero,
+  body.lesson-1 .sources-grid,
+  body.lesson-2 .classify-hero{
+    display:none!important;
+  }
+  /* Inspector hidden until final chapter */
+  body.lesson-1 .right, body.lesson-2 .right,
+  body.lesson-3 .right, body.lesson-4 .right{
+    display:none!important;
+  }
+  /* When inspector hidden, widen center area: drop the right track */
+  body.lesson-1 .app, body.lesson-2 .app,
+  body.lesson-3 .app, body.lesson-4 .app{
+    grid-template-columns: 320px minmax(0,1fr) !important;
+    grid-template-areas: "topbar topbar" "log center" !important;
+  }
+  /* Soft spotlight around focused area */
+  .log-rail, .sources-grid, .classify-hero, .right{position:relative}
+  body.lesson-active.focus-log .log-rail,
+  body.lesson-active.focus-tables .sources-grid,
+  body.lesson-active.focus-matrix .classify-hero,
+  body.lesson-active.focus-inspector .right{
+    box-shadow:0 0 0 2px var(--accent), 0 0 0 6px rgba(42,92,170,0.12);
+    border-radius:var(--radius);
+  }
+  /* Event flash in log (for demo) */
+  .log-entry.flash{animation:entryflash 1.8s ease-out}
+  @keyframes entryflash{
+    0%{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+    100%{background:transparent}
+  }
+  /* Matrix cell flash (for demo) */
+  .matrix td.flip-flash{animation:cellflash 1.8s ease-out}
+  @keyframes cellflash{
+    0%{background:#fef3c7;box-shadow:inset 0 0 0 2px #f59e0b}
+    100%{background:transparent}
+  }
 
   /* Classification = hero */
   .classify-hero{
@@ -493,28 +580,10 @@
   }
   body.mode-crm .app{
     grid-template-columns: 220px minmax(0,1fr);
+    grid-template-rows: 56px 1fr;
     grid-template-areas:
       "topbar topbar"
       "crmnav crmmain";
-  }
-  @media (max-width: 720px){
-    body.mode-crm .app{
-      grid-template-columns: minmax(0,1fr);
-      grid-template-rows: auto auto 1fr;
-      grid-template-areas:
-        "topbar"
-        "crmnav"
-        "crmmain";
-    }
-    body.mode-crm .crm-nav{
-      flex-direction:row;flex-wrap:wrap;padding:10px;gap:4px;
-      border-right:none;border-bottom:1px solid var(--line);
-    }
-    body.mode-crm .crm-nav .nav-title,
-    body.mode-crm .crm-nav .divider{display:none}
-    body.mode-crm .crm-nav .nav-item{padding:6px 10px;font-size:12.5px}
-    body.mode-crm .crm-main{padding:14px 14px 60px}
-    body.mode-crm .crm-detail{width:100vw;max-width:100vw}
   }
   body.mode-crm .log-rail, body.mode-crm .right{display:none}
   body.mode-crm .center{grid-area:crmmain;padding:0;background:var(--bg)}
@@ -796,6 +865,7 @@
 
     <button class="tb-btn" onclick="undoLast()" title="Undo last event">↶ Undo</button>
     <button class="tb-btn ghost" onclick="resetAll()" title="Reset to seeded state">Reset</button>
+    <button class="tb-btn" onclick="startLesson()" title="Replay the guided tour" id="tour-btn">▷ Tour</button>
 
     <button class="iconbtn" onclick="toggleHelp()" title="About the model" aria-label="Help">?</button>
   </header>
@@ -825,11 +895,11 @@
     </div>
 
     <div class="log-filters" id="log-filters">
-      <span class="chip" data-k="INS" data-on="true" onclick="toggleFilter('INS')"><span class="dot"></span>INS</span>
-      <span class="chip" data-k="DEF" data-on="true" onclick="toggleFilter('DEF')"><span class="dot"></span>DEF</span>
-      <span class="chip" data-k="SEG" data-on="true" onclick="toggleFilter('SEG')"><span class="dot"></span>SEG</span>
-      <span class="chip" data-k="EVA" data-on="true" onclick="toggleFilter('EVA')"><span class="dot"></span>EVA</span>
-      <span class="chip" data-k="REC" data-on="true" onclick="toggleFilter('REC')"><span class="dot"></span>REC</span>
+      <span class="chip" data-k="INS" data-on="true" onclick="toggleFilter('INS')" title="INS — insert/update: new person, new field, field value changed"><span class="dot"></span>INS<span class="plain">edit</span></span>
+      <span class="chip" data-k="DEF" data-on="true" onclick="toggleFilter('DEF')" title="DEF — schema definition: new column, type change, new allowed value"><span class="dot"></span>DEF<span class="plain">schema</span></span>
+      <span class="chip" data-k="SEG" data-on="true" onclick="toggleFilter('SEG')" title="SEG — segregation: hide or move this from the canonical projection"><span class="dot"></span>SEG<span class="plain">hide</span></span>
+      <span class="chip" data-k="EVA" data-on="true" onclick="toggleFilter('EVA')" title="EVA — evaluation failure: observed value didn't fit the current schema"><span class="dot"></span>EVA<span class="plain">broke</span></span>
+      <span class="chip" data-k="REC" data-on="true" onclick="toggleFilter('REC')" title="REC — recommendation: system suggests a schema change to resolve a failure"><span class="dot"></span>REC<span class="plain">fix?</span></span>
     </div>
 
     <ol id="log-entries"></ol>
@@ -838,6 +908,25 @@
   <!-- ============ CENTER ============ -->
   <main class="center">
     <div id="view-banner"></div>
+
+    <!-- Lesson (progressive-disclosure tutorial) -->
+    <section class="lesson" id="lesson">
+      <div class="lesson-head">
+        <span class="chapter-pill"><span id="lesson-pill-n">1</span>/<span id="lesson-pill-total">5</span> &nbsp;·&nbsp; <span id="lesson-eyebrow">The log</span></span>
+        <button class="lesson-skip" onclick="endLesson()" title="Skip tour">Skip tour ✕</button>
+      </div>
+      <h2 class="lesson-h" id="lesson-title">Everything starts with a log.</h2>
+      <div class="lesson-body" id="lesson-body">
+        <p>The panel on the <strong>left</strong> is the <em>given-log</em> — an append-only stream of every event that's ever happened. New person added. Agency rule defined. Value fixed. Never mutated, never deleted.</p>
+        <p><strong>It's the only thing that's really stored.</strong> Everything else on this page is a live recomputation of these events.</p>
+        <p class="lesson-try">Try: drag the <code>▬▬▬</code> cursor on the timeline, or click ◀ / ▶ to step through history. Then hit <strong>Next</strong>.</p>
+      </div>
+      <div class="lesson-foot">
+        <button class="lesson-prev" onclick="prevLesson()" disabled>← Back</button>
+        <div class="lesson-dots" id="lesson-dots"></div>
+        <button class="lesson-next" onclick="nextLesson()">Next →</button>
+      </div>
+    </section>
 
     <!-- Classification matrix — hero -->
     <section class="classify-hero" id="classify-panel">
@@ -2495,6 +2584,242 @@ document.body.classList.toggle('mode-crm', state.mode === 'crm');
 document.querySelectorAll('.mode-switch button').forEach(b=>{
   b.dataset.on = String(b.dataset.mode === state.mode);
 });
+
+// ============ LESSON MODE (progressive disclosure) ============
+const LESSONS = [
+  {
+    key: 'log',
+    eyebrow: 'The log',
+    title: 'Everything starts with a log.',
+    bodyHTML: `
+      <p>The panel on the <strong>left</strong> is the <em>given-log</em> — an append-only stream of every event that's ever happened. New person added. Agency rule defined. Value fixed. Never mutated, never deleted.</p>
+      <p><strong>It's the only thing that's really stored.</strong> Everything else on this page is a live recomputation of these events.</p>
+      <p>Each event has a kind: <code>INS</code> records a fact, <code>DEF</code> declares schema, <code>EVA</code> flags a break, <code>REC</code> proposes a fix, <code>SEG</code> hides an entry without erasing it.</p>
+      <p class="lesson-try"><strong>Try it:</strong> drag the cursor on the timeline ← → to replay history. Hover an entry to see detail. Then hit <strong>Next</strong>.</p>
+    `,
+    focus: 'log',
+    onEnter(){}
+  },
+  {
+    key: 'projections',
+    eyebrow: 'Projections',
+    title: 'The log becomes tables.',
+    bodyHTML: `
+      <p>Below, two tables just appeared: <strong>People</strong> and <strong>Agency Definitions</strong>.</p>
+      <p>Neither is stored. Each is a live <em>reduce</em> of the log: "for each entity, take the latest value of each field." Delete these tables — you can rebuild them from the log. Delete the log — you have nothing.</p>
+      <p>This is why we call the log <em>integral</em>. Tables are snapshots; the log is the derivative that produced them.</p>
+      <p class="lesson-try"><strong>Notice:</strong> every row and every cell you see below traces back to specific events on the left. Click any cell later to prove it.</p>
+    `,
+    focus: 'tables'
+  },
+  {
+    key: 'matrix',
+    eyebrow: 'The question',
+    title: 'Ask: who counts as homeless?',
+    bodyHTML: `
+      <p>The matrix above is the reason this whole system exists. For every person × every agency, it asks one thing: <em>is this person's <code>current_situation</code> in the set of situations this agency counts as homeless?</em></p>
+      <p>Same person. Same observation. <strong>Different answer</strong> depending on which agency is asking — because each agency has its own rule, not because the data is inconsistent.</p>
+      <p>Nothing in the matrix is stored. It's recomputed every time you change anything.</p>
+      <p class="lesson-try"><strong>Look:</strong> scan a row. Some ✓, some ✗. That's the point: disagreement is legitimate, and the system makes it visible instead of hiding it behind a false consensus.</p>
+    `,
+    focus: 'matrix'
+  },
+  {
+    key: 'propagate',
+    eyebrow: 'Live propagation',
+    title: 'Watch one change ripple out.',
+    bodyHTML: `
+      <p>When you hit <strong>Next</strong>, we'll do one edit for you: we'll change a person's <code>current_situation</code>.</p>
+      <p>Watch three things happen simultaneously:</p>
+      <ol style="padding-left:20px;margin:8px 0">
+        <li>A new <code>INS</code> event is appended to the log on the left.</li>
+        <li>The <strong>People</strong> row updates (because it's a projection of the log).</li>
+        <li>A matrix cell <strong>flips</strong> — because the classification recomputes.</li>
+      </ol>
+      <p>No database was "updated." A single event was appended. Every view re-derived itself from the new log.</p>
+      <p class="lesson-try"><strong>Click Next</strong> to see it live.</p>
+    `,
+    focus: 'matrix'
+  },
+  {
+    key: 'breaks',
+    eyebrow: 'When rules break',
+    title: 'Reality doesn\u2019t always fit the schema.',
+    bodyHTML: `
+      <p>Sometimes an observation doesn't fit any agency's rule — a person is "living in their car," but no definition lists that situation. The classifier can't answer.</p>
+      <p>Instead of crashing or silently rounding off, the system emits an <code>EVA</code> event (evaluation failure) and produces a <code>REC</code> — a <strong>recommendation</strong> to change the schema so the observation fits.</p>
+      <p>Open the <strong>Suggestions</strong> tab on the right → a human reviews the proposal. Accept, and a new <code>DEF</code> event is appended to the log. Reject, and a <code>SEG</code> event hides it. Either way, <strong>the decision itself becomes a log event.</strong></p>
+      <p class="lesson-try"><strong>Try freely:</strong> edit any cell, flip to <em>What-if</em> to stage rule changes without affecting <em>Actual</em>, or click any matrix cell to see exactly which events derived it.</p>
+    `,
+    focus: 'inspector'
+  }
+];
+
+let lessonStep = -1; // -1 = not in lesson
+
+function startLesson(){
+  // Reset to seeded state to make demo predictable
+  resetAll();
+  // Switch to integral mode
+  if (state.mode !== 'integral') switchMode('integral');
+  try{ localStorage.removeItem('im.lessonComplete'); }catch(e){}
+  document.body.classList.add('lesson-active');
+  document.body.classList.remove('explainer-dismissed', 'lesson-done');
+  lessonStep = 0;
+  applyLessonStep();
+  // Ensure lesson card scrolls into view
+  const el = document.getElementById('lesson');
+  if (el) el.scrollIntoView({block:'start', behavior:'smooth'});
+}
+
+function endLesson(){
+  document.body.classList.remove('lesson-active');
+  for (let i=0;i<=LESSONS.length;i++) document.body.classList.remove('lesson-'+i);
+  document.body.classList.remove('focus-log','focus-tables','focus-matrix','focus-inspector');
+  document.body.classList.add('explainer-dismissed','lesson-done');
+  try{ localStorage.setItem('im.lessonComplete','1'); }catch(e){}
+  lessonStep = -1;
+}
+
+function prevLesson(){
+  if (lessonStep <= 0) return;
+  lessonStep--;
+  applyLessonStep();
+}
+
+function nextLesson(){
+  // If we're about to enter chapter 4 (propagate) from chapter 3, do the demo edit
+  if (lessonStep === 2){
+    lessonStep = 3;
+    applyLessonStep();
+    return;
+  }
+  if (lessonStep === 3){
+    // Run propagate demo, then advance
+    runPropagateDemo();
+    return;
+  }
+  if (lessonStep >= LESSONS.length - 1){
+    endLesson();
+    return;
+  }
+  lessonStep++;
+  applyLessonStep();
+}
+
+function applyLessonStep(){
+  const n = lessonStep;
+  const L = LESSONS[n];
+  if (!L) return;
+  // body classes
+  for (let i=0;i<=LESSONS.length;i++) document.body.classList.remove('lesson-'+i);
+  document.body.classList.add('lesson-' + (n+1));
+  document.body.classList.remove('focus-log','focus-tables','focus-matrix','focus-inspector');
+  document.body.classList.add('focus-' + L.focus);
+  // Reposition lesson card: before matrix (chapters 1-2), after matrix (chapters 3+)
+  const lessonEl = document.getElementById('lesson');
+  const centerEl = document.querySelector('.center');
+  const matrixEl = document.getElementById('classify-panel');
+  const tablesEl = document.querySelector('.sources-grid');
+  if (lessonEl && centerEl && matrixEl){
+    if (n <= 1){
+      // before matrix
+      centerEl.insertBefore(lessonEl, matrixEl);
+    } else if (n === 2 || n === 3){
+      // between matrix and tables so it stays near the matrix
+      if (tablesEl) centerEl.insertBefore(lessonEl, tablesEl);
+    } else {
+      // final chapter — keep at top for visibility of "try freely"
+      centerEl.insertBefore(lessonEl, matrixEl);
+    }
+  }
+  // Update card content
+  document.getElementById('lesson-pill-n').textContent = (n+1);
+  document.getElementById('lesson-pill-total').textContent = LESSONS.length;
+  document.getElementById('lesson-eyebrow').textContent = L.eyebrow;
+  document.getElementById('lesson-title').textContent = L.title;
+  document.getElementById('lesson-body').innerHTML = L.bodyHTML;
+  // Dots
+  const dots = document.getElementById('lesson-dots');
+  if (dots){
+    dots.innerHTML = '';
+    for (let i=0;i<LESSONS.length;i++){
+      const d = document.createElement('span');
+      d.className = 'dot' + (i===n?' active': (i<n?' done':''));
+      dots.appendChild(d);
+    }
+  }
+  // Button states
+  const prevBtn = document.querySelector('.lesson-prev');
+  const nextBtn = document.querySelector('.lesson-next');
+  if (prevBtn) prevBtn.disabled = (n===0);
+  if (nextBtn) nextBtn.textContent = (n >= LESSONS.length-1 ? 'Explore freely →' : 'Next →');
+  if (L.onEnter) L.onEnter();
+}
+
+function runPropagateDemo(){
+  try{
+    const pid = 'person:sarah_m';
+    const p = project('person');
+    const cur = p.values?.[pid]?.current_situation?.value;
+    const next = (cur === 'doubled_up') ? 'sheltered' : 'doubled_up';
+    // Append event via editCell
+    editCell('person', pid, 'current_situation', next);
+    // Highlight the newest log entry
+    setTimeout(()=>{
+      const firstEntry = document.querySelector('#log-entries .log-entry');
+      if (firstEntry) firstEntry.classList.add('flash');
+    }, 80);
+    // Highlight flipped matrix cell(s)
+    setTimeout(()=>{
+      document.querySelectorAll(`.matrix td[data-pid="${pid}"], .matrix tr[data-pid="${pid}"] td`).forEach(td=>{
+        td.classList.add('flip-flash');
+      });
+    }, 250);
+    // Advance lesson after a beat
+    setTimeout(()=>{
+      lessonStep = 4;
+      applyLessonStep();
+    }, 2000);
+  }catch(e){
+    console.warn('propagate demo failed', e);
+    lessonStep = 4;
+    applyLessonStep();
+  }
+}
+
+window.startLesson = startLesson;
+window.endLesson = endLesson;
+window.prevLesson = prevLesson;
+window.nextLesson = nextLesson;
+
+// Explainer dismissal (for back-compat, same as endLesson)
+function dismissExplainer(){ endLesson(); }
+window.dismissExplainer = dismissExplainer;
+
+// Apply initial mode (CRM is the landing view)
+document.body.classList.toggle('mode-crm', state.mode === 'crm');
+document.querySelectorAll('.mode-switch button').forEach(b=>{
+  b.dataset.on = String(b.dataset.mode === state.mode);
+});
+
+// Boot: if user hasn't completed lesson, start it after init.
+// (CRM is landing view so this only fires if the user flips to integral.)
+if (localStorage.getItem('im.lessonComplete') === '1'){
+  document.body.classList.add('explainer-dismissed','lesson-done');
+}
+
+// Auto-start lesson when switching to integral for the first time.
+const _origSwitchMode = window.switchMode;
+window.switchMode = function(m){
+  const wasMode = state.mode;
+  _origSwitchMode(m);
+  if (m === 'integral' && wasMode !== 'integral'
+      && localStorage.getItem('im.lessonComplete') !== '1'
+      && !document.body.classList.contains('lesson-active')){
+    setTimeout(()=>startLesson(), 120);
+  }
+};
 
 resetAll();
 </script>
